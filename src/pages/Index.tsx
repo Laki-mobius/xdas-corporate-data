@@ -29,7 +29,7 @@ function DashboardContent() {
               {/* KPI Row */}
               <div className="grid grid-cols-4 gap-2.5 mb-3">
                 <KpiCard
-                  label="Total records processed"
+                  label="Total records"
                   value="98.7M"
                   delta="1.2M"
                   subtitle="All segments combined"
