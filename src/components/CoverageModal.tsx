@@ -23,7 +23,7 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
   ];
 
   return (
-    <ModalShell id="modal-coverage" onClose={onClose} fullHeight>
+    <ModalShell id="modal-coverage" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
         title="Comprehensiveness score"
         subtitle="Attribute coverage depth · 98.7M total records"

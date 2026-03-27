@@ -1,6 +1,6 @@
 import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown } from './ModalParts';
 
-export default function TotalRecordsModal({ onClose }: { onClose: () => void }) {
+export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const tiers = [
     { label: 'Tier 1', name: 'Public — US', value: '28,100', width: '62%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
     { label: 'Tier 2', name: 'Public — Non-US', value: '17,200', width: '38%', color: '#1A7A4A', tierClass: 'bg-brand-light text-brand' },
@@ -9,7 +9,7 @@ export default function TotalRecordsModal({ onClose }: { onClose: () => void }) 
   ];
 
   return (
-    <ModalShell id="modal-total" onClose={onClose}>
+    <ModalShell id="modal-total" onClose={onClose} inline={inline}>
       <ModalHeader
         title="Total records processed"
         subtitle="All segments combined · 98.7M records as of today"

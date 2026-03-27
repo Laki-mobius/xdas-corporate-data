@@ -40,7 +40,7 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
   ];
 
   return (
-    <ModalShell id="modal-accuracy" onClose={onClose} fullHeight>
+    <ModalShell id="modal-accuracy" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
         title="Accuracy score"
         subtitle="Data correctness across segments, tiers and processing methods"

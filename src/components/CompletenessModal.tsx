@@ -32,7 +32,7 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
   ];
 
   return (
-    <ModalShell id="modal-completeness" onClose={onClose} fullHeight>
+    <ModalShell id="modal-completeness" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
         title="Completeness score"
         subtitle="Field population rates and data freshness across all segments"
