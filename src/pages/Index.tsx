@@ -47,7 +47,7 @@ function DashboardContent() {
                   active={selectedKpi === 'coverage'}
                 />
                 <KpiCard
-                  label="Accuracy score"
+                  label="Accuracy metrics"
                   value="97.1%"
                   delta="0.3%"
                   subtitle="Data correctness rate"
