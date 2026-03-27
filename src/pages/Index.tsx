@@ -56,7 +56,7 @@ function DashboardContent() {
                   active={selectedKpi === 'accuracy'}
                 />
                 <KpiCard
-                  label="Completeness score"
+                  label="Currentness metrics"
                   value="91.8%"
                   delta="0.8%"
                   subtitle="Field population rate"
