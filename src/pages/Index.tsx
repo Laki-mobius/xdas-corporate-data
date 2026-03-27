@@ -16,7 +16,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 function DashboardContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState('metrics');
-  const [modal, setModal] = useState<string | null>(null);
+  const [selectedKpi, setSelectedKpi] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col h-screen">
