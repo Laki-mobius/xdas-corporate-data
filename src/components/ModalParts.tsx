@@ -2,13 +2,21 @@ import { cn } from '@/lib/utils';
 
 // Shared sub-components for modals
 
-export function ModalShell({ children, id, onClose, wide = true, fullHeight = false }: {
+export function ModalShell({ children, id, onClose, wide = true, fullHeight = false, inline = false }: {
   children: React.ReactNode;
   id: string;
   onClose: () => void;
   wide?: boolean;
   fullHeight?: boolean;
+  inline?: boolean;
 }) {
+  if (inline) {
+    return (
+      <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm min-h-[420px]">
+        {children}
+      </div>
+    );
+  }
   return (
     <div
       className="fixed inset-0 bg-black/55 z-[300] flex items-center justify-center p-4"

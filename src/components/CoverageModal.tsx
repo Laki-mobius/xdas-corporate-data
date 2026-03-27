@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, HeroCard, StatusPill, AttributeTable, FilterToolbar } from './ModalParts';
 import { covData, dataGroups, getColorForValue } from '@/data/dashboard-data';
 
-export default function CoverageModal({ onClose }: { onClose: () => void }) {
+export default function CoverageModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('all');
@@ -23,7 +23,7 @@ export default function CoverageModal({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <ModalShell id="modal-coverage" onClose={onClose} fullHeight>
+    <ModalShell id="modal-coverage" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
         title="Comprehensiveness score"
         subtitle="Attribute coverage depth · 98.7M total records"

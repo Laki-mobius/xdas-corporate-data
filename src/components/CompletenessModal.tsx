@@ -3,7 +3,7 @@ import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, Her
 import { compData, dataGroups, getColorForValue, getFreshnessPill } from '@/data/dashboard-data';
 import { cn } from '@/lib/utils';
 
-export default function CompletenessModal({ onClose }: { onClose: () => void }) {
+export default function CompletenessModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('all');
@@ -32,7 +32,7 @@ export default function CompletenessModal({ onClose }: { onClose: () => void }) 
   ];
 
   return (
-    <ModalShell id="modal-completeness" onClose={onClose} fullHeight>
+    <ModalShell id="modal-completeness" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
         title="Completeness score"
         subtitle="Field population rates and data freshness across all segments"

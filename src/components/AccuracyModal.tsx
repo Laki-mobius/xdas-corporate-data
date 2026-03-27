@@ -3,7 +3,7 @@ import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, Her
 import { accData, dataGroups, getAccuracyColor } from '@/data/dashboard-data';
 import { cn } from '@/lib/utils';
 
-export default function AccuracyModal({ onClose }: { onClose: () => void }) {
+export default function AccuracyModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('all');
@@ -40,7 +40,7 @@ export default function AccuracyModal({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <ModalShell id="modal-accuracy" onClose={onClose} fullHeight>
+    <ModalShell id="modal-accuracy" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
         title="Accuracy score"
         subtitle="Data correctness across segments, tiers and processing methods"

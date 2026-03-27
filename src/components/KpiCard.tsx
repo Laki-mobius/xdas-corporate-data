@@ -5,13 +5,14 @@ interface KpiCardProps {
   subtitle: string;
   icon: React.ReactNode;
   onClick: () => void;
+  active?: boolean;
 }
 
-export default function KpiCard({ label, value, delta, subtitle, icon, onClick }: KpiCardProps) {
+export default function KpiCard({ label, value, delta, subtitle, icon, onClick, active }: KpiCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-card border border-border rounded-lg p-3.5 cursor-pointer transition-all duration-150 hover:border-brand-mid hover:shadow-[0_2px_10px_rgba(26,122,74,0.07)] hover:-translate-y-px"
+      className={`bg-card border rounded-lg p-3.5 cursor-pointer transition-all duration-150 hover:border-brand-mid hover:shadow-[0_2px_10px_rgba(26,122,74,0.07)] hover:-translate-y-px ${active ? 'border-brand-mid shadow-[0_2px_10px_rgba(26,122,74,0.10)] ring-1 ring-brand/20' : 'border-border'}`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="text-sm font-normal text-foreground leading-tight">{label}</div>
