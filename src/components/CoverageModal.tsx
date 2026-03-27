@@ -7,13 +7,35 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('all');
 
+  // Ensure Company Name and Address appear first with 100% coverage
+  const adjustedCovData = useMemo(() => {
+    return covData.map(a => {
+      if (a.name === 'Company Name' || a.name === 'Street Address') {
+        return { ...a, v: 100, cnt: '98.7M', st: 'good' as const };
+      }
+      return a;
+    });
+  }, []);
+
+  const sorted = useMemo(() => {
+    const priority = ['Company Name', 'Street Address'];
+    return [...adjustedCovData].sort((a, b) => {
+      const aIdx = priority.indexOf(a.name);
+      const bIdx = priority.indexOf(b.name);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return 0;
+    });
+  }, [adjustedCovData]);
+
   const filtered = useMemo(() => {
-    return covData.filter(a =>
+    return sorted.filter(a =>
       (a.name.toLowerCase().includes(search.toLowerCase()) || a.src.toLowerCase().includes(search.toLowerCase())) &&
       (group === 'all' || a.g === group) &&
       (filter === 'all' || (filter === 'good' && a.v >= 80) || (filter === 'warn' && a.v >= 60 && a.v < 80) || (filter === 'low' && a.v < 60))
     );
-  }, [search, group, filter]);
+  }, [search, group, filter, sorted]);
 
   const tiers = [
     { label: 'T1', name: 'Public — US', value: '98.2%', width: '98.2%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
@@ -25,7 +47,7 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
   return (
     <ModalShell id="modal-coverage" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
-        title="Comprehensiveness score"
+        title="Coverage metrics"
         subtitle="Attribute coverage depth · 98.7M total records"
         iconBg="bg-status-blue-light"
         icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-status-blue"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" /><path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
@@ -39,48 +61,9 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
             <SectionLabel>By segment</SectionLabel>
             <SegmentCards pubLabel="Public" pubValue="96.8%" pubSub="Daily" prvValue="93.1%" prvSub="Weekly" showBars pubBar={96.8} prvBar={93.1} />
           </div>
-          <div className="mb-4">
+          <div>
             <SectionLabel>Tier breakdown</SectionLabel>
             <TierBreakdown tiers={tiers} />
-          </div>
-          <div>
-            <SectionLabel>Additional breakdown</SectionLabel>
-            <div className="flex flex-col gap-[7px]">
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-surface border border-border rounded-md p-2.5">
-                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Avg attrs extracted</div>
-                  <div className="text-[17px] font-medium text-foreground tracking-[-0.5px] leading-none mb-0.5">30</div>
-                  <div className="text-[10px] text-muted-foreground">per company</div>
-                </div>
-                <div className="bg-surface border border-border rounded-md p-2.5">
-                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Missing attr count</div>
-                  <div className="text-[17px] font-medium text-destructive tracking-[-0.5px] leading-none mb-0.5">8</div>
-                  <div className="text-[10px] text-muted-foreground">below 60%</div>
-                </div>
-              </div>
-              <div className="bg-surface border border-border rounded-md p-2.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Mandatory attrs coverage</div>
-                <div className="text-[17px] font-medium text-brand tracking-[-0.5px] leading-none mb-0.5">97.3%</div>
-                <div className="h-1 bg-border rounded-sm overflow-hidden mt-1.5"><div className="w-[97.3%] h-full bg-brand rounded-sm" /></div>
-              </div>
-              <div className="bg-surface border border-border rounded-md p-2.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Optional attrs coverage</div>
-                <div className="text-[17px] font-medium text-status-blue tracking-[-0.5px] leading-none mb-0.5">68.4%</div>
-                <div className="h-1 bg-border rounded-sm overflow-hidden mt-1.5"><div className="w-[68.4%] h-full bg-status-blue rounded-sm" /></div>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-surface border border-border rounded-md p-2.5">
-                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Orphan entities</div>
-                  <div className="text-[17px] font-medium text-status-amber tracking-[-0.5px] leading-none mb-0.5">4,821</div>
-                  <div className="text-[10px] text-muted-foreground">no parent</div>
-                </div>
-                <div className="bg-surface border border-border rounded-md p-2.5">
-                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Stale &gt;90 days</div>
-                  <div className="text-[17px] font-medium text-destructive tracking-[-0.5px] leading-none mb-0.5">7.5M</div>
-                  <div className="text-[10px] text-muted-foreground">7.6%</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
