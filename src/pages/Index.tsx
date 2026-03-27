@@ -47,7 +47,7 @@ function DashboardContent() {
                   active={selectedKpi === 'coverage'}
                 />
                 <KpiCard
-                  label="Accuracy score"
+                  label="Accuracy metrics"
                   value="97.1%"
                   delta="0.3%"
                   subtitle="Data correctness rate"
@@ -56,7 +56,7 @@ function DashboardContent() {
                   active={selectedKpi === 'accuracy'}
                 />
                 <KpiCard
-                  label="Completeness score"
+                  label="Currentness metrics"
                   value="91.8%"
                   delta="0.8%"
                   subtitle="Field population rate"

@@ -1,124 +1,186 @@
 import { useState, useMemo } from 'react';
-import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, HeroCard, StatusPill, AttributeTable, FilterToolbar } from './ModalParts';
-import { accData, dataGroups, getAccuracyColor } from '@/data/dashboard-data';
+import { ModalShell, ModalHeader, SectionLabel, FilterToolbar } from './ModalParts';
+import { dataGroups } from '@/data/dashboard-data';
 import { cn } from '@/lib/utils';
 
+const qcAttributes = [
+  { name: 'Company Name', accuracy: 99, correct: 99, total: 100, status: 'passed' as const, issues: '1 Minor Typo' },
+  { name: 'Headquarters Country', accuracy: 98, correct: 98, total: 100, status: 'passed' as const, issues: '2 Abbreviation Issues' },
+  { name: 'Foundation Year', accuracy: 99, correct: 99, total: 100, status: 'passed' as const, issues: '1 Null Value' },
+  { name: 'Industry Sector', accuracy: 95, correct: 95, total: 100, status: 'warning' as const, issues: '5 Misclassifications' },
+  { name: 'Employee Count', accuracy: 91, correct: 91, total: 100, status: 'warning' as const, issues: '9 Outdated Data' },
+  { name: 'Revenue Range', accuracy: 96, correct: 96, total: 100, status: 'passed' as const, issues: '4 Formatting Errors' },
+  { name: 'Street Address', accuracy: 97, correct: 97, total: 100, status: 'passed' as const, issues: '3 Formatting Issues' },
+  { name: 'Phone Number', accuracy: 88, correct: 88, total: 100, status: 'failed' as const, issues: '12 Invalid Formats' },
+  { name: 'NAICS Code', accuracy: 96, correct: 96, total: 100, status: 'passed' as const, issues: '4 Mapping Errors' },
+  { name: 'Website', accuracy: 93, correct: 93, total: 100, status: 'warning' as const, issues: '7 Broken Links' },
+  { name: 'Net Income', accuracy: 97, correct: 97, total: 100, status: 'passed' as const, issues: '3 Rounding Errors' },
+  { name: 'Executive Name', accuracy: 89, correct: 89, total: 100, status: 'failed' as const, issues: '11 Outdated Records' },
+];
+
+function CircularGauge({ value, label, subtitle, color }: { value: number; label: string; subtitle: string; color: string }) {
+  const circumference = 2 * Math.PI * 40;
+  const offset = circumference * (1 - value / 100);
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-[100px] h-[100px]">
+        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
+          <circle cx="50" cy="50" r="40" fill="none" stroke={color} strokeWidth="8" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center text-xl font-semibold text-foreground">{value}%</div>
+      </div>
+      <div className="text-center">
+        <div className="text-xs font-semibold text-foreground">{label}</div>
+        <div className="text-[10px] text-muted-foreground">{subtitle}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function AccuracyModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
+  const [companyType, setCompanyType] = useState('all');
+  const [tier, setTier] = useState('all');
   const [search, setSearch] = useState('');
-  const [group, setGroup] = useState('all');
-  const [filter, setFilter] = useState('all');
 
   const filtered = useMemo(() => {
-    return accData.filter(a =>
-      (a.name.toLowerCase().includes(search.toLowerCase()) || a.src.toLowerCase().includes(search.toLowerCase())) &&
-      (group === 'all' || a.g === group) &&
-      (filter === 'all' || (filter === 'good' && a.v >= 95) || (filter === 'warn' && a.v >= 90 && a.v < 95) || (filter === 'low' && a.v < 90))
+    return qcAttributes.filter(a =>
+      a.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search, group, filter]);
+  }, [search]);
 
-  const tiers = [
-    { label: 'T1', name: 'Public — US', value: '99.1%', width: '99.1%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
-    { label: 'T2', name: 'Public — Non-US', value: '97.8%', width: '97.8%', color: '#1A7A4A', tierClass: 'bg-brand-light text-brand' },
-    { label: 'T3', name: 'Private — US', value: '96.9%', width: '96.9%', color: '#C97A00', tierClass: 'bg-status-amber-light text-status-amber' },
-    { label: 'T4', name: 'Private — Non-US', value: '95.7%', width: '95.7%', color: '#534AB7', tierClass: 'bg-status-purple-light text-status-purple' },
-  ];
-
-  const errors = [
-    { rank: 1, name: 'Parsing error', pct: 42, color: '#C0392B', cnt: '1,202' },
-    { rank: 2, name: 'Mapping error', pct: 28, color: '#C97A00', cnt: '801' },
-    { rank: 3, name: 'Source misinterpretation', pct: 18, color: '#185FA5', cnt: '515' },
-    { rank: 4, name: 'Data currency error', pct: 12, color: 'hsl(var(--gray-400))', cnt: '343' },
-  ];
-
-  const sources = [
-    { code: 'SE', name: 'SEC EDGAR', seg: 'Public', pct: 99.2, color: '#1A7A4A', bg: '#1A7A4A', status: 'good', label: 'Excellent' },
-    { code: 'BB', name: 'Bloomberg', seg: 'Public', pct: 98.7, color: '#185FA5', bg: '#185FA5', status: 'good', label: 'Excellent' },
-    { code: 'OR', name: 'Orbis (BvD)', seg: 'Mixed', pct: 97.1, color: '#534AB7', bg: '#534AB7', status: 'good', label: 'Good' },
-    { code: 'GR', name: 'Gov. Registries', seg: 'Private', pct: 94.8, color: 'hsl(var(--gray-500))', bg: '#5C7A6B', status: 'warn', label: 'Medium' },
-    { code: 'CW', name: 'Company Websites', seg: 'Mixed', pct: 89.3, color: '#C97A00', bg: '#C97A00', status: 'warn', label: 'Medium' },
-    { code: 'AD', name: 'Alternative Data', seg: 'Private', pct: 82.4, color: '#C0392B', bg: '#C0392B', status: 'low', label: 'Low' },
-  ];
+  const statusPill = (status: 'passed' | 'warning' | 'failed') => {
+    const cls = status === 'passed' ? 'bg-brand-light text-brand' : status === 'warning' ? 'bg-status-amber-light text-status-amber' : 'bg-destructive-light text-destructive';
+    const label = status === 'passed' ? 'PASSED' : status === 'warning' ? 'WARNING' : 'FAILED';
+    return <span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-bold whitespace-nowrap inline-block uppercase', cls)}>{label}</span>;
+  };
 
   return (
     <ModalShell id="modal-accuracy" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
-        title="Accuracy score"
-        subtitle="Data correctness across segments, tiers and processing methods"
+        title="Quality Control (QC) Scorecard"
+        subtitle="Verified accuracy based on 100 sample records"
         iconBg="bg-brand-light"
         icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-brand"><path d="M10 3a7 7 0 1 0 0 14A7 7 0 0 0 10 3Z" stroke="currentColor" strokeWidth="1.5" /><path d="M7 10l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
         onClose={onClose}
       />
-      <div className="grid grid-cols-[280px_1fr] flex-1 overflow-hidden min-h-0">
-        <div className="p-[18px_20px] overflow-y-auto border-r border-border">
-          <HeroCard label="Overall accuracy" value="97.1%" subtitle="+0.3% vs previous month" ringPercent={97.1} />
-          <div className="mb-4"><SectionLabel>By segment</SectionLabel><SegmentCards pubLabel="Public" pubValue="98.4%" pubSub="Daily" prvValue="96.5%" prvSub="Weekly" showBars pubBar={98.4} prvBar={96.5} /></div>
-          <div className="mb-4"><SectionLabel>Tier breakdown</SectionLabel><TierBreakdown tiers={tiers} /></div>
-          <div className="mb-4">
-            <SectionLabel>Operational metrics</SectionLabel>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-surface border border-border rounded-md p-2.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Automated</div>
-                <div className="text-[17px] font-medium text-brand tracking-[-0.5px] leading-none mb-0.5">96.8%</div>
-                <div className="text-[10px] text-muted-foreground">AI pipeline</div>
-              </div>
-              <div className="bg-surface border border-border rounded-md p-2.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">HITL validated</div>
-                <div className="text-[17px] font-medium text-status-blue tracking-[-0.5px] leading-none mb-0.5">99.2%</div>
-                <div className="text-[10px] text-muted-foreground">Human rate</div>
-              </div>
-              <div className="bg-surface border border-border rounded-md p-2.5">
-                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Error rate</div>
-                <div className="text-[17px] font-medium text-destructive tracking-[-0.5px] leading-none mb-0.5">2.9%</div>
-                <div className="text-[10px] text-muted-foreground">all records</div>
-              </div>
+      <div className="flex-1 overflow-y-auto p-[18px_20px] flex flex-col gap-4">
+        {/* Filter Controls */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Company Type</span>
+            <div className="flex gap-1">
+              {[{ v: 'all', l: 'All' }, { v: 'public', l: 'Public' }, { v: 'private', l: 'Private' }].map(o => (
+                <button key={o.v} onClick={() => setCompanyType(o.v)} className={cn('py-[3px] px-2.5 rounded-[20px] border text-[11px] font-medium cursor-pointer transition-colors', companyType === o.v ? 'bg-gray-900 border-gray-900 text-primary-foreground dark:bg-brand dark:border-brand' : 'bg-card border-border text-muted-foreground')}>{o.l}</button>
+              ))}
             </div>
           </div>
-          <div>
-            <SectionLabel>Top error categories</SectionLabel>
-            {errors.map(e => (
-              <div key={e.rank} className="flex items-center gap-2.5 py-[7px] px-2.5 bg-surface border border-border rounded-md mb-[5px] last:mb-0">
-                <div className="w-[18px] h-[18px] rounded-full bg-border flex items-center justify-center text-[9px] font-bold text-muted-foreground shrink-0">{e.rank}</div>
-                <div className="flex-1 text-xs font-normal text-foreground">{e.name}</div>
-                <div className="flex-[2] h-[5px] bg-border rounded-sm overflow-hidden">
-                  <div className="h-full rounded-sm" style={{ width: `${e.pct}%`, background: e.color }} />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Company Tier</span>
+            <div className="flex gap-1">
+              {[{ v: 'all', l: 'All' }, { v: 't1', l: 'Tier 1' }, { v: 't2', l: 'Tier 2' }, { v: 't3', l: 'Tier 3' }].map(o => (
+                <button key={o.v} onClick={() => setTier(o.v)} className={cn('py-[3px] px-2.5 rounded-[20px] border text-[11px] font-medium cursor-pointer transition-colors', tier === o.v ? 'bg-gray-900 border-gray-900 text-primary-foreground dark:bg-brand dark:border-brand' : 'bg-card border-border text-muted-foreground')}>{o.l}</button>
+              ))}
+            </div>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Record Scope</span>
+            <span className="py-[3px] px-2.5 rounded-[20px] border border-border bg-surface text-[11px] font-semibold text-foreground">Sample 100</span>
+          </div>
+        </div>
+
+        {/* Three Circular Gauges */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center">
+            <CircularGauge value={97} label="Overall Quality" subtitle="Overall Record Accuracy" color="#1A7A4A" />
+          </div>
+          <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center">
+            <CircularGauge value={99} label="Attribute Fill Rate" subtitle="System Completeness" color="#185FA5" />
+          </div>
+          <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center">
+            <CircularGauge value={98} label="Accuracy vs QC Flag" subtitle="Avg Attribute Correctness" color="#534AB7" />
+          </div>
+        </div>
+
+        {/* Attribute Level Accuracy Breakdown Table */}
+        <div>
+          <SectionLabel>Attribute level accuracy breakdown (Sample: 100 records)</SectionLabel>
+          <div className="mb-2.5">
+            <div className="relative max-w-[200px]">
+              <svg viewBox="0 0 14 14" fill="none" className="absolute left-2 top-1/2 -translate-y-1/2 w-[11px] h-[11px] text-muted-foreground pointer-events-none">
+                <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M9.5 9.5l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+              <input className="w-full py-[5px] pr-2 pl-7 border border-border rounded-md text-[11px] bg-card text-foreground outline-none focus:border-brand" placeholder="Search attribute..." onChange={e => setSearch(e.target.value)} />
+            </div>
+          </div>
+          <div className="border border-border rounded-lg overflow-hidden">
+            <div className="overflow-y-auto max-h-[300px]">
+              <table className="w-full border-collapse text-xs">
+                <thead>
+                  <tr className="bg-surface">
+                    <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Attribute</th>
+                    <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Accuracy %</th>
+                    <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Correct / Total</th>
+                    <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Status</th>
+                    <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Issues</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-4 text-muted-foreground text-xs">No results</td></tr>
+                  ) : filtered.map((row, i) => {
+                    const barColor = row.accuracy >= 95 ? '#1A7A4A' : row.accuracy >= 90 ? '#C97A00' : '#C0392B';
+                    return (
+                      <tr key={i} className="hover:bg-surface">
+                        <td className="py-1.5 px-2.5 border-b border-border font-medium text-foreground whitespace-nowrap text-xs">{row.name}</td>
+                        <td className="py-1.5 px-2.5 border-b border-border min-w-[100px]">
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex-1 h-[5px] bg-border rounded-sm overflow-hidden">
+                              <div className="h-full rounded-sm" style={{ width: `${row.accuracy}%`, background: barColor }} />
+                            </div>
+                            <span className="font-semibold text-[11px] font-mono" style={{ color: barColor }}>{row.accuracy}%</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground font-mono whitespace-nowrap">{row.correct}/{row.total}</td>
+                        <td className="py-1.5 px-2.5 border-b border-border">{statusPill(row.status)}</td>
+                        <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.issues}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Accuracy Split by Company Type */}
+        <div>
+          <SectionLabel>Accuracy split by company type</SectionLabel>
+          <div className="space-y-2.5">
+            {[
+              { label: 'Public Companies', pct: 98, count: '231 records', color: '#185FA5' },
+              { label: 'Private Companies', pct: 96, count: '961 records', color: '#1A7A4A' },
+            ].map(item => (
+              <div key={item.label} className="bg-surface border border-border rounded-md p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium text-foreground">{item.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold font-mono" style={{ color: item.color }}>{item.pct}%</span>
+                    <span className="text-[10px] text-muted-foreground">{item.count}</span>
+                  </div>
                 </div>
-                <div className="text-[11px] font-semibold text-right shrink-0 min-w-[30px]" style={{ color: e.color }}>{e.pct}%</div>
-                <div className="text-[10px] text-muted-foreground shrink-0 min-w-[36px] text-right">{e.cnt}</div>
+                <div className="h-[8px] bg-border rounded-sm overflow-hidden">
+                  <div className="h-full rounded-sm transition-all" style={{ width: `${item.pct}%`, background: item.color }} />
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="p-[18px_20px] overflow-y-auto flex flex-col gap-3.5">
-          <div>
-            <SectionLabel>Attribute level accuracy</SectionLabel>
-            <FilterToolbar
-              searchId="acc-s" searchPlaceholder="Search attribute..." onSearch={setSearch}
-              groups={dataGroups} selectedGroup={group} onGroupChange={setGroup}
-              pills={[{ value: 'all', label: 'All' }, { value: 'good', label: '≥95%' }, { value: 'warn', label: '90–94%' }, { value: 'low', label: '<90%' }]}
-              activePill={filter} onPillClick={setFilter}
-            />
-            <AttributeTable
-              data={filtered.map(a => ({ ...a, status: <StatusPill status={a.st} goodLabel="High" warnLabel="Medium" /> }))}
-              columns={['Attribute', 'Primary source', 'Accuracy %', 'Count', 'Last validated', 'Status']}
-              colorFn={getAccuracyColor}
-            />
-          </div>
-          <div>
-            <SectionLabel>Source-wise accuracy</SectionLabel>
-            {sources.map(s => (
-              <div key={s.code} className="flex items-center gap-2.5 py-2 px-3 bg-surface border border-border rounded-md mb-1.5 last:mb-0 transition-colors hover:border-gray-300 hover:bg-card">
-                <div className="w-7 h-7 rounded-[7px] flex items-center justify-center shrink-0 text-[10px] font-bold text-primary-foreground" style={{ background: s.bg }}>{s.code}</div>
-                <div className="flex-1 text-xs font-medium text-foreground">{s.name}</div>
-                <div className="text-[11px] text-muted-foreground mr-2">{s.seg}</div>
-                <div className="flex-[2] h-[5px] bg-border rounded-sm overflow-hidden">
-                  <div className="h-full rounded-sm" style={{ width: `${s.pct}%`, background: s.color }} />
-                </div>
-                <div className="text-xs font-semibold text-right shrink-0 min-w-[34px] font-mono" style={{ color: s.color }}>{s.pct}%</div>
-                <StatusPill status={s.status} goodLabel={s.label} warnLabel={s.label} />
-              </div>
-            ))}
-          </div>
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-2 border-t border-border text-[10px] text-muted-foreground">
+          <span>Last updated: 2026-02-27 &nbsp;|&nbsp; Next QC check: 2026-03-27</span>
         </div>
       </div>
     </ModalShell>

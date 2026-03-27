@@ -1,22 +1,59 @@
 import { useState, useMemo } from 'react';
-import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, HeroCard, AttributeTable, FilterToolbar } from './ModalParts';
-import { compData, dataGroups, getColorForValue, getFreshnessPill } from '@/data/dashboard-data';
+import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, HeroCard } from './ModalParts';
 import { cn } from '@/lib/utils';
+import { format, subDays, subMonths, isAfter, isBefore, startOfDay } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+const currentnessData = [
+  { name: 'Company Name', g: 'Basic Data', ref: '2026-03-14', cnt: '98.5M', geo: { US: '42.1M', UK: '8.2M', Europe: '22.4M', APAC: '18.6M', Other: '7.2M' } },
+  { name: 'Country', g: 'Basic Data', ref: '2026-03-14', cnt: '97.9M', geo: { US: '41.8M', UK: '8.1M', Europe: '22.1M', APAC: '18.3M', Other: '7.6M' } },
+  { name: 'Street Address', g: 'Basic Data', ref: '2026-03-13', cnt: '90.3M', geo: { US: '38.7M', UK: '7.5M', Europe: '20.4M', APAC: '16.9M', Other: '6.8M' } },
+  { name: 'City', g: 'Basic Data', ref: '2026-03-13', cnt: '91.2M', geo: { US: '39.1M', UK: '7.6M', Europe: '20.6M', APAC: '17.1M', Other: '6.8M' } },
+  { name: 'Foundation Year', g: 'Basic Data', ref: '2026-03-08', cnt: '83.1M', geo: { US: '35.6M', UK: '6.9M', Europe: '18.8M', APAC: '15.6M', Other: '6.2M' } },
+  { name: 'Phone Number', g: 'Basic Data', ref: '2026-03-07', cnt: '70.5M', geo: { US: '30.2M', UK: '5.9M', Europe: '15.9M', APAC: '13.2M', Other: '5.3M' } },
+  { name: 'NAICS Code', g: 'Basic Data', ref: '2026-03-12', cnt: '82.9M', geo: { US: '35.5M', UK: '6.9M', Europe: '18.7M', APAC: '15.5M', Other: '6.3M' } },
+  { name: 'Website', g: 'Basic Data', ref: '2026-02-22', cnt: '54.9M', geo: { US: '23.5M', UK: '4.6M', Europe: '12.4M', APAC: '10.3M', Other: '4.1M' } },
+  { name: 'Revenue', g: 'Financial Data', ref: '2026-03-12', cnt: '81.6M', geo: { US: '34.9M', UK: '6.8M', Europe: '18.4M', APAC: '15.3M', Other: '6.2M' } },
+  { name: 'Assets', g: 'Financial Data', ref: '2026-03-10', cnt: '73.3M', geo: { US: '31.4M', UK: '6.1M', Europe: '16.6M', APAC: '13.7M', Other: '5.5M' } },
+  { name: 'Net Income', g: 'Financial Data', ref: '2026-03-09', cnt: '67.7M', geo: { US: '29.0M', UK: '5.6M', Europe: '15.3M', APAC: '12.7M', Other: '5.1M' } },
+  { name: 'Ticker and Exchange', g: 'Financial Data', ref: '2026-03-14', cnt: '94.0M', geo: { US: '40.3M', UK: '7.8M', Europe: '21.2M', APAC: '17.6M', Other: '7.1M' } },
+  { name: 'Executive Name', g: 'Corporate Hierarchy & Governance', ref: '2026-03-06', cnt: '62.6M', geo: { US: '26.8M', UK: '5.2M', Europe: '14.1M', APAC: '11.7M', Other: '4.8M' } },
+  { name: 'Board of Directors', g: 'Corporate Hierarchy & Governance', ref: '2026-02-28', cnt: '57.6M', geo: { US: '24.7M', UK: '4.8M', Europe: '13.0M', APAC: '10.8M', Other: '4.3M' } },
+  { name: 'Parent Company', g: 'Corporate Hierarchy & Governance', ref: '2026-02-25', cnt: '54.1M', geo: { US: '23.2M', UK: '4.5M', Europe: '12.2M', APAC: '10.1M', Other: '4.1M' } },
+  { name: 'Mergers & Acquisition', g: 'Corporate Hierarchy & Governance', ref: '2026-02-20', cnt: '46.6M', geo: { US: '20.0M', UK: '3.9M', Europe: '10.5M', APAC: '8.7M', Other: '3.5M' } },
+];
+
+type DatePreset = 'week' | 'month' | '3months' | 'custom';
 
 export default function CompletenessModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
-  const [filter, setFilter] = useState('all');
+  const [datePreset, setDatePreset] = useState<DatePreset>('month');
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(subMonths(new Date(), 1));
+  const [customTo, setCustomTo] = useState<Date | undefined>(new Date());
+  const [geoExpanded, setGeoExpanded] = useState<string | null>(null);
 
-  const daysSince = (d: string) => (Date.now() - new Date(d).getTime()) / 86400000;
+  const dateRange = useMemo(() => {
+    const now = new Date();
+    switch (datePreset) {
+      case 'week': return { from: subDays(now, 7), to: now };
+      case 'month': return { from: subMonths(now, 1), to: now };
+      case '3months': return { from: subMonths(now, 3), to: now };
+      case 'custom': return { from: customFrom || subMonths(now, 1), to: customTo || now };
+    }
+  }, [datePreset, customFrom, customTo]);
 
   const filtered = useMemo(() => {
-    return compData.filter(a =>
-      a.name.toLowerCase().includes(search.toLowerCase()) &&
-      (group === 'all' || a.g === group) &&
-      (filter === 'all' || (filter === 'fresh' && daysSince(a.ref) < 30) || (filter === 'mid' && daysSince(a.ref) >= 30 && daysSince(a.ref) < 90) || (filter === 'stale' && daysSince(a.ref) >= 90))
-    );
-  }, [search, group, filter]);
+    return currentnessData.filter(a => {
+      const refDate = startOfDay(new Date(a.ref));
+      const inDateRange = isAfter(refDate, startOfDay(dateRange.from)) || refDate.getTime() === startOfDay(dateRange.from).getTime();
+      const beforeEnd = isBefore(refDate, startOfDay(dateRange.to)) || refDate.getTime() === startOfDay(dateRange.to).getTime();
+      return a.name.toLowerCase().includes(search.toLowerCase()) &&
+        (group === 'all' || a.g === group) &&
+        inDateRange && beforeEnd;
+    });
+  }, [search, group, dateRange]);
 
   const tiers = [
     { label: 'T1', name: 'Public — US', value: '95.3%', width: '95.3%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
@@ -25,91 +62,149 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
     { label: 'T4', name: 'Private — Non-US', value: '89.3%', width: '89.3%', color: '#534AB7', tierClass: 'bg-status-purple-light text-status-purple' },
   ];
 
-  const freshness = [
-    { label: 'Updated <30 days', value: '76.4M', pct: '77.4% of total', color: '#1A7A4A', bgClass: 'bg-brand-light border-brand-mid dark:bg-[hsl(152,38%,16%)] dark:border-[hsl(152,35%,22%)]', icon: <svg viewBox="0 0 18 18" fill="none" className="w-[17px] h-[17px] text-brand"><path d="M9 3a6 6 0 1 0 0 12A6 6 0 0 0 9 3Z" stroke="currentColor" strokeWidth="1.4" /><path d="M9 6v3.5l2 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg> },
-    { label: 'Updated 30–90 days', value: '14.8M', pct: '15.0% of total', color: '#C97A00', bgClass: 'bg-status-amber-light border-status-amber-mid dark:bg-[hsl(40,70%,9%)] dark:border-[hsl(40,50%,15%)]', icon: <svg viewBox="0 0 18 18" fill="none" className="w-[17px] h-[17px] text-status-amber"><circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.4" /><path d="M9 6v3.5M9 11v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg> },
-    { label: 'Stale >90 days', value: '7.5M', pct: '7.6% of total', color: '#C0392B', bgClass: 'bg-destructive-light border-destructive/30 dark:bg-[hsl(0,50%,11%)] dark:border-[hsl(0,40%,18%)]', icon: <svg viewBox="0 0 18 18" fill="none" className="w-[17px] h-[17px] text-destructive"><circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.4" /><path d="M6 6l6 6M12 6l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg> },
-  ];
+  const geoKeys = ['US', 'UK', 'Europe', 'APAC', 'Other'] as const;
+  const geoColors: Record<string, string> = { US: '#185FA5', UK: '#1A7A4A', Europe: '#534AB7', APAC: '#C97A00', Other: 'hsl(var(--muted-foreground))' };
+
+  const freshnessPill = (dateStr: string) => {
+    const days = (Date.now() - new Date(dateStr).getTime()) / 86400000;
+    if (days < 30) return { label: 'Fresh', cls: 'bg-brand-light text-brand' };
+    if (days < 90) return { label: 'Aging', cls: 'bg-status-amber-light text-status-amber' };
+    return { label: 'Stale', cls: 'bg-destructive-light text-destructive' };
+  };
 
   return (
-    <ModalShell id="modal-completeness" onClose={onClose} fullHeight inline={inline}>
+    <ModalShell id="modal-currentness" onClose={onClose} fullHeight inline={inline}>
       <ModalHeader
-        title="Completeness score"
-        subtitle="Field population rates and data freshness across all segments"
+        title="Currentness metrics"
+        subtitle="Data recency and update frequency across all segments"
         iconBg="bg-status-amber-light"
         icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-status-amber"><rect x="3" y="11" width="3" height="6" rx="1" fill="currentColor" opacity=".4" /><rect x="8.5" y="7" width="3" height="10" rx="1" fill="currentColor" opacity=".7" /><rect x="14" y="3" width="3" height="14" rx="1" fill="currentColor" /></svg>}
         onClose={onClose}
       />
       <div className="grid grid-cols-[280px_1fr] flex-1 overflow-hidden min-h-0">
         <div className="p-[18px_20px] overflow-y-auto border-r border-border">
-          <HeroCard label="Overall completeness" value="91.8%" subtitle="+0.8% vs previous month" ringPercent={91.8} />
+          <HeroCard label="Overall currentness" value="91.8%" subtitle="+0.8% vs previous month" ringPercent={91.8} />
           <div className="mb-4"><SectionLabel>By segment</SectionLabel><SegmentCards pubLabel="Public" pubValue="93.5%" pubSub="Daily" prvValue="90.7%" prvSub="Weekly" showBars pubBar={93.5} prvBar={90.7} /></div>
           <div><SectionLabel>Tier breakdown</SectionLabel><TierBreakdown tiers={tiers} /></div>
         </div>
 
         <div className="p-[18px_20px] overflow-y-auto flex flex-col gap-3.5">
+          {/* Date Range Selector */}
           <div>
-            <SectionLabel>Data freshness distribution — all 98.7M records</SectionLabel>
-            <div className="grid grid-cols-3 gap-2.5">
-              {freshness.map(f => (
-                <div key={f.label} className={cn('rounded-[10px] p-3.5 border flex items-center gap-3.5', f.bgClass)}>
-                  <div className="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center shrink-0" style={{ background: `${f.color}1F` }}>
-                    {f.icon}
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.05em] mb-1" style={{ color: f.color }}>{f.label}</div>
-                    <div className="text-xl font-medium tracking-[-0.5px] leading-none mb-0.5" style={{ color: f.color }}>{f.value}</div>
-                    <div className="text-[11px] font-medium opacity-75" style={{ color: f.color }}>{f.pct}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <SectionLabel>Freshness distribution</SectionLabel>
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-[10px] text-muted-foreground">By last update recency</span>
-              <span className="text-[10px] text-muted-foreground italic">hover for details</span>
-            </div>
-            <div className="flex h-6 rounded-md overflow-hidden mb-2.5 gap-0.5">
-              <div className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground px-[7px] cursor-pointer hover:brightness-110 relative group" style={{ width: '77.4%', background: '#1A7A4A' }}>
-                &lt;30 days — 77.4%
-                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">✓ Updated &lt;30 days<br /><strong>76.4M</strong> · 77.4%</div>
-              </div>
-              <div className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground px-[7px] cursor-pointer hover:brightness-110 relative group" style={{ width: '15%', background: '#C97A00' }}>
-                30–90d 15%
-                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">⚠ 30–90 days<br /><strong>14.8M</strong> · 15.0%</div>
-              </div>
-              <div className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground px-[7px] cursor-pointer hover:brightness-110 relative group" style={{ width: '7.6%', background: '#C0392B' }}>
-                7.6%
-                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">✗ Stale &gt;90 days<br /><strong>7.5M</strong> · 7.6%</div>
-              </div>
-            </div>
-            <div className="flex gap-3 flex-wrap">
-              <span className="flex items-center gap-[5px] text-[11px] text-muted-foreground"><span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: '#1A7A4A' }} />&lt;30d: 76.4M (77.4%)</span>
-              <span className="flex items-center gap-[5px] text-[11px] text-muted-foreground"><span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: '#C97A00' }} />30–90d: 14.8M (15.0%)</span>
-              <span className="flex items-center gap-[5px] text-[11px] text-muted-foreground"><span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: '#C0392B' }} />Stale: 7.5M (7.6%)</span>
-            </div>
-          </div>
-
-          <div className="flex-1 min-h-0 flex flex-col">
             <SectionLabel>Last verified update by attribute</SectionLabel>
-            <FilterToolbar
-              searchId="comp-s" searchPlaceholder="Search attribute..." onSearch={setSearch}
-              groups={dataGroups} selectedGroup={group} onGroupChange={setGroup}
-              pills={[{ value: 'all', label: 'All' }, { value: 'fresh', label: '<30d' }, { value: 'mid', label: '30–90d' }, { value: 'stale', label: '>90d' }]}
-              activePill={filter} onPillClick={setFilter}
-            />
-            <AttributeTable
-              data={filtered.map(a => {
-                const fp = getFreshnessPill(a.ref);
-                const cls = fp.class === 'good' ? 'bg-brand-light text-brand' : fp.class === 'warn' ? 'bg-status-amber-light text-status-amber' : 'bg-destructive-light text-destructive';
-                return { ...a, src: a.g, status: <span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', cls)}>{fp.label}</span> };
-              })}
-              columns={['Attribute', 'Data group', 'Fill rate %', 'Record count', 'Last verified', 'Freshness']}
-              colorFn={getColorForValue}
-            />
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Date Range</span>
+              <div className="flex gap-1">
+                {([
+                  { v: 'week' as DatePreset, l: 'Last Week' },
+                  { v: 'month' as DatePreset, l: 'Last Month' },
+                  { v: '3months' as DatePreset, l: 'Last 3 Months' },
+                  { v: 'custom' as DatePreset, l: 'Custom' },
+                ]).map(o => (
+                  <button key={o.v} onClick={() => setDatePreset(o.v)} className={cn('py-[3px] px-2.5 rounded-[20px] border text-[11px] font-medium cursor-pointer transition-colors', datePreset === o.v ? 'bg-gray-900 border-gray-900 text-primary-foreground dark:bg-brand dark:border-brand' : 'bg-card border-border text-muted-foreground')}>{o.l}</button>
+                ))}
+              </div>
+              {datePreset === 'custom' && (
+                <div className="flex items-center gap-1.5 ml-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="py-[3px] px-2.5 rounded-md border border-border bg-card text-[11px] text-foreground cursor-pointer hover:border-brand">
+                        {customFrom ? format(customFrom, 'MMM dd, yyyy') : 'From'}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                  <span className="text-[10px] text-muted-foreground">to</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="py-[3px] px-2.5 rounded-md border border-border bg-card text-[11px] text-foreground cursor-pointer hover:border-brand">
+                        {customTo ? format(customTo, 'MMM dd, yyyy') : 'To'}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={customTo} onSelect={setCustomTo} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+              <div className="ml-auto text-[10px] text-muted-foreground">
+                Showing: {format(dateRange.from, 'MMM dd')} – {format(dateRange.to, 'MMM dd, yyyy')}
+              </div>
+            </div>
+
+            {/* Search & Group Filter */}
+            <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+              <div className="relative flex-1 min-w-[130px] max-w-[180px]">
+                <svg viewBox="0 0 14 14" fill="none" className="absolute left-2 top-1/2 -translate-y-1/2 w-[11px] h-[11px] text-muted-foreground pointer-events-none">
+                  <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
+                  <path d="M9.5 9.5l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                <input className="w-full py-[5px] pr-2 pl-7 border border-border rounded-md text-[11px] bg-card text-foreground outline-none focus:border-brand" placeholder="Search attribute..." onChange={e => setSearch(e.target.value)} />
+              </div>
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer min-w-[150px] focus:border-brand" value={group} onChange={e => setGroup(e.target.value)}>
+                  <option value="all">All data groups</option>
+                  {['Basic Data', 'Financial Data', 'Corporate Hierarchy & Governance'].map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className="overflow-y-auto max-h-[340px]">
+                <table className="w-full border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-surface">
+                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Attribute</th>
+                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Data Group</th>
+                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Records Updated</th>
+                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Last Verified</th>
+                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Freshness</th>
+                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border w-[28px]"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.length === 0 ? (
+                      <tr><td colSpan={6} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
+                    ) : filtered.map((row, i) => {
+                      const fp = freshnessPill(row.ref);
+                      const isExpanded = geoExpanded === row.name;
+                      return (
+                        <>
+                          <tr key={row.name} className="hover:bg-surface cursor-pointer" onClick={() => setGeoExpanded(isExpanded ? null : row.name)}>
+                            <td className="py-1.5 px-2.5 border-b border-border font-medium text-foreground whitespace-nowrap text-xs">{row.name}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.g}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.cnt}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.ref}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border"><span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', fp.cls)}>{fp.label}</span></td>
+                            <td className="py-1.5 px-2.5 border-b border-border">
+                              <svg viewBox="0 0 10 10" className={cn("w-2.5 h-2.5 text-muted-foreground transition-transform", isExpanded && "rotate-90")}><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
+                            </td>
+                          </tr>
+                          {isExpanded && (
+                            <tr key={`${row.name}-geo`}>
+                              <td colSpan={6} className="py-2 px-4 border-b border-border bg-surface">
+                                <div className="grid grid-cols-5 gap-2">
+                                  {geoKeys.map(geo => (
+                                    <div key={geo} className="bg-card border border-border rounded-md p-2 text-center">
+                                      <div className="text-[10px] font-bold uppercase tracking-[0.05em] mb-1" style={{ color: geoColors[geo] }}>{geo}</div>
+                                      <div className="text-sm font-semibold text-foreground font-mono">{row.geo[geo]}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
