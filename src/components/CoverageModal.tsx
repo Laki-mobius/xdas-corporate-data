@@ -1,0 +1,151 @@
+import { useState, useMemo } from 'react';
+import { ModalShell, ModalHeader, SectionLabel, SegmentCards, TierBreakdown, HeroCard, StatusPill, AttributeTable, FilterToolbar } from './ModalParts';
+import { covData, dataGroups, getColorForValue } from '@/data/dashboard-data';
+
+export default function CoverageModal({ onClose }: { onClose: () => void }) {
+  const [search, setSearch] = useState('');
+  const [group, setGroup] = useState('all');
+  const [filter, setFilter] = useState('all');
+
+  const filtered = useMemo(() => {
+    return covData.filter(a =>
+      (a.name.toLowerCase().includes(search.toLowerCase()) || a.src.toLowerCase().includes(search.toLowerCase())) &&
+      (group === 'all' || a.g === group) &&
+      (filter === 'all' || (filter === 'good' && a.v >= 80) || (filter === 'warn' && a.v >= 60 && a.v < 80) || (filter === 'low' && a.v < 60))
+    );
+  }, [search, group, filter]);
+
+  const tiers = [
+    { label: 'T1', name: 'Public — US', value: '98.2%', width: '98.2%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
+    { label: 'T2', name: 'Public — Non-US', value: '95.4%', width: '95.4%', color: '#1A7A4A', tierClass: 'bg-brand-light text-brand' },
+    { label: 'T3', name: 'Private — US', value: '94.0%', width: '94%', color: '#C97A00', tierClass: 'bg-status-amber-light text-status-amber' },
+    { label: 'T4', name: 'Private — Non-US', value: '91.8%', width: '91.8%', color: '#534AB7', tierClass: 'bg-status-purple-light text-status-purple' },
+  ];
+
+  return (
+    <ModalShell id="modal-coverage" onClose={onClose} fullHeight>
+      <ModalHeader
+        title="Comprehensiveness score"
+        subtitle="Attribute coverage depth · 98.7M total records"
+        iconBg="bg-status-blue-light"
+        icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-status-blue"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" /><path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
+        onClose={onClose}
+      />
+      <div className="grid grid-cols-[280px_1fr] flex-1 overflow-hidden min-h-0">
+        {/* Left Pane */}
+        <div className="p-[18px_20px] overflow-y-auto border-r border-border">
+          <HeroCard label="Overall" value="94.2%" subtitle="+1.4% vs last month" ringPercent={94.2} />
+          <div className="mb-4">
+            <SectionLabel>By segment</SectionLabel>
+            <SegmentCards pubLabel="Public" pubValue="96.8%" pubSub="Daily" prvValue="93.1%" prvSub="Weekly" showBars pubBar={96.8} prvBar={93.1} />
+          </div>
+          <div className="mb-4">
+            <SectionLabel>Tier breakdown</SectionLabel>
+            <TierBreakdown tiers={tiers} />
+          </div>
+          <div>
+            <SectionLabel>Additional breakdown</SectionLabel>
+            <div className="flex flex-col gap-[7px]">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-surface border border-border rounded-md p-2.5">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Avg attrs extracted</div>
+                  <div className="text-[17px] font-medium text-foreground tracking-[-0.5px] leading-none mb-0.5">30</div>
+                  <div className="text-[10px] text-muted-foreground">per company</div>
+                </div>
+                <div className="bg-surface border border-border rounded-md p-2.5">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Missing attr count</div>
+                  <div className="text-[17px] font-medium text-destructive tracking-[-0.5px] leading-none mb-0.5">8</div>
+                  <div className="text-[10px] text-muted-foreground">below 60%</div>
+                </div>
+              </div>
+              <div className="bg-surface border border-border rounded-md p-2.5">
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Mandatory attrs coverage</div>
+                <div className="text-[17px] font-medium text-brand tracking-[-0.5px] leading-none mb-0.5">97.3%</div>
+                <div className="h-1 bg-border rounded-sm overflow-hidden mt-1.5"><div className="w-[97.3%] h-full bg-brand rounded-sm" /></div>
+              </div>
+              <div className="bg-surface border border-border rounded-md p-2.5">
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Optional attrs coverage</div>
+                <div className="text-[17px] font-medium text-status-blue tracking-[-0.5px] leading-none mb-0.5">68.4%</div>
+                <div className="h-1 bg-border rounded-sm overflow-hidden mt-1.5"><div className="w-[68.4%] h-full bg-status-blue rounded-sm" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-surface border border-border rounded-md p-2.5">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Orphan entities</div>
+                  <div className="text-[17px] font-medium text-status-amber tracking-[-0.5px] leading-none mb-0.5">4,821</div>
+                  <div className="text-[10px] text-muted-foreground">no parent</div>
+                </div>
+                <div className="bg-surface border border-border rounded-md p-2.5">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.05em] mb-1">Stale &gt;90 days</div>
+                  <div className="text-[17px] font-medium text-destructive tracking-[-0.5px] leading-none mb-0.5">7.5M</div>
+                  <div className="text-[10px] text-muted-foreground">7.6%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Pane */}
+        <div className="p-[18px_20px] overflow-y-auto flex flex-col gap-3.5">
+          <div>
+            <SectionLabel>Record completeness — all 98.7M records</SectionLabel>
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[10px] text-muted-foreground">By field population level</span>
+              <span className="text-[10px] text-muted-foreground italic">hover for details</span>
+            </div>
+            {/* Stacked bar */}
+            <div className="flex h-6 rounded-md overflow-hidden mb-2.5 gap-0.5">
+              <div className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground whitespace-nowrap px-[7px] cursor-pointer transition-[filter] hover:brightness-110 relative group" style={{ width: '5.4%', background: '#1A7A4A' }}>
+                5.3M
+                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 border border-border rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">
+                  ✓ Fully filled<br /><strong>5.3M</strong> · 5.4%
+                </div>
+              </div>
+              <div className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground whitespace-nowrap px-[7px] cursor-pointer transition-[filter] hover:brightness-110 relative group" style={{ width: '12.4%', background: '#C97A00' }}>
+                Partial 12.2M
+                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 border border-border rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">
+                  ⚠ Partially filled<br /><strong>12.2M</strong> · 12.4%
+                </div>
+              </div>
+              <div className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground whitespace-nowrap px-[7px] cursor-pointer transition-[filter] hover:brightness-110 relative group" style={{ width: '82.2%', background: '#1E3A5A' }}>
+                Below threshold ≤60% — 82.2%
+                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 border border-border rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">
+                  ○ Below threshold<br /><strong>81.2M</strong> · 82.2%
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <span className="flex items-center gap-[5px] text-[11px] text-muted-foreground"><span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: '#1A7A4A' }} />Fully filled: 5.3M (5.4%)</span>
+              <span className="flex items-center gap-[5px] text-[11px] text-muted-foreground"><span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: '#C97A00' }} />Partially filled: 12.2M (12.4%)</span>
+              <span className="flex items-center gap-[5px] text-[11px] text-muted-foreground"><span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: '#1E3A5A' }} />Below threshold: 81.2M (82.2%)</span>
+            </div>
+          </div>
+
+          <div className="flex-1 min-h-0 flex flex-col">
+            <SectionLabel>Attribute level completeness</SectionLabel>
+            <FilterToolbar
+              searchId="cov-s"
+              searchPlaceholder="Search attribute..."
+              onSearch={setSearch}
+              groups={dataGroups}
+              selectedGroup={group}
+              onGroupChange={setGroup}
+              pills={[
+                { value: 'all', label: 'All' },
+                { value: 'good', label: '≥80%' },
+                { value: 'warn', label: '60–79%' },
+                { value: 'low', label: '<60%' },
+              ]}
+              activePill={filter}
+              onPillClick={setFilter}
+            />
+            <AttributeTable
+              data={filtered.map(a => ({ ...a, status: <StatusPill status={a.st} goodLabel="Good" warnLabel="Medium" /> }))}
+              columns={['Attribute', 'Primary source', 'Coverage %', 'Count', 'Last refreshed', 'Status']}
+              colorFn={getColorForValue}
+            />
+          </div>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}
