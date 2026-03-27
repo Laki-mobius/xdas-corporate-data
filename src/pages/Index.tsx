@@ -29,7 +29,7 @@ function DashboardContent() {
               {/* KPI Row */}
               <div className="grid grid-cols-4 gap-2.5 mb-3">
                 <KpiCard
-                  label="Total records processed"
+                  label="Total records"
                   value="98.7M"
                   delta="1.2M"
                   subtitle="All segments combined"
@@ -38,10 +38,10 @@ function DashboardContent() {
                   active={selectedKpi === 'total'}
                 />
                 <KpiCard
-                  label="Comprehensiveness score"
+                  label="Coverage metrics"
                   value="94.2%"
                   delta="1.4%"
-                  subtitle="% of required attributes"
+                  subtitle="Attribute coverage depth"
                   icon={<svg viewBox="0 0 20 20" fill="none" className="w-[18px] h-[18px]"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.4" /><path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
                   onClick={() => setSelectedKpi(selectedKpi === 'coverage' ? null : 'coverage')}
                   active={selectedKpi === 'coverage'}
