@@ -1,4 +1,62 @@
-import { ModalShell, ModalHeader, SectionLabel, TierBreakdown } from './ModalParts';
+import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, Cell, LabelList
+} from 'recharts';
+
+const TIER_COLORS = {
+  tier1: 'hsl(210, 60%, 45%)',
+  tier2: 'hsl(100, 35%, 55%)',
+  tier3: 'hsl(25, 75%, 55%)',
+  tier4: 'hsl(55, 65%, 55%)',
+};
+
+const geoTierData = [
+  { region: 'North America', tier1: 274, tier2: 219, tier3: 152, tier4: 372, total: '1.02k' },
+  { region: 'Europe',        tier1: 262, tier2: 180, tier3: 166, tier4: 103, total: '711' },
+  { region: 'Asia Pacific',  tier1: 289, tier2: 306, tier3: 103, tier4: 284, total: '982' },
+  { region: 'Latin America', tier1: 373, tier2: 292, tier3: 210, tier4: 193, total: '1.07k' },
+  { region: 'MEA',           tier1: 307, tier2: 139, tier3: 159, tier4: 316, total: '921' },
+  { region: 'Sub-Saharan Africa', tier1: 346, tier2: 185, tier3: 141, tier4: 169, total: '841' },
+  { region: 'Central Asia',  tier1: 219, tier2: 277, tier3: 128, tier4: 110, total: '734' },
+  { region: 'Oceania',       tier1: 149, tier2: 162, tier3: 102, tier4: 169, total: '582' },
+  { region: 'Rest of World', tier1: 273, tier2: 178, tier3: 378, tier4: 113, total: '942' },
+];
+
+const tierTotals = {
+  'Tier 1': geoTierData.reduce((s, r) => s + r.tier1, 0),
+  'Tier 2': geoTierData.reduce((s, r) => s + r.tier2, 0),
+  'Tier 3': geoTierData.reduce((s, r) => s + r.tier3, 0),
+  'Tier 4': geoTierData.reduce((s, r) => s + r.tier4, 0),
+};
+
+interface TierTooltipProps {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}
+
+function TierTooltip({ active, payload, label }: TierTooltipProps) {
+  if (!active || !payload?.length) return null;
+  const total = payload.reduce((s, p) => s + p.value, 0);
+  return (
+    <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
+      <div className="font-semibold text-foreground mb-1.5">{label} — {total.toLocaleString()} total</div>
+      {payload.map(p => (
+        <div key={p.name} className="flex items-center gap-2 py-0.5">
+          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: p.color }} />
+          <span className="text-muted-foreground">{p.name}</span>
+          <span className="ml-auto font-mono font-medium text-foreground">{p.value.toLocaleString()}</span>
+        </div>
+      ))}
+      <div className="border-t border-border mt-1.5 pt-1.5 text-[10px] text-muted-foreground">
+        {Object.entries(tierTotals).map(([k, v]) => (
+          <span key={k} className="mr-3">{k}: {v.toLocaleString()}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const companyTypes = [
@@ -7,22 +65,6 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
     { type: 'Parent Companies', count: '4.8M', sub: '% of total', pct: '4.9%', bgClass: 'bg-gradient-to-br from-status-amber-light to-[hsl(40,80%,88%)] border-[hsl(40,60%,80%)] dark:from-[hsl(40,70%,9%)] dark:to-[hsl(40,50%,13%)] dark:border-[hsl(40,50%,15%)]', textClass: 'text-status-amber' },
     { type: 'Subsidiaries', count: '3.1M', sub: '% of total', pct: '3.1%', bgClass: 'bg-gradient-to-br from-status-purple-light to-[hsl(252,50%,90%)] border-[hsl(252,40%,82%)] dark:from-[hsl(252,30%,14%)] dark:to-[hsl(252,25%,18%)] dark:border-[hsl(252,25%,25%)]', textClass: 'text-status-purple' },
     { type: 'Government / State-Owned', count: '0.6M', sub: '% of total', pct: '0.6%', bgClass: 'bg-gradient-to-br from-destructive-light to-[hsl(0,60%,92%)] border-destructive/30 dark:from-[hsl(0,50%,11%)] dark:to-[hsl(0,40%,14%)] dark:border-[hsl(0,40%,18%)]', textClass: 'text-destructive' },
-  ];
-
-  const tiers = [
-    { label: 'Tier 1', name: 'Public — US', value: '28,100', width: '62%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
-    { label: 'Tier 2', name: 'Public — Non-US', value: '17,200', width: '38%', color: '#1A7A4A', tierClass: 'bg-brand-light text-brand' },
-    { label: 'Tier 3', name: 'Private — US', value: '54.8M', width: '70%', color: '#C97A00', tierClass: 'bg-status-amber-light text-status-amber' },
-    { label: 'Tier 4', name: 'Private — Non-US', value: '35.4M', width: '45%', color: '#534AB7', tierClass: 'bg-status-purple-light text-status-purple' },
-  ];
-
-  const geographyData = [
-    { region: 'North America', count: '42.1M', pct: '42.7%', width: '100%', color: '#185FA5' },
-    { region: 'Europe', count: '25.3M', pct: '25.6%', width: '60%', color: '#1A7A4A' },
-    { region: 'Asia Pacific', count: '18.7M', pct: '18.9%', width: '44%', color: '#C97A00' },
-    { region: 'Latin America', count: '7.2M', pct: '7.3%', width: '17%', color: '#534AB7' },
-    { region: 'MEA', count: '3.8M', pct: '3.9%', width: '9%', color: '#C0392B' },
-    { region: 'Rest of World', count: '1.6M', pct: '1.6%', width: '4%', color: '#6B7280' },
   ];
 
   return (
@@ -35,7 +77,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         onClose={onClose}
       />
       <div className="p-[18px_24px] overflow-y-auto flex-1">
-        {/* Company type cards — full-width row */}
+        {/* Company type cards */}
         <div className="grid grid-cols-5 gap-2.5 mb-5">
           {companyTypes.map(ct => (
             <div key={ct.type} className={`rounded-[10px] p-3 border ${ct.bgClass}`}>
@@ -47,27 +89,59 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           ))}
         </div>
 
-        {/* Two-column: Tier + Geography */}
-        <div className="grid grid-cols-2 gap-[22px]">
-          <div>
-            <SectionLabel>Distribution by tier</SectionLabel>
-            <TierBreakdown tiers={tiers} />
-          </div>
-          <div>
-            <SectionLabel>Distribution by geography</SectionLabel>
-            <div className="flex flex-col gap-1.5">
-              {geographyData.map(g => (
-                <div key={g.region} className="bg-surface border border-border rounded-md py-2.5 px-3 flex items-center gap-2.5">
-                  <span className="text-[11px] font-normal text-foreground min-w-[100px]">{g.region}</span>
-                  <div className="flex-1 h-[4px] bg-border rounded-sm overflow-hidden">
-                    <div className="h-full rounded-sm" style={{ width: g.width, background: g.color }} />
-                  </div>
-                  <span className="text-[12px] font-semibold text-foreground font-mono min-w-[42px] text-right">{g.count}</span>
-                  <span className="text-[10px] text-muted-foreground min-w-[36px] text-right">{g.pct}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Stacked bar chart: Geography × Tier */}
+        <SectionLabel>Distribution by geography &amp; tier</SectionLabel>
+        <div className="bg-surface border border-border rounded-lg p-4 mt-1">
+          <ResponsiveContainer width="100%" height={380}>
+            <BarChart
+              data={geoTierData}
+              layout="vertical"
+              margin={{ top: 5, right: 60, left: 10, bottom: 5 }}
+              barSize={22}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+              <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <YAxis
+                dataKey="region"
+                type="category"
+                width={120}
+                tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip content={<TierTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
+              <Legend
+                formatter={(value: string) => {
+                  const key = value as keyof typeof tierTotals;
+                  const label = value.replace('tier', 'Tier ');
+                  const total = tierTotals[`Tier ${value.replace('tier', '')}`  as keyof typeof tierTotals];
+                  return <span className="text-xs text-foreground">{label} — {total?.toLocaleString()}</span>;
+                }}
+                iconSize={10}
+              />
+              <Bar dataKey="tier1" name="Tier 1" stackId="a" fill={TIER_COLORS.tier1} radius={[0, 0, 0, 0]}>
+                <LabelList dataKey="tier1" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
+              </Bar>
+              <Bar dataKey="tier2" name="Tier 2" stackId="a" fill={TIER_COLORS.tier2}>
+                <LabelList dataKey="tier2" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
+              </Bar>
+              <Bar dataKey="tier3" name="Tier 3" stackId="a" fill={TIER_COLORS.tier3}>
+                <LabelList dataKey="tier3" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
+              </Bar>
+              <Bar dataKey="tier4" name="Tier 4" stackId="a" fill={TIER_COLORS.tier4} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="tier4" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
+              </Bar>
+              {/* Total label at end of bar */}
+              <Bar dataKey="tier4" stackId="b" fill="transparent" >
+                <LabelList
+                  dataKey="total"
+                  position="right"
+                  style={{ fontSize: 11, fill: 'hsl(var(--foreground))', fontWeight: 600 }}
+                  offset={8}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </ModalShell>
