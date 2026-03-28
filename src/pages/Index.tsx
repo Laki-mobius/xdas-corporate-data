@@ -70,8 +70,6 @@ function DashboardContent() {
               {selectedKpi === 'accuracy' && <AccuracyModal onClose={() => setSelectedKpi(null)} inline />}
               {selectedKpi === 'completeness' && <CompletenessModal onClose={() => setSelectedKpi(null)} inline />}
 
-              <GeographicSection />
-              <AttributeChart />
               <CorporateHierarchySection />
             </>
           )}
