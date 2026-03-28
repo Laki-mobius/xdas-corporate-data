@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import KpiCard from '@/components/KpiCard';
-import CorporateHierarchySection from '@/components/CorporateHierarchySection';
+import DataIntelligenceSection from '@/components/DataIntelligenceSection';
 import TotalRecordsModal from '@/components/TotalRecordsModal';
 import CoverageModal from '@/components/CoverageModal';
 import JobStatusDashboard from '@/components/JobStatusDashboard';
@@ -70,7 +70,7 @@ function DashboardContent() {
               {selectedKpi === 'accuracy' && <AccuracyModal onClose={() => setSelectedKpi(null)} inline />}
               {selectedKpi === 'completeness' && <CompletenessModal onClose={() => setSelectedKpi(null)} inline />}
 
-              <CorporateHierarchySection />
+              <DataIntelligenceSection />
             </>
           )}
 
