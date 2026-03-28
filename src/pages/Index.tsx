@@ -2,8 +2,6 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import KpiCard from '@/components/KpiCard';
-import GeographicSection from '@/components/GeographicSection';
-import AttributeChart from '@/components/AttributeChart';
 import CorporateHierarchySection from '@/components/CorporateHierarchySection';
 import TotalRecordsModal from '@/components/TotalRecordsModal';
 import CoverageModal from '@/components/CoverageModal';
