@@ -1,36 +1,4 @@
-import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
-
-const TIER_COLORS: Record<string, string> = {
-  'Tier 1': 'hsl(210, 60%, 45%)',
-  'Tier 2': 'hsl(100, 35%, 55%)',
-  'Tier 3': 'hsl(25, 75%, 55%)',
-  'Tier 4': 'hsl(55, 65%, 55%)',
-};
-
-const tierData = [
-  { tier: 'Tier 1', count: 2492, pct: 33.4 },
-  { tier: 'Tier 2', count: 1938, pct: 26.0 },
-  { tier: 'Tier 3', count: 1539, pct: 20.6 },
-  { tier: 'Tier 4', count: 1496, pct: 20.0 },
-];
-
-const geoData = [
-  { region: 'North America', count: '1.02k', pct: 13.7 },
-  { region: 'Europe', count: '711', pct: 9.5 },
-  { region: 'Asia Pacific', count: '982', pct: 13.2 },
-  { region: 'Latin America', count: '1.07k', pct: 14.3 },
-  { region: 'MEA', count: '921', pct: 12.3 },
-  { region: 'Sub-Saharan Africa', count: '841', pct: 11.3 },
-  { region: 'Central Asia', count: '734', pct: 9.8 },
-  { region: 'Oceania', count: '582', pct: 7.8 },
-  { region: 'Rest of World', count: '942', pct: 12.6 },
-];
-
-const GEO_COLORS = [
-  'hsl(210, 60%, 50%)', 'hsl(152, 45%, 45%)', 'hsl(25, 75%, 55%)',
-  'hsl(280, 40%, 55%)', 'hsl(355, 55%, 55%)', 'hsl(55, 65%, 50%)',
-  'hsl(190, 50%, 45%)', 'hsl(100, 35%, 50%)', 'hsl(330, 40%, 55%)',
-];
+import { ModalShell, ModalHeader, SectionLabel, TierBreakdown } from './ModalParts';
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const companyTypes = [
@@ -41,7 +9,21 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
     { type: 'Government / State-Owned', count: '0.6M', sub: '% of total', pct: '0.6%', bgClass: 'bg-gradient-to-br from-destructive-light to-[hsl(0,60%,92%)] border-destructive/30 dark:from-[hsl(0,50%,11%)] dark:to-[hsl(0,40%,14%)] dark:border-[hsl(0,40%,18%)]', textClass: 'text-destructive' },
   ];
 
-  const totalTier = tierData.reduce((s, t) => s + t.count, 0);
+  const tiers = [
+    { label: 'Tier 1', name: 'Public — US', value: '28,100', width: '62%', color: '#185FA5', tierClass: 'bg-status-blue-light text-status-blue' },
+    { label: 'Tier 2', name: 'Public — Non-US', value: '17,200', width: '38%', color: '#1A7A4A', tierClass: 'bg-brand-light text-brand' },
+    { label: 'Tier 3', name: 'Private — US', value: '54.8M', width: '70%', color: '#C97A00', tierClass: 'bg-status-amber-light text-status-amber' },
+    { label: 'Tier 4', name: 'Private — Non-US', value: '35.4M', width: '45%', color: '#534AB7', tierClass: 'bg-status-purple-light text-status-purple' },
+  ];
+
+  const geographyData = [
+    { region: 'North America', count: '42.1M', pct: '42.7%', width: '100%', color: '#185FA5' },
+    { region: 'Europe', count: '25.3M', pct: '25.6%', width: '60%', color: '#1A7A4A' },
+    { region: 'Asia Pacific', count: '18.7M', pct: '18.9%', width: '44%', color: '#C97A00' },
+    { region: 'Latin America', count: '7.2M', pct: '7.3%', width: '17%', color: '#534AB7' },
+    { region: 'MEA', count: '3.8M', pct: '3.9%', width: '9%', color: '#C0392B' },
+    { region: 'Rest of World', count: '1.6M', pct: '1.6%', width: '4%', color: '#6B7280' },
+  ];
 
   return (
     <ModalShell id="modal-total" onClose={onClose} inline={inline}>
@@ -53,7 +35,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         onClose={onClose}
       />
       <div className="p-[18px_24px] overflow-y-auto flex-1">
-        {/* Company type cards */}
+        {/* Company type cards — full-width row */}
         <div className="grid grid-cols-5 gap-2.5 mb-5">
           {companyTypes.map(ct => (
             <div key={ct.type} className={`rounded-[10px] p-3 border ${ct.bgClass}`}>
@@ -66,45 +48,22 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         </div>
 
         {/* Two-column: Tier + Geography */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Left: Distribution by Tier */}
+        <div className="grid grid-cols-2 gap-[22px]">
           <div>
             <SectionLabel>Distribution by tier</SectionLabel>
-            <div className="bg-surface border border-border rounded-lg p-4 mt-1 space-y-3">
-              {tierData.map(t => (
-                <div key={t.tier}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-sm" style={{ background: TIER_COLORS[t.tier] }} />
-                      <span className="text-xs font-medium text-foreground">{t.tier}</span>
-                    </div>
-                    <span className="text-xs font-mono text-muted-foreground">{t.count.toLocaleString()} <span className="text-[10px]">({t.pct}%)</span></span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${(t.count / totalTier) * 100}%`, background: TIER_COLORS[t.tier] }} />
-                  </div>
-                </div>
-              ))}
-              <div className="pt-2 border-t border-border flex justify-between text-[11px]">
-                <span className="text-muted-foreground font-medium">Total</span>
-                <span className="font-mono font-semibold text-foreground">{totalTier.toLocaleString()}</span>
-              </div>
-            </div>
+            <TierBreakdown tiers={tiers} />
           </div>
-
-          {/* Right: Distribution by Geography */}
           <div>
             <SectionLabel>Distribution by geography</SectionLabel>
-            <div className="bg-surface border border-border rounded-lg p-4 mt-1 space-y-2">
-              {geoData.map((g, i) => (
-                <div key={g.region} className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: GEO_COLORS[i] }} />
-                  <span className="text-[11px] text-foreground w-[110px] truncate">{g.region}</span>
-                  <div className="flex-1 h-[7px] rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${g.pct * 5}%`, background: GEO_COLORS[i] }} />
+            <div className="flex flex-col gap-1.5">
+              {geographyData.map(g => (
+                <div key={g.region} className="bg-surface border border-border rounded-md py-2.5 px-3 flex items-center gap-2.5">
+                  <span className="text-[11px] font-normal text-foreground min-w-[100px]">{g.region}</span>
+                  <div className="flex-1 h-[4px] bg-border rounded-sm overflow-hidden">
+                    <div className="h-full rounded-sm" style={{ width: g.width, background: g.color }} />
                   </div>
-                  <span className="text-[11px] font-mono text-muted-foreground w-10 text-right">{g.count}</span>
-                  <span className="text-[10px] text-muted-foreground w-9 text-right">{g.pct}%</span>
+                  <span className="text-[12px] font-semibold text-foreground font-mono min-w-[42px] text-right">{g.count}</span>
+                  <span className="text-[10px] text-muted-foreground min-w-[36px] text-right">{g.pct}</span>
                 </div>
               ))}
             </div>
