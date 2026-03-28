@@ -1,62 +1,36 @@
 import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, Cell, LabelList
-} from 'recharts';
 
-const TIER_COLORS = {
-  tier1: 'hsl(210, 60%, 45%)',
-  tier2: 'hsl(100, 35%, 55%)',
-  tier3: 'hsl(25, 75%, 55%)',
-  tier4: 'hsl(55, 65%, 55%)',
+const TIER_COLORS: Record<string, string> = {
+  'Tier 1': 'hsl(210, 60%, 45%)',
+  'Tier 2': 'hsl(100, 35%, 55%)',
+  'Tier 3': 'hsl(25, 75%, 55%)',
+  'Tier 4': 'hsl(55, 65%, 55%)',
 };
 
-const geoTierData = [
-  { region: 'North America', tier1: 274, tier2: 219, tier3: 152, tier4: 372, total: '1.02k' },
-  { region: 'Europe',        tier1: 262, tier2: 180, tier3: 166, tier4: 103, total: '711' },
-  { region: 'Asia Pacific',  tier1: 289, tier2: 306, tier3: 103, tier4: 284, total: '982' },
-  { region: 'Latin America', tier1: 373, tier2: 292, tier3: 210, tier4: 193, total: '1.07k' },
-  { region: 'MEA',           tier1: 307, tier2: 139, tier3: 159, tier4: 316, total: '921' },
-  { region: 'Sub-Saharan Africa', tier1: 346, tier2: 185, tier3: 141, tier4: 169, total: '841' },
-  { region: 'Central Asia',  tier1: 219, tier2: 277, tier3: 128, tier4: 110, total: '734' },
-  { region: 'Oceania',       tier1: 149, tier2: 162, tier3: 102, tier4: 169, total: '582' },
-  { region: 'Rest of World', tier1: 273, tier2: 178, tier3: 378, tier4: 113, total: '942' },
+const tierData = [
+  { tier: 'Tier 1', count: 2492, pct: 33.4 },
+  { tier: 'Tier 2', count: 1938, pct: 26.0 },
+  { tier: 'Tier 3', count: 1539, pct: 20.6 },
+  { tier: 'Tier 4', count: 1496, pct: 20.0 },
 ];
 
-const tierTotals = {
-  'Tier 1': geoTierData.reduce((s, r) => s + r.tier1, 0),
-  'Tier 2': geoTierData.reduce((s, r) => s + r.tier2, 0),
-  'Tier 3': geoTierData.reduce((s, r) => s + r.tier3, 0),
-  'Tier 4': geoTierData.reduce((s, r) => s + r.tier4, 0),
-};
+const geoData = [
+  { region: 'North America', count: '1.02k', pct: 13.7 },
+  { region: 'Europe', count: '711', pct: 9.5 },
+  { region: 'Asia Pacific', count: '982', pct: 13.2 },
+  { region: 'Latin America', count: '1.07k', pct: 14.3 },
+  { region: 'MEA', count: '921', pct: 12.3 },
+  { region: 'Sub-Saharan Africa', count: '841', pct: 11.3 },
+  { region: 'Central Asia', count: '734', pct: 9.8 },
+  { region: 'Oceania', count: '582', pct: 7.8 },
+  { region: 'Rest of World', count: '942', pct: 12.6 },
+];
 
-interface TierTooltipProps {
-  active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
-  label?: string;
-}
-
-function TierTooltip({ active, payload, label }: TierTooltipProps) {
-  if (!active || !payload?.length) return null;
-  const total = payload.reduce((s, p) => s + p.value, 0);
-  return (
-    <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-lg text-xs">
-      <div className="font-semibold text-foreground mb-1.5">{label} — {total.toLocaleString()} total</div>
-      {payload.map(p => (
-        <div key={p.name} className="flex items-center gap-2 py-0.5">
-          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: p.color }} />
-          <span className="text-muted-foreground">{p.name}</span>
-          <span className="ml-auto font-mono font-medium text-foreground">{p.value.toLocaleString()}</span>
-        </div>
-      ))}
-      <div className="border-t border-border mt-1.5 pt-1.5 text-[10px] text-muted-foreground">
-        {Object.entries(tierTotals).map(([k, v]) => (
-          <span key={k} className="mr-3">{k}: {v.toLocaleString()}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
+const GEO_COLORS = [
+  'hsl(210, 60%, 50%)', 'hsl(152, 45%, 45%)', 'hsl(25, 75%, 55%)',
+  'hsl(280, 40%, 55%)', 'hsl(355, 55%, 55%)', 'hsl(55, 65%, 50%)',
+  'hsl(190, 50%, 45%)', 'hsl(100, 35%, 50%)', 'hsl(330, 40%, 55%)',
+];
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const companyTypes = [
@@ -66,6 +40,8 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
     { type: 'Subsidiaries', count: '3.1M', sub: '% of total', pct: '3.1%', bgClass: 'bg-gradient-to-br from-status-purple-light to-[hsl(252,50%,90%)] border-[hsl(252,40%,82%)] dark:from-[hsl(252,30%,14%)] dark:to-[hsl(252,25%,18%)] dark:border-[hsl(252,25%,25%)]', textClass: 'text-status-purple' },
     { type: 'Government / State-Owned', count: '0.6M', sub: '% of total', pct: '0.6%', bgClass: 'bg-gradient-to-br from-destructive-light to-[hsl(0,60%,92%)] border-destructive/30 dark:from-[hsl(0,50%,11%)] dark:to-[hsl(0,40%,14%)] dark:border-[hsl(0,40%,18%)]', textClass: 'text-destructive' },
   ];
+
+  const totalTier = tierData.reduce((s, t) => s + t.count, 0);
 
   return (
     <ModalShell id="modal-total" onClose={onClose} inline={inline}>
@@ -89,59 +65,50 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           ))}
         </div>
 
-        {/* Stacked bar chart: Geography × Tier */}
-        <SectionLabel>Distribution by geography &amp; tier</SectionLabel>
-        <div className="bg-surface border border-border rounded-lg p-4 mt-1">
-          <ResponsiveContainer width="100%" height={380}>
-            <BarChart
-              data={geoTierData}
-              layout="vertical"
-              margin={{ top: 5, right: 60, left: 10, bottom: 5 }}
-              barSize={22}
-            >
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-              <XAxis type="number" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-              <YAxis
-                dataKey="region"
-                type="category"
-                width={120}
-                tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<TierTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />
-              <Legend
-                formatter={(value: string) => {
-                  const key = value as keyof typeof tierTotals;
-                  const label = value.replace('tier', 'Tier ');
-                  const total = tierTotals[`Tier ${value.replace('tier', '')}`  as keyof typeof tierTotals];
-                  return <span className="text-xs text-foreground">{label} — {total?.toLocaleString()}</span>;
-                }}
-                iconSize={10}
-              />
-              <Bar dataKey="tier1" name="Tier 1" stackId="a" fill={TIER_COLORS.tier1} radius={[0, 0, 0, 0]}>
-                <LabelList dataKey="tier1" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
-              </Bar>
-              <Bar dataKey="tier2" name="Tier 2" stackId="a" fill={TIER_COLORS.tier2}>
-                <LabelList dataKey="tier2" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
-              </Bar>
-              <Bar dataKey="tier3" name="Tier 3" stackId="a" fill={TIER_COLORS.tier3}>
-                <LabelList dataKey="tier3" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
-              </Bar>
-              <Bar dataKey="tier4" name="Tier 4" stackId="a" fill={TIER_COLORS.tier4} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="tier4" position="center" style={{ fontSize: 9, fill: '#fff', fontWeight: 600 }} />
-              </Bar>
-              {/* Total label at end of bar */}
-              <Bar dataKey="tier4" stackId="b" fill="transparent" >
-                <LabelList
-                  dataKey="total"
-                  position="right"
-                  style={{ fontSize: 11, fill: 'hsl(var(--foreground))', fontWeight: 600 }}
-                  offset={8}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Two-column: Tier + Geography */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Left: Distribution by Tier */}
+          <div>
+            <SectionLabel>Distribution by tier</SectionLabel>
+            <div className="bg-surface border border-border rounded-lg p-4 mt-1 space-y-3">
+              {tierData.map(t => (
+                <div key={t.tier}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-sm" style={{ background: TIER_COLORS[t.tier] }} />
+                      <span className="text-xs font-medium text-foreground">{t.tier}</span>
+                    </div>
+                    <span className="text-xs font-mono text-muted-foreground">{t.count.toLocaleString()} <span className="text-[10px]">({t.pct}%)</span></span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${(t.count / totalTier) * 100}%`, background: TIER_COLORS[t.tier] }} />
+                  </div>
+                </div>
+              ))}
+              <div className="pt-2 border-t border-border flex justify-between text-[11px]">
+                <span className="text-muted-foreground font-medium">Total</span>
+                <span className="font-mono font-semibold text-foreground">{totalTier.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Distribution by Geography */}
+          <div>
+            <SectionLabel>Distribution by geography</SectionLabel>
+            <div className="bg-surface border border-border rounded-lg p-4 mt-1 space-y-2">
+              {geoData.map((g, i) => (
+                <div key={g.region} className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: GEO_COLORS[i] }} />
+                  <span className="text-[11px] text-foreground w-[110px] truncate">{g.region}</span>
+                  <div className="flex-1 h-[7px] rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${g.pct * 5}%`, background: GEO_COLORS[i] }} />
+                  </div>
+                  <span className="text-[11px] font-mono text-muted-foreground w-10 text-right">{g.count}</span>
+                  <span className="text-[10px] text-muted-foreground w-9 text-right">{g.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </ModalShell>
