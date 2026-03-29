@@ -9,10 +9,10 @@ const companyTypes = [
 ];
 
 const tierSegments = [
-  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: 'hsl(var(--status-blue))', group: 'Public Companies' },
-  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: 'hsl(var(--brand))', group: 'Public Companies' },
-  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: 'hsl(148,45%,52%)', group: 'Private Companies' },
-  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: 'hsl(var(--status-blue))', group: 'Private Companies' },
+  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: '#185FA5', group: 'Public Companies' },
+  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: '#1A7A4A', group: 'Public Companies' },
+  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: '#5BAD76', group: 'Private Companies' },
+  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: '#534AB7', group: 'Private Companies' },
 ];
 
 const geographyBars = [
