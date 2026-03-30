@@ -74,13 +74,6 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
 
   return (
     <ModalShell id="modal-currentness" onClose={onClose} fullHeight inline={inline}>
-      <ModalHeader
-        title="Currentness metrics"
-        subtitle="Data recency and update frequency across all segments"
-        iconBg="bg-status-amber-light"
-        icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-status-amber"><rect x="3" y="11" width="3" height="6" rx="1" fill="currentColor" opacity=".4" /><rect x="8.5" y="7" width="3" height="10" rx="1" fill="currentColor" opacity=".7" /><rect x="14" y="3" width="3" height="14" rx="1" fill="currentColor" /></svg>}
-        onClose={onClose}
-      />
       <div className="grid grid-cols-[280px_1fr] flex-1 overflow-hidden min-h-0">
         <div className="p-[18px_20px] overflow-y-auto border-r border-border">
           <HeroCard label="Overall currentness" value="91.8%" subtitle="+0.8% vs previous month" ringPercent={91.8} />
