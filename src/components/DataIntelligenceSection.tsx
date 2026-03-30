@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { Search, Download, Upload, ChevronDown } from 'lucide-react';
+import { Search, Download, Upload, Network, User, Newspaper, Building2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
