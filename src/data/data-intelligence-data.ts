@@ -3,7 +3,7 @@
 export interface DataGroup {
   id: string;
   label: string;
-  icon: string; // emoji for simplicity
+  iconId: string;
   description: string;
   filters: FilterDef[];
   columns: ColumnDef[];
@@ -27,7 +27,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'corporate-hierarchy',
     label: 'Corporate Hierarchy Intelligence',
-    icon: '🏢',
+    iconId: 'network',
     description: 'Parent-subsidiary relationships, ownership chains, and hierarchy links',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
@@ -59,7 +59,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'executive-data',
     label: 'Executive Data',
-    icon: '👤',
+    iconId: 'user',
     description: 'C-suite and board-level executive profiles, roles, and tenure',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
@@ -90,7 +90,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'news-events',
     label: 'News & Events',
-    icon: '📰',
+    iconId: 'newspaper',
     description: 'Corporate announcements, M&A activity, regulatory filings, and press releases',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
@@ -121,7 +121,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'company-profile',
     label: 'Company Profile',
-    icon: '📋',
+    iconId: 'building2',
     description: 'Core company attributes including name, address, financials, and industry classification',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
