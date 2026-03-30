@@ -58,20 +58,20 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         <SectionLabel>Total records by tier &amp; segment (scale proportional)</SectionLabel>
         <div className="border border-border rounded-lg p-3 mb-5 bg-surface">
           {/* Group labels */}
-          <div className="flex mb-1.5" style={{ gap: '4px' }}>
+          <div className="flex mb-1.5">
             <div style={{ flex: tierSegments[0].flex + tierSegments[1].flex }} className="text-[11px] font-medium text-foreground">Public Companies</div>
             <div style={{ flex: tierSegments[2].flex + tierSegments[3].flex }} className="text-[11px] font-medium text-foreground">Private Companies</div>
           </div>
-          {/* Proportional blocks */}
-          <div className="flex h-[56px]">
+          {/* Continuous stacked bar */}
+          <div className="flex h-[36px] rounded-[4px] overflow-hidden">
             {tierSegments.map((t, i) => (
               <div
                 key={i}
-                className={`flex flex-col justify-end p-2.5 text-white min-w-0 ${i === 0 ? 'rounded-l-md' : ''} ${i === tierSegments.length - 1 ? 'rounded-r-md' : ''}`}
-                style={{ flex: t.flex, background: t.gradient }}
+                className="flex items-center px-2.5 text-white min-w-0 gap-1.5"
+                style={{ flex: t.flex, background: t.bg }}
               >
-                <div className="text-[11px] font-semibold leading-tight">{t.label}</div>
-                <div className="text-[10px] opacity-90 leading-tight">{t.name}: {t.value}</div>
+                <span className="text-[11px] font-bold whitespace-nowrap">{t.value}</span>
+                <span className="text-[10px] opacity-80 whitespace-nowrap truncate">{t.label} · {t.name}</span>
               </div>
             ))}
           </div>
