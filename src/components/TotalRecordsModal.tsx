@@ -9,6 +9,64 @@ const companyTypes = [
   { type: 'Government / State-Owned', count: '0.6M', sub: '0.6% of total', icon: Landmark, iconColor: 'text-status-amber' },
 ];
 
+const tierSegments = [
+  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: '#185FA5' },
+  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: '#1A7A4A' },
+  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: '#C97A00' },
+  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: '#534AB7' },
+] as const;
+
+const publicCompanyFlex = tierSegments[0].flex + tierSegments[1].flex;
+const privateCompanyFlex = tierSegments[2].flex + tierSegments[3].flex;
+const totalTierFlex = publicCompanyFlex + privateCompanyFlex;
+const privateCompanyStart = (publicCompanyFlex / totalTierFlex) * 100;
+
+const geographyBars = [
+  { region: 'US', count: 31, label: '31M' },
+  { region: 'Canada', count: 12, label: '12M' },
+  { region: 'UK', count: 7, label: '7M' },
+  { region: 'China', count: 8, label: '8M' },
+  { region: 'India', count: 5, label: '5M' },
+  { region: 'Germany', count: 5, label: '5M' },
+  { region: 'Japan', count: 3, label: '3M' },
+  { region: 'France', count: 3, label: '3M' },
+  { region: 'SE Asia', count: 3, label: '3M' },
+  { region: 'Latin Am.', count: 7, label: '7M' },
+  { region: 'Rest of World', count: 5, label: '5M' },
+];
+
+const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
+
+export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
+  return (
+    <ModalShell id="modal-total" onClose={onClose} inline={inline}>
+      <div className="p-[18px_24px] overflow-y-auto flex-1">
+        <div className="flex gap-5">
+          {/* LEFT PANE — By Segment (25%) */}
+          <div className="w-1/4 shrink-0 flex flex-col">
+            <SectionLabel>By segment</SectionLabel>
+            <div className="grid grid-cols-2 gap-2.5 flex-1">
+              {companyTypes.map((ct, i) => {
+                const Icon = ct.icon;
+                return (
+                  <div
+                    key={ct.type}
+                    className={`rounded-lg border border-border bg-card p-3 flex flex-col gap-1.5 ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0`}>
+                        <Icon className={`w-3.5 h-3.5 ${ct.iconColor}`} />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground leading-tight">{ct.type}</span>
+                    </div>
+                    <div className={`text-[18px] font-light tracking-[-0.5px] leading-none ${ct.iconColor}`}>{ct.count}</div>
+                    <div className="text-[9px] text-muted-foreground leading-snug">{ct.sub}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* RIGHT PANE — Tier & Geography (75%) */}
           <div className="flex-1 min-w-0">
             {/* TOTAL RECORDS BY TIER & SEGMENT */}
