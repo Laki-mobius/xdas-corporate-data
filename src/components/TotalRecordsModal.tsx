@@ -105,9 +105,8 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                 ))}
               </div>
               {geographyBars.map((g, i) => {
-                const hue = 260 - (i * 12);
-                const saturation = 65 + (i * 2);
-                const barGradient = `linear-gradient(to top, hsl(${hue}, ${saturation}%, 55%), hsl(${hue - 30}, ${saturation}%, 60%))`;
+                const lightness = 22 + (i * 4);
+                const barGradient = `linear-gradient(to top, hsl(152, 64%, ${lightness}%), hsl(152, 54%, ${lightness + 8}%))`;
                 return (
                   <div key={g.region} className="flex flex-col items-center flex-1 min-w-0 relative z-10" style={{ height: '100%', justifyContent: 'flex-end' }}>
                     <span className="text-[9px] font-semibold text-foreground mb-1 font-mono">{g.label}</span>
