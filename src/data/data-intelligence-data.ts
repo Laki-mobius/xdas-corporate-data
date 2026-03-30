@@ -121,7 +121,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'company-profile',
     label: 'Company Profile',
-    icon: '📋',
+    iconId: 'building2',
     description: 'Core company attributes including name, address, financials, and industry classification',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
