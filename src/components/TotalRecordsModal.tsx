@@ -9,10 +9,10 @@ const companyTypes = [
 ];
 
 const tierSegments = [
-  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, gradient: 'linear-gradient(135deg, #6366f1, #818cf8)', group: 'Public Companies' },
-  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, gradient: 'linear-gradient(135deg, #34d399, #6ee7b7)', group: 'Public Companies' },
-  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, gradient: 'linear-gradient(135deg, #3b5998, #4a6fa5)', group: 'Private Companies' },
-  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, gradient: 'linear-gradient(135deg, #7c5cbf, #a78bfa)', group: 'Private Companies' },
+  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, bg: 'hsl(var(--brand-dark))' },
+  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, bg: 'hsl(var(--brand))' },
+  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, bg: 'hsl(215, 35%, 25%)' },
+  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, bg: 'hsl(215, 35%, 30%)' },
 ];
 
 const geographyBars = [
@@ -58,20 +58,20 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         <SectionLabel>Total records by tier &amp; segment (scale proportional)</SectionLabel>
         <div className="border border-border rounded-lg p-3 mb-5 bg-surface">
           {/* Group labels */}
-          <div className="flex mb-1.5" style={{ gap: '4px' }}>
+          <div className="flex mb-1.5">
             <div style={{ flex: tierSegments[0].flex + tierSegments[1].flex }} className="text-[11px] font-medium text-foreground">Public Companies</div>
             <div style={{ flex: tierSegments[2].flex + tierSegments[3].flex }} className="text-[11px] font-medium text-foreground">Private Companies</div>
           </div>
-          {/* Proportional blocks */}
-          <div className="flex h-[56px]">
+          {/* Continuous stacked bar */}
+          <div className="flex h-[36px] rounded-[4px] overflow-hidden">
             {tierSegments.map((t, i) => (
               <div
                 key={i}
-                className={`flex flex-col justify-end p-2.5 text-white min-w-0 ${i === 0 ? 'rounded-l-md' : ''} ${i === tierSegments.length - 1 ? 'rounded-r-md' : ''}`}
-                style={{ flex: t.flex, background: t.gradient }}
+                className="flex items-center px-2.5 text-white min-w-0 gap-1.5"
+                style={{ flex: t.flex, background: t.bg }}
               >
-                <div className="text-[11px] font-semibold leading-tight">{t.label}</div>
-                <div className="text-[10px] opacity-90 leading-tight">{t.name}: {t.value}</div>
+                <span className="text-[11px] font-bold whitespace-nowrap">{t.value}</span>
+                <span className="text-[10px] opacity-80 whitespace-nowrap truncate">{t.label} · {t.name}</span>
               </div>
             ))}
           </div>
