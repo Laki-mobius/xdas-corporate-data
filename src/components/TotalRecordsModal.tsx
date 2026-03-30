@@ -9,10 +9,10 @@ const companyTypes = [
 ];
 
 const tierSegments = [
-  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: '#185FA5', group: 'Public Companies' },
-  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: '#1A7A4A', group: 'Public Companies' },
-  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: '#5BAD76', group: 'Private Companies' },
-  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: '#534AB7', group: 'Private Companies' },
+  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, gradient: 'linear-gradient(135deg, #6366f1, #818cf8)', group: 'Public Companies' },
+  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, gradient: 'linear-gradient(135deg, #34d399, #6ee7b7)', group: 'Public Companies' },
+  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, gradient: 'linear-gradient(135deg, #3b5998, #4a6fa5)', group: 'Private Companies' },
+  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, gradient: 'linear-gradient(135deg, #7c5cbf, #a78bfa)', group: 'Private Companies' },
 ];
 
 const geographyBars = [
@@ -63,12 +63,12 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
             <div style={{ flex: tierSegments[2].flex + tierSegments[3].flex }} className="text-[11px] font-medium text-foreground">Private Companies</div>
           </div>
           {/* Proportional blocks */}
-          <div className="flex gap-[4px] h-[72px]">
+          <div className="flex h-[56px]">
             {tierSegments.map((t, i) => (
               <div
                 key={i}
-                className="rounded-md flex flex-col justify-end p-2.5 text-white min-w-0"
-                style={{ flex: t.flex, background: t.color }}
+                className={`flex flex-col justify-end p-2.5 text-white min-w-0 ${i === 0 ? 'rounded-l-md' : ''} ${i === tierSegments.length - 1 ? 'rounded-r-md' : ''}`}
+                style={{ flex: t.flex, background: t.gradient }}
               >
                 <div className="text-[11px] font-semibold leading-tight">{t.label}</div>
                 <div className="text-[10px] opacity-90 leading-tight">{t.name}: {t.value}</div>
