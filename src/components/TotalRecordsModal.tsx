@@ -19,20 +19,16 @@ const geographyBars = [
   { region: 'US', count: 31, label: '31M' },
   { region: 'Canada', count: 12, label: '12M' },
   { region: 'UK', count: 7, label: '7M' },
-  { region: 'Germany', count: 5, label: '5M' },
-  { region: 'France', count: 3, label: '3M' },
-  { region: 'Rest of Europe', count: 11, label: '11M' },
   { region: 'China', count: 8, label: '8M' },
   { region: 'India', count: 5, label: '5M' },
+  { region: 'Germany', count: 5, label: '5M' },
   { region: 'Japan', count: 3, label: '3M' },
-  { region: 'Southeast Asia', count: 3, label: '3M' },
-  { region: 'Australia', count: 1, label: '1M' },
-  { region: 'Latin America', count: 7, label: '7M' },
-  { region: 'Middle East', count: 2, label: '2M' },
-  { region: 'Africa', count: 2, label: '2M' },
+  { region: 'France', count: 3, label: '3M' },
+  { region: 'SE Asia', count: 3, label: '3M' },
+  { region: 'Latin Am.', count: 7, label: '7M' },
+  { region: 'Rest of World', count: 5, label: '5M' },
 ];
 
-const maxBar = Math.max(...geographyBars.map(g => g.count));
 const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
