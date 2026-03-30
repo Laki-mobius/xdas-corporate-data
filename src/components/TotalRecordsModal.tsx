@@ -1,11 +1,12 @@
 import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
+import { Building2, Building, Network, GitBranch, Landmark } from 'lucide-react';
 
 const companyTypes = [
-  { type: 'Public Companies', count: '45,300', sub: 'Exchange-listed · daily', pct: '0.05%', bgClass: 'bg-gradient-to-br from-status-blue-light to-[hsl(210,80%,90%)] border-[hsl(210,50%,82%)] dark:from-[hsl(210,60%,12%)] dark:to-[hsl(210,50%,15%)] dark:border-[hsl(210,40%,25%)]', textClass: 'text-status-blue' },
-  { type: 'Private Companies', count: '98.655M', sub: 'Registry-sourced · weekly/monthly', pct: '99.95%', bgClass: 'bg-gradient-to-br from-brand-light to-[hsl(148,50%,86%)] border-brand-mid dark:from-[hsl(152,38%,16%)] dark:to-[hsl(152,40%,19%)] dark:border-[hsl(152,35%,22%)]', textClass: 'text-brand' },
-  { type: 'Parent Companies', count: '4.8M', sub: '4.9% of total', pct: '4.9%', bgClass: 'bg-gradient-to-br from-[hsl(25,80%,93%)] to-[hsl(25,70%,88%)] border-[hsl(25,60%,78%)] dark:from-[hsl(25,50%,12%)] dark:to-[hsl(25,40%,16%)] dark:border-[hsl(25,40%,22%)]', textClass: 'text-[hsl(25,80%,45%)]' },
-  { type: 'Subsidiaries', count: '3.1M', sub: '3.1% of total', pct: '3.1%', bgClass: 'bg-[hsl(0,0%,95%)] border-[hsl(0,0%,85%)] dark:bg-[hsl(0,0%,14%)] dark:border-[hsl(0,0%,22%)]', textClass: 'text-muted-foreground' },
-  { type: 'Government / State-Owned', count: '0.6M', sub: '0.6% of total', pct: '0.6%', bgClass: 'bg-gradient-to-br from-status-amber-light to-[hsl(40,80%,88%)] border-[hsl(40,60%,80%)] dark:from-[hsl(40,70%,9%)] dark:to-[hsl(40,50%,13%)] dark:border-[hsl(40,50%,15%)]', textClass: 'text-status-amber' },
+  { type: 'Public Companies', count: '45,300', sub: 'Exchange-listed · daily', icon: Building2, iconColor: 'text-status-blue' },
+  { type: 'Private Companies', count: '98.655M', sub: 'Registry-sourced · weekly/monthly', icon: Building, iconColor: 'text-brand' },
+  { type: 'Parent Companies', count: '4.8M', sub: '4.9% of total', icon: Network, iconColor: 'text-[hsl(25,80%,45%)]' },
+  { type: 'Subsidiaries', count: '3.1M', sub: '3.1% of total', icon: GitBranch, iconColor: 'text-muted-foreground' },
+  { type: 'Government / State-Owned', count: '0.6M', sub: '0.6% of total', icon: Landmark, iconColor: 'text-status-amber' },
 ];
 
 const tierSegments = [
@@ -42,16 +43,27 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
       <div className="p-[18px_24px] overflow-y-auto flex-1">
         <div className="flex gap-5">
           {/* LEFT PANE — By Segment (25%) */}
-          <div className="w-1/4 shrink-0">
+          <div className="w-1/4 shrink-0 flex flex-col">
             <SectionLabel>By segment</SectionLabel>
-            <div className="grid grid-cols-2 gap-2.5">
-              {companyTypes.map((ct, i) => (
-                <div key={ct.type} className={`rounded-[10px] p-3 border ${ct.bgClass} ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}>
-                  <div className={`text-[10px] font-bold uppercase tracking-[0.05em] mb-1.5 ${ct.textClass}`}>{ct.type}</div>
-                  <div className={`text-[21px] font-light tracking-[-0.8px] leading-none mb-1 ${ct.textClass}`}>{ct.count}</div>
-                  <div className="text-[10px] text-muted-foreground">{ct.sub}</div>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-2.5 flex-1">
+              {companyTypes.map((ct, i) => {
+                const Icon = ct.icon;
+                return (
+                  <div
+                    key={ct.type}
+                    className={`rounded-lg border border-border bg-card p-3 flex flex-col gap-1.5 ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0`}>
+                        <Icon className={`w-3.5 h-3.5 ${ct.iconColor}`} />
+                      </div>
+                      <span className="text-[11px] font-semibold text-foreground leading-tight">{ct.type}</span>
+                    </div>
+                    <div className={`text-[18px] font-light tracking-[-0.5px] leading-none ${ct.iconColor}`}>{ct.count}</div>
+                    <div className="text-[9px] text-muted-foreground leading-snug">{ct.sub}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
