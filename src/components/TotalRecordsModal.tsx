@@ -42,8 +42,8 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
     <ModalShell id="modal-total" onClose={onClose} inline={inline}>
       <div className="p-[18px_24px] overflow-y-auto flex-1">
         <div className="flex gap-5">
-          {/* LEFT PANE — By Segment (25%) */}
-          <div className="w-1/4 shrink-0 flex flex-col">
+          {/* LEFT PANE — By Segment (30%) */}
+          <div className="w-[30%] shrink-0 flex flex-col">
             <SectionLabel>By segment</SectionLabel>
             <div className="grid grid-cols-2 gap-3 flex-1">
               {companyTypes.map((ct, i) => {
