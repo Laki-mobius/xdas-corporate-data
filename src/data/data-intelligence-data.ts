@@ -3,7 +3,7 @@
 export interface DataGroup {
   id: string;
   label: string;
-  icon: string; // emoji for simplicity
+  iconId: string;
   description: string;
   filters: FilterDef[];
   columns: ColumnDef[];
