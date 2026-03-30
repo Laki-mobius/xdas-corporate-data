@@ -63,10 +63,9 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         <SectionLabel>Total records by tier &amp; segment (scale proportional)</SectionLabel>
         <div className="border border-border rounded-lg p-3 mb-5 bg-surface">
           {/* Group labels */}
-          <div className="flex mb-1.5">
-            <div style={{ flex: tierSegments[0].flex }} className="text-[11px] font-medium text-foreground">Public Companies</div>
-            <div style={{ flex: tierSegments[1].flex }} />
-            <div style={{ flex: tierSegments[2].flex + tierSegments[3].flex }} className="text-[11px] font-medium text-foreground">Private Companies</div>
+          <div className="relative mb-1.5 h-4">
+            <div className="absolute left-0 top-0 text-[11px] font-medium text-foreground">Public Companies</div>
+            <div className="absolute top-0 text-[11px] font-medium text-foreground" style={{ left: `${privateCompanyStart}%` }}>Private Companies</div>
           </div>
           {/* Continuous stacked bar */}
           <div className="flex h-[36px] rounded-[4px] overflow-hidden">
