@@ -1,59 +1,13 @@
 import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
+import { Building2, Building, Network, GitBranch, Landmark } from 'lucide-react';
 
 const companyTypes = [
-  { type: 'Public Companies', count: '45,300', sub: 'Exchange-listed · daily', pct: '0.05%', bgClass: 'bg-gradient-to-br from-status-blue-light to-[hsl(210,80%,90%)] border-[hsl(210,50%,82%)] dark:from-[hsl(210,60%,12%)] dark:to-[hsl(210,50%,15%)] dark:border-[hsl(210,40%,25%)]', textClass: 'text-status-blue' },
-  { type: 'Private Companies', count: '98.655M', sub: 'Registry-sourced · weekly/monthly', pct: '99.95%', bgClass: 'bg-gradient-to-br from-brand-light to-[hsl(148,50%,86%)] border-brand-mid dark:from-[hsl(152,38%,16%)] dark:to-[hsl(152,40%,19%)] dark:border-[hsl(152,35%,22%)]', textClass: 'text-brand' },
-  { type: 'Parent Companies', count: '4.8M', sub: '4.9% of total', pct: '4.9%', bgClass: 'bg-gradient-to-br from-[hsl(25,80%,93%)] to-[hsl(25,70%,88%)] border-[hsl(25,60%,78%)] dark:from-[hsl(25,50%,12%)] dark:to-[hsl(25,40%,16%)] dark:border-[hsl(25,40%,22%)]', textClass: 'text-[hsl(25,80%,45%)]' },
-  { type: 'Subsidiaries', count: '3.1M', sub: '3.1% of total', pct: '3.1%', bgClass: 'bg-[hsl(0,0%,95%)] border-[hsl(0,0%,85%)] dark:bg-[hsl(0,0%,14%)] dark:border-[hsl(0,0%,22%)]', textClass: 'text-muted-foreground' },
-  { type: 'Government / State-Owned', count: '0.6M', sub: '0.6% of total', pct: '0.6%', bgClass: 'bg-gradient-to-br from-status-amber-light to-[hsl(40,80%,88%)] border-[hsl(40,60%,80%)] dark:from-[hsl(40,70%,9%)] dark:to-[hsl(40,50%,13%)] dark:border-[hsl(40,50%,15%)]', textClass: 'text-status-amber' },
+  { type: 'Public Companies', count: '45,300', sub: 'Exchange-listed · daily', icon: Building2, iconColor: 'text-status-blue' },
+  { type: 'Private Companies', count: '98.655M', sub: 'Registry-sourced · weekly/monthly', icon: Building, iconColor: 'text-brand' },
+  { type: 'Parent Companies', count: '4.8M', sub: '4.9% of total', icon: Network, iconColor: 'text-[hsl(25,80%,45%)]' },
+  { type: 'Subsidiaries', count: '3.1M', sub: '3.1% of total', icon: GitBranch, iconColor: 'text-muted-foreground' },
+  { type: 'Government / State-Owned', count: '0.6M', sub: '0.6% of total', icon: Landmark, iconColor: 'text-status-amber' },
 ];
-
-const tierSegments = [
-  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: '#185FA5' },
-  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: '#1A7A4A' },
-  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: '#C97A00' },
-  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: '#534AB7' },
-] as const;
-
-const publicCompanyFlex = tierSegments[0].flex + tierSegments[1].flex;
-const privateCompanyFlex = tierSegments[2].flex + tierSegments[3].flex;
-const totalTierFlex = publicCompanyFlex + privateCompanyFlex;
-const privateCompanyStart = (publicCompanyFlex / totalTierFlex) * 100;
-
-const geographyBars = [
-  { region: 'US', count: 31, label: '31M' },
-  { region: 'Canada', count: 12, label: '12M' },
-  { region: 'UK', count: 7, label: '7M' },
-  { region: 'China', count: 8, label: '8M' },
-  { region: 'India', count: 5, label: '5M' },
-  { region: 'Germany', count: 5, label: '5M' },
-  { region: 'Japan', count: 3, label: '3M' },
-  { region: 'France', count: 3, label: '3M' },
-  { region: 'SE Asia', count: 3, label: '3M' },
-  { region: 'Latin Am.', count: 7, label: '7M' },
-  { region: 'Rest of World', count: 5, label: '5M' },
-];
-
-const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
-
-export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
-  return (
-    <ModalShell id="modal-total" onClose={onClose} inline={inline}>
-      <div className="p-[18px_24px] overflow-y-auto flex-1">
-        <div className="flex gap-5">
-          {/* LEFT PANE — By Segment (25%) */}
-          <div className="w-1/4 shrink-0">
-            <SectionLabel>By segment</SectionLabel>
-            <div className="grid grid-cols-2 gap-2.5">
-              {companyTypes.map((ct, i) => (
-                <div key={ct.type} className={`rounded-[10px] p-3 border ${ct.bgClass} ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}>
-                  <div className={`text-[10px] font-bold uppercase tracking-[0.05em] mb-1.5 ${ct.textClass}`}>{ct.type}</div>
-                  <div className={`text-[21px] font-light tracking-[-0.8px] leading-none mb-1 ${ct.textClass}`}>{ct.count}</div>
-                  <div className="text-[10px] text-muted-foreground">{ct.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* RIGHT PANE — Tier & Geography (75%) */}
           <div className="flex-1 min-w-0">
