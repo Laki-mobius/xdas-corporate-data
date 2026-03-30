@@ -120,7 +120,7 @@ export const dataGroups: DataGroup[] = [
   },
   {
     id: 'company-profile',
-    label: 'Company Profile / Basic Data',
+    label: 'Company Profile',
     icon: '📋',
     description: 'Core company attributes including name, address, financials, and industry classification',
     filters: [

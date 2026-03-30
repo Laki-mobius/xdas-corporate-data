@@ -19,20 +19,16 @@ const geographyBars = [
   { region: 'US', count: 31, label: '31M' },
   { region: 'Canada', count: 12, label: '12M' },
   { region: 'UK', count: 7, label: '7M' },
-  { region: 'Germany', count: 5, label: '5M' },
-  { region: 'France', count: 3, label: '3M' },
-  { region: 'Rest of Europe', count: 11, label: '11M' },
   { region: 'China', count: 8, label: '8M' },
   { region: 'India', count: 5, label: '5M' },
+  { region: 'Germany', count: 5, label: '5M' },
   { region: 'Japan', count: 3, label: '3M' },
-  { region: 'Southeast Asia', count: 3, label: '3M' },
-  { region: 'Australia', count: 1, label: '1M' },
-  { region: 'Latin America', count: 7, label: '7M' },
-  { region: 'Middle East', count: 2, label: '2M' },
-  { region: 'Africa', count: 2, label: '2M' },
+  { region: 'France', count: 3, label: '3M' },
+  { region: 'SE Asia', count: 3, label: '3M' },
+  { region: 'Latin Am.', count: 7, label: '7M' },
+  { region: 'Rest of World', count: 5, label: '5M' },
 ];
 
-const maxBar = Math.max(...geographyBars.map(g => g.count));
 const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
@@ -82,37 +78,46 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
         </div>
 
         {/* BAR CHART BY GEOGRAPHY */}
-        <SectionLabel>Records by geography</SectionLabel>
+        <SectionLabel>Records by geography (Top 10 + Rest of World)</SectionLabel>
         <div className="border border-border rounded-lg p-4 bg-surface">
-          <div className="flex items-end gap-0" style={{ height: 200 }}>
+          <div className="flex items-end gap-0" style={{ height: 220 }}>
             {/* Y-axis labels */}
-            <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 24 }}>
+            <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 28 }}>
               {yTicks.slice().reverse().map(t => (
                 <span key={t} className="text-[9px] text-muted-foreground font-mono leading-none text-right min-w-[24px]">{t}M</span>
               ))}
             </div>
             {/* Bars */}
-            <div className="flex-1 flex items-end justify-between gap-[3px]" style={{ height: '100%', paddingBottom: 24, position: 'relative' }}>
+            <div className="flex-1 flex items-end justify-between gap-[6px]" style={{ height: '100%', paddingBottom: 28, position: 'relative' }}>
               {/* Grid lines */}
-              <div className="absolute inset-0" style={{ bottom: 24 }}>
+              <div className="absolute inset-0" style={{ bottom: 28 }}>
                 {yTicks.map(t => (
                   <div
                     key={t}
-                    className="absolute w-full border-t border-border"
+                    className="absolute w-full border-t border-border/50"
                     style={{ bottom: `${(t / 35) * 100}%` }}
                   />
                 ))}
               </div>
-              {geographyBars.map(g => (
-                <div key={g.region} className="flex flex-col items-center flex-1 min-w-0 relative z-10" style={{ height: '100%', justifyContent: 'flex-end' }}>
-                  <span className="text-[9px] font-semibold text-foreground mb-0.5 font-mono">{g.label}</span>
-                  <div
-                    className="w-full max-w-[32px] rounded-t-[3px] bg-brand"
-                    style={{ height: `${(g.count / 35) * 100}%`, minHeight: 4 }}
-                  />
-                  <span className="text-[8px] text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[48px]">{g.region}</span>
-                </div>
-              ))}
+              {geographyBars.map((g, i) => {
+                const hue = 260 - (i * 12);
+                const saturation = 65 + (i * 2);
+                const barGradient = `linear-gradient(to top, hsl(${hue}, ${saturation}%, 55%), hsl(${hue - 30}, ${saturation}%, 60%))`;
+                return (
+                  <div key={g.region} className="flex flex-col items-center flex-1 min-w-0 relative z-10" style={{ height: '100%', justifyContent: 'flex-end' }}>
+                    <span className="text-[9px] font-semibold text-foreground mb-1 font-mono">{g.label}</span>
+                    <div
+                      className="w-full max-w-[36px] rounded-full shadow-sm"
+                      style={{
+                        height: `${(g.count / 35) * 100}%`,
+                        minHeight: 8,
+                        background: barGradient,
+                      }}
+                    />
+                    <span className="text-[8px] text-muted-foreground mt-2 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
