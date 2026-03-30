@@ -13,7 +13,12 @@ const tierSegments = [
   { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, bg: 'hsl(var(--brand))' },
   { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, bg: 'hsl(215, 35%, 25%)' },
   { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, bg: 'hsl(215, 35%, 30%)' },
-];
+] as const;
+
+const publicCompanyFlex = tierSegments[0].flex + tierSegments[1].flex;
+const privateCompanyFlex = tierSegments[2].flex + tierSegments[3].flex;
+const totalTierFlex = publicCompanyFlex + privateCompanyFlex;
+const privateCompanyStart = (publicCompanyFlex / totalTierFlex) * 100;
 
 const geographyBars = [
   { region: 'US', count: 31, label: '31M' },
