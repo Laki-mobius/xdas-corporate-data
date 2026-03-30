@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { ShieldCheck, BarChart3, Target } from 'lucide-react';
 import { ModalShell, ModalHeader, SectionLabel, FilterToolbar } from './ModalParts';
 import { dataGroups } from '@/data/dashboard-data';
 import { cn } from '@/lib/utils';
