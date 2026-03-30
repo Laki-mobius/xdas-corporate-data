@@ -59,7 +59,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'executive-data',
     label: 'Executive Data',
-    icon: '👤',
+    iconId: 'user',
     description: 'C-suite and board-level executive profiles, roles, and tenure',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
