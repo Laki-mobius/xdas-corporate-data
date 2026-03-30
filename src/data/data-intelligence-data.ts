@@ -90,7 +90,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'news-events',
     label: 'News & Events',
-    icon: '📰',
+    iconId: 'newspaper',
     description: 'Corporate announcements, M&A activity, regulatory filings, and press releases',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
