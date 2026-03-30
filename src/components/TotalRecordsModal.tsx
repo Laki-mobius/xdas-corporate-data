@@ -9,10 +9,10 @@ const companyTypes = [
 ];
 
 const tierSegments = [
-  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, bg: 'hsl(var(--brand-dark))' },
-  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, bg: 'hsl(var(--brand))' },
-  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, bg: 'hsl(215, 35%, 25%)' },
-  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, bg: 'hsl(215, 35%, 30%)' },
+  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: '#185FA5' },
+  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: '#1A7A4A' },
+  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: '#C97A00' },
+  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: '#534AB7' },
 ] as const;
 
 const publicCompanyFlex = tierSegments[0].flex + tierSegments[1].flex;
@@ -54,25 +54,38 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
 
         {/* TOTAL RECORDS BY TIER & SEGMENT */}
         <SectionLabel>Total records by tier &amp; segment (scale proportional)</SectionLabel>
-        <div className="border border-border rounded-lg p-3 mb-5 bg-surface">
-          {/* Group labels */}
-          <div className="relative mb-1.5 h-4">
-            <div className="absolute left-0 top-0 text-[11px] font-medium text-foreground">Public Companies</div>
-            <div className="absolute top-0 text-[11px] font-medium text-foreground" style={{ left: `${privateCompanyStart}%` }}>Private Companies</div>
-          </div>
-          {/* Continuous stacked bar */}
-          <div className="flex h-[36px] rounded-[4px] overflow-hidden">
-            {tierSegments.map((t, i) => (
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-[10px] text-muted-foreground">By tier classification</span>
+          <span className="text-[10px] text-muted-foreground italic">hover for details</span>
+        </div>
+        {/* Stacked bar — matching Coverage "Record completeness" style */}
+        <div className="flex h-6 rounded-md overflow-hidden mb-2.5 gap-0.5">
+          {tierSegments.map((t, i) => {
+            const pct = ((t.flex / totalTierFlex) * 100).toFixed(1);
+            return (
               <div
                 key={i}
-                className="flex items-center px-2.5 text-white min-w-0 gap-1.5"
-                style={{ flex: t.flex, background: t.bg }}
+                className="flex items-center justify-center text-[10px] font-semibold text-primary-foreground whitespace-nowrap px-[7px] cursor-pointer transition-[filter] hover:brightness-110 relative group"
+                style={{ width: `${pct}%`, background: t.color }}
               >
-                <span className="text-[11px] font-bold whitespace-nowrap">{t.value}</span>
-                <span className="text-[10px] opacity-80 whitespace-nowrap truncate">{t.label} · {t.name}</span>
+                {t.value}
+                <div className="absolute bottom-[calc(100%+7px)] left-1/2 -translate-x-1/2 bg-gray-900 border border-border rounded-md py-1.5 px-2.5 text-[11px] text-primary-foreground whitespace-nowrap pointer-events-none z-50 hidden group-hover:block text-center leading-relaxed">
+                  {t.label} · {t.name}<br /><strong>{t.value}</strong> · {pct}%
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-3 flex-wrap mb-5">
+          {tierSegments.map((t, i) => {
+            const pct = ((t.flex / totalTierFlex) * 100).toFixed(1);
+            return (
+              <span key={i} className="flex items-center gap-[5px] text-[11px] text-muted-foreground">
+                <span className="w-[9px] h-[9px] rounded-sm shrink-0" style={{ background: t.color }} />
+                {t.label} · {t.name}: {t.value} ({pct}%)
+              </span>
+            );
+          })}
         </div>
 
         {/* BAR CHART BY GEOGRAPHY */}
