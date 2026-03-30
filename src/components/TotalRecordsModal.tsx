@@ -63,12 +63,12 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
             <div style={{ flex: tierSegments[2].flex + tierSegments[3].flex }} className="text-[11px] font-medium text-foreground">Private Companies</div>
           </div>
           {/* Proportional blocks */}
-          <div className="flex gap-[4px] h-[72px]">
+          <div className="flex h-[56px]">
             {tierSegments.map((t, i) => (
               <div
                 key={i}
-                className="rounded-md flex flex-col justify-end p-2.5 text-white min-w-0"
-                style={{ flex: t.flex, background: t.color }}
+                className={`flex flex-col justify-end p-2.5 text-white min-w-0 ${i === 0 ? 'rounded-l-md' : ''} ${i === tierSegments.length - 1 ? 'rounded-r-md' : ''}`}
+                style={{ flex: t.flex, background: t.gradient }}
               >
                 <div className="text-[11px] font-semibold leading-tight">{t.label}</div>
                 <div className="text-[10px] opacity-90 leading-tight">{t.name}: {t.value}</div>
