@@ -45,19 +45,22 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           {/* LEFT PANE — By Segment (25%) */}
           <div className="w-1/4 shrink-0 flex flex-col">
             <SectionLabel>By segment</SectionLabel>
-            <div className="grid grid-cols-2 gap-2 flex-1">
+            <div className="grid grid-cols-2 gap-3 flex-1">
               {companyTypes.map((ct, i) => {
                 const Icon = ct.icon;
                 return (
                   <div
                     key={ct.type}
-                    className={`text-left p-3 rounded-lg border border-border bg-surface transition-all hover:border-brand/40 ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
+                    className={`text-left p-4 rounded-xl border border-border bg-card transition-all hover:border-brand/40 hover:shadow-sm ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Icon className={`w-4 h-4 ${ct.iconColor}`} />
-                      <span className="text-[12px] font-semibold text-foreground">{ct.type}</span>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-[28px] h-[28px] rounded-lg bg-surface border border-border flex items-center justify-center shrink-0">
+                        <Icon className={`w-3.5 h-3.5 ${ct.iconColor}`} />
+                      </div>
+                      <span className="text-[13px] font-semibold text-foreground">{ct.type}</span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground leading-snug">{ct.count} · {ct.sub}</p>
+                    <div className="text-[24px] font-light tracking-[-1px] leading-none text-foreground mb-1.5">{ct.count}</div>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{ct.sub}</p>
                   </div>
                 );
               })}
