@@ -44,9 +44,9 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           {/* LEFT PANE — By Segment (25%) */}
           <div className="w-1/4 shrink-0">
             <SectionLabel>By segment</SectionLabel>
-            <div className="flex flex-col gap-2.5">
-              {companyTypes.map(ct => (
-                <div key={ct.type} className={`rounded-[10px] p-3 border ${ct.bgClass}`}>
+            <div className="grid grid-cols-2 gap-2.5">
+              {companyTypes.map((ct, i) => (
+                <div key={ct.type} className={`rounded-[10px] p-3 border ${ct.bgClass} ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}>
                   <div className={`text-[10px] font-bold uppercase tracking-[0.05em] mb-1.5 ${ct.textClass}`}>{ct.type}</div>
                   <div className={`text-[21px] font-light tracking-[-0.8px] leading-none mb-1 ${ct.textClass}`}>{ct.count}</div>
                   <div className="text-[10px] text-muted-foreground">{ct.sub}</div>
