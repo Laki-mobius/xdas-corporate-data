@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { ShieldCheck, BarChart3, Target } from 'lucide-react';
 import { ModalShell, ModalHeader, SectionLabel, FilterToolbar } from './ModalParts';
 import { dataGroups } from '@/data/dashboard-data';
 import { cn } from '@/lib/utils';
@@ -18,17 +19,30 @@ const qcAttributes = [
   { name: 'Executive Name', accuracy: 89, correct: 89, total: 100, status: 'failed' as const, issues: '11 Outdated Records' },
 ];
 
-function CircularGauge({ value, label, subtitle, color }: { value: number; label: string; subtitle: string; color: string }) {
-  const circumference = 2 * Math.PI * 40;
-  const offset = circumference * (1 - value / 100);
+function CircularGauge({ value, label, subtitle, color, icon }: { value: number; label: string; subtitle: string; color: string; icon: React.ReactNode }) {
+  const radius = 42;
+  const strokeWidth = 10;
+  const circumference = 2 * Math.PI * radius;
+  // Leave a small gap at the top (270° start with ~8% gap)
+  const gapFraction = 0.15;
+  const arcLength = circumference * (1 - gapFraction);
+  const filledLength = arcLength * (value / 100);
+  const emptyLength = arcLength - filledLength;
+  const rotationDeg = 90 + (gapFraction / 2) * 360; // rotate to center the gap at the top-right
+
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative w-[100px] h-[100px]">
-        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
-          <circle cx="50" cy="50" r="40" fill="none" stroke={color} strokeWidth="8" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+      <div className="relative w-[120px] h-[120px]">
+        <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: `rotate(${rotationDeg}deg)` }}>
+          {/* Background track */}
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
+          {/* Filled arc */}
+          <circle cx="50" cy="50" r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={`${filledLength} ${circumference - filledLength}`} strokeLinecap="round" />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-xl font-semibold text-foreground">{value}%</div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-muted-foreground mb-0.5" style={{ color }}>{icon}</div>
+          <div className="text-xl font-bold text-foreground leading-none">{value}%</div>
+        </div>
       </div>
       <div className="text-center">
         <div className="text-xs font-semibold text-foreground">{label}</div>
@@ -85,13 +99,13 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
         {/* Three Circular Gauges */}
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center">
-            <CircularGauge value={97} label="Overall Quality" subtitle="Overall Record Accuracy" color="#1A7A4A" />
+            <CircularGauge value={97} label="Overall Quality" subtitle="Overall Record Accuracy" color="hsl(var(--brand))" icon={<ShieldCheck size={20} />} />
           </div>
           <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center">
-            <CircularGauge value={99} label="Attribute Fill Rate" subtitle="System Completeness" color="#185FA5" />
+            <CircularGauge value={99} label="Attribute Fill Rate" subtitle="System Completeness" color="hsl(var(--blue))" icon={<BarChart3 size={20} />} />
           </div>
           <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-center">
-            <CircularGauge value={98} label="Accuracy vs QC Flag" subtitle="Avg Attribute Correctness" color="#534AB7" />
+            <CircularGauge value={98} label="Accuracy vs QC Flag" subtitle="Avg Attribute Correctness" color="hsl(var(--purple))" icon={<Target size={20} />} />
           </div>
         </div>
 
