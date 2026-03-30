@@ -12,7 +12,7 @@ export default function KpiCard({ label, value, delta, subtitle, icon, onClick, 
   return (
     <div
       onClick={onClick}
-      className={`bg-card border rounded-lg p-3.5 cursor-pointer transition-all duration-150 hover:border-brand-mid hover:shadow-[0_2px_10px_rgba(26,122,74,0.07)] hover:-translate-y-px ${active ? 'border-brand-mid shadow-[0_2px_10px_rgba(26,122,74,0.10)] ring-1 ring-brand/20' : 'border-border'}`}
+      className={`bg-card border rounded-lg p-3.5 cursor-pointer transition-all duration-150 hover:bg-brand-light hover:border-brand-mid hover:shadow-[0_2px_10px_rgba(26,122,74,0.07)] hover:-translate-y-px ${active ? 'bg-brand-light border-brand-mid shadow-[0_2px_10px_rgba(26,122,74,0.10)] ring-1 ring-brand/20' : 'border-border'}`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="text-sm font-normal text-foreground leading-tight">{label}</div>
