@@ -137,7 +137,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                             background: barGradient,
                           }}
                         />
-                        <span className="text-[8px] text-muted-foreground mt-2 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
+                        <span className="text-[11px] text-muted-foreground mt-2 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
                       </div>
                     );
                   })}
