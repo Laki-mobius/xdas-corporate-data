@@ -27,7 +27,7 @@ export const dataGroups: DataGroup[] = [
   {
     id: 'corporate-hierarchy',
     label: 'Corporate Hierarchy Intelligence',
-    icon: '🏢',
+    iconId: 'network',
     description: 'Parent-subsidiary relationships, ownership chains, and hierarchy links',
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
