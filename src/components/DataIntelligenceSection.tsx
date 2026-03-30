@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { Search, Download, Upload, Network, User, Newspaper, Building2 } from 'lucide-react';
+import { Search, Download, Upload, ChevronDown } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -100,35 +100,26 @@ export default function DataIntelligenceSection() {
           {/* ── Dataset Group Selector ── */}
           <div className="space-y-2">
             <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Select Dataset</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {dataGroups.map(g => {
-                const IconMap: Record<string, typeof Network> = { network: Network, user: User, newspaper: Newspaper, building2: Building2 };
-                const Icon = IconMap[g.iconId] ?? Network;
-                return (
-                  <button
-                    key={g.id}
-                    onClick={() => handleGroupChange(g.id)}
-                    className={cn(
-                      'text-left p-3.5 rounded-lg border transition-all cursor-pointer',
-                      'hover:border-brand/40',
-                      selectedGroupId === g.id
-                        ? 'border-brand bg-brand-light shadow-sm'
-                        : 'border-border bg-card'
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5 mb-1.5">
-                      <div className={cn(
-                        'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                        selectedGroupId === g.id ? 'bg-brand/15 text-brand' : 'bg-muted text-muted-foreground'
-                      )}>
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <span className={cn('text-[12px] font-bold leading-tight', selectedGroupId === g.id ? 'text-brand' : 'text-foreground')}>{g.label}</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground leading-snug pl-[42px]">{g.description}</p>
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {dataGroups.map(g => (
+                <button
+                  key={g.id}
+                  onClick={() => handleGroupChange(g.id)}
+                  className={cn(
+                    'text-left p-3 rounded-lg border transition-all cursor-pointer',
+                    'hover:border-brand/40',
+                    selectedGroupId === g.id
+                      ? 'border-brand bg-brand-light shadow-sm'
+                      : 'border-border bg-surface'
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-base">{g.icon}</span>
+                    <span className={cn('text-[12px] font-semibold', selectedGroupId === g.id ? 'text-brand' : 'text-foreground')}>{g.label}</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-snug">{g.description}</p>
+                </button>
+              ))}
             </div>
           </div>
 
