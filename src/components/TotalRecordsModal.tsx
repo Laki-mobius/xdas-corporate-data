@@ -128,7 +128,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                     const barGradient = `linear-gradient(to top, hsl(152, 64%, ${lightness}%), hsl(152, 54%, ${lightness + 8}%))`;
                     return (
                       <div key={g.region} className="flex flex-col items-center flex-1 min-w-0 relative z-10" style={{ height: '100%', justifyContent: 'flex-end' }}>
-                        <span className="text-[9px] font-semibold text-foreground mb-1 font-mono">{g.label}</span>
+                        <span className="text-[11px] font-semibold text-foreground mb-1">{g.label}</span>
                         <div
                           className="w-full max-w-[36px] rounded-full shadow-sm"
                           style={{
