@@ -39,13 +39,6 @@ const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   return (
     <ModalShell id="modal-total" onClose={onClose} inline={inline}>
-      <ModalHeader
-        title="Total records"
-        subtitle="Data Overview · 98.7M records as of today"
-        iconBg="bg-brand-light"
-        icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-brand"><ellipse cx="10" cy="6" rx="7" ry="2.5" stroke="currentColor" strokeWidth="1.5" /><path d="M3 6v4c0 1.4 3.1 2.5 7 2.5S17 11.4 17 10V6" stroke="currentColor" strokeWidth="1.5" /><path d="M3 10v4c0 1.4 3.1 2.5 7 2.5S17 15.4 17 14v-4" stroke="currentColor" strokeWidth="1.5" /></svg>}
-        onClose={onClose}
-      />
       <div className="p-[18px_24px] overflow-y-auto flex-1">
         {/* BY SEGMENT */}
         <SectionLabel>By segment</SectionLabel>

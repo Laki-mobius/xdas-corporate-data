@@ -46,13 +46,6 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
 
   return (
     <ModalShell id="modal-coverage" onClose={onClose} fullHeight inline={inline}>
-      <ModalHeader
-        title="Coverage metrics"
-        subtitle="Attribute coverage depth · 98.7M total records"
-        iconBg="bg-status-blue-light"
-        icon={<svg viewBox="0 0 20 20" fill="none" className="w-[19px] h-[19px] text-status-blue"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" /><path d="M6 7h8M6 10h8M6 13h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
-        onClose={onClose}
-      />
       <div className="grid grid-cols-[280px_1fr] flex-1 overflow-hidden min-h-0">
         {/* Left Pane */}
         <div className="p-[18px_20px] overflow-y-auto border-r border-border">
