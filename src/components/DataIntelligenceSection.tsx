@@ -205,9 +205,9 @@ export default function DataIntelligenceSection() {
                       : 'border-border bg-surface'
                   )}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-base">{g.icon}</span>
+                  <div className="flex items-center justify-between mb-1">
                     <span className={cn('text-[12px] font-semibold', selectedGroupId === g.id ? 'text-brand' : 'text-foreground')}>{g.label}</span>
+                    <span className="text-base">{g.icon}</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground leading-snug">{g.description}</p>
                 </button>
