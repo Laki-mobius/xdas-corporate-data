@@ -49,8 +49,6 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
 }
 
 export default function AccuracyModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
-  const [companyType, setCompanyType] = useState('all');
-  const [tier, setTier] = useState('all');
   const [search, setSearch] = useState('');
   const [segment, setSegment] = useState('all');
   const [filterTier, setFilterTier] = useState('all');
@@ -76,29 +74,6 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
   return (
     <ModalShell id="modal-accuracy" onClose={onClose} fullHeight inline={inline}>
       <div className="flex-1 overflow-y-auto p-[18px_20px] flex flex-col gap-4">
-        {/* Filter Controls */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Company Type</span>
-            <div className="flex gap-1">
-              {[{ v: 'all', l: 'All' }, { v: 'public', l: 'Public' }, { v: 'private', l: 'Private' }].map(o => (
-                <button key={o.v} onClick={() => setCompanyType(o.v)} className={cn('py-[3px] px-2.5 rounded-[20px] border text-[11px] font-medium cursor-pointer transition-colors', companyType === o.v ? 'bg-gray-900 border-gray-900 text-primary-foreground dark:bg-brand dark:border-brand' : 'bg-card border-border text-muted-foreground')}>{o.l}</button>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Company Tier</span>
-            <div className="flex gap-1">
-              {[{ v: 'all', l: 'All' }, { v: 't1', l: 'Tier 1' }, { v: 't2', l: 'Tier 2' }, { v: 't3', l: 'Tier 3' }].map(o => (
-                <button key={o.v} onClick={() => setTier(o.v)} className={cn('py-[3px] px-2.5 rounded-[20px] border text-[11px] font-medium cursor-pointer transition-colors', tier === o.v ? 'bg-gray-900 border-gray-900 text-primary-foreground dark:bg-brand dark:border-brand' : 'bg-card border-border text-muted-foreground')}>{o.l}</button>
-              ))}
-            </div>
-          </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em]">Record Scope</span>
-            <span className="py-[3px] px-2.5 rounded-[20px] border border-border bg-surface text-[11px] font-semibold text-foreground">Sample 100</span>
-          </div>
-        </div>
 
         {/* Section Label above gauges */}
         <SectionLabel>Attribute level accuracy breakdown (Sample: 100 records)</SectionLabel>
