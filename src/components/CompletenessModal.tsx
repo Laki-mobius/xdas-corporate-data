@@ -222,7 +222,7 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                   <thead>
                     <tr className="bg-surface">
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Attribute</th>
-                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Data Group</th>
+                      
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Records Updated</th>
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Last Verified</th>
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Freshness</th>
@@ -231,15 +231,14 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
+                      <tr><td colSpan={5} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
                     ) : filtered.map((row, i) => {
                       const fp = freshnessPill(row.ref);
                       const isExpanded = geoExpanded === row.name;
                       return (
                         <>
                           <tr key={row.name} className="hover:bg-surface cursor-pointer" onClick={() => setGeoExpanded(isExpanded ? null : row.name)}>
-                            <td className="py-1.5 px-2.5 border-b border-border font-medium text-foreground whitespace-nowrap text-xs">{row.name}</td>
-                            <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.g}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border text-foreground whitespace-nowrap text-xs">{row.name}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.cnt}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.ref}</td>
                             <td className="py-1.5 px-2.5 border-b border-border"><span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', fp.cls)}>{fp.label}</span></td>
@@ -249,7 +248,7 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                           </tr>
                           {isExpanded && (
                             <tr key={`${row.name}-geo`}>
-                              <td colSpan={6} className="py-2 px-4 border-b border-border bg-surface">
+                              <td colSpan={5} className="py-2 px-4 border-b border-border bg-surface">
                                 <div className="grid grid-cols-5 gap-2">
                                   {geoKeys.map(geo => (
                                     <div key={geo} className="bg-card border border-border rounded-md p-2 text-center">
