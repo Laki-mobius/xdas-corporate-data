@@ -231,12 +231,13 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={4} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
+                      <tr><td colSpan={5} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
                     ) : filtered.map((row, i) => {
                       const fp = freshnessPill(row.ref);
                       return (
                           <tr key={row.name} className="hover:bg-surface">
                             <td className="py-1.5 px-2.5 border-b border-border text-foreground whitespace-nowrap text-xs">{row.name}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.pct}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.cnt}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.ref}</td>
                             <td className="py-1.5 px-2.5 border-b border-border"><span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', fp.cls)}>{fp.label}</span></td>
