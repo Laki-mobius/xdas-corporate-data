@@ -51,7 +51,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                 return (
                   <div
                     key={ct.type}
-                    className={`text-left p-4 rounded-xl border border-border bg-card transition-all hover:border-brand/40 hover:shadow-sm ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
+                    className={`text-left p-3 rounded-lg border border-border bg-surface transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-[28px] h-[28px] rounded-lg bg-surface border border-border flex items-center justify-center shrink-0">
