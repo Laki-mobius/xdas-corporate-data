@@ -1,9 +1,13 @@
 import { useState, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
   MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
+  CalendarIcon, Timer,
 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import InsightDrawer from "@/components/InsightDrawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
