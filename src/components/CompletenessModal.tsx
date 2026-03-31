@@ -248,7 +248,7 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                           </tr>
                           {isExpanded && (
                             <tr key={`${row.name}-geo`}>
-                              <td colSpan={6} className="py-2 px-4 border-b border-border bg-surface">
+                              <td colSpan={5} className="py-2 px-4 border-b border-border bg-surface">
                                 <div className="grid grid-cols-5 gap-2">
                                   {geoKeys.map(geo => (
                                     <div key={geo} className="bg-card border border-border rounded-md p-2 text-center">
