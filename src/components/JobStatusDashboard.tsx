@@ -2,7 +2,7 @@ import { useState, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
-  MoreHorizontal, ExternalLink, RotateCcw, StopCircle, Play, Upload, X, FileText,
+  MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
 } from "lucide-react";
 import InsightDrawer from "@/components/InsightDrawer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -184,7 +184,7 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                   <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Status</TableHead>
                   <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Records</TableHead>
                   <TableHead className="w-[20%] text-[11px] py-1.5 h-8">Progress</TableHead>
-                  <TableHead className="w-[8%] text-right text-[11px] py-1.5 h-8">Actions</TableHead>
+                  <TableHead className="w-[8%] text-right text-[11px] py-1.5 h-8">Download</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -208,7 +208,7 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                       </TableCell>
                       <TableCell className="text-right py-1.5">
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <Download className="w-3.5 h-3.5" />
                         </Button>
                       </TableCell>
                     </TableRow>
