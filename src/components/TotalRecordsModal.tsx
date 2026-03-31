@@ -45,19 +45,19 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           {/* LEFT PANE — By Segment (30%) */}
           <div className="w-[30%] shrink-0 flex flex-col">
             <SectionLabel>By segment</SectionLabel>
-            <div className="grid grid-cols-2 gap-3 flex-1">
+            <div className="grid grid-cols-2 gap-2 flex-1 content-start">
               {companyTypes.map((ct, i) => {
                 const Icon = ct.icon;
                 return (
                   <div
                     key={ct.type}
-                    className={`text-left p-3 rounded-lg border border-border bg-surface transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
+                    className={`text-left p-2.5 rounded-lg border border-border bg-surface transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
                   >
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-[28px] h-[28px] rounded-lg bg-surface border border-border flex items-center justify-center shrink-0">
-                        <Icon className={`w-3.5 h-3.5 ${ct.iconColor}`} />
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-[24px] h-[24px] rounded-md bg-surface border border-border flex items-center justify-center shrink-0">
+                        <Icon className={`w-3 h-3 ${ct.iconColor}`} />
                       </div>
-                      <span className="text-[13px] font-semibold text-foreground">{ct.type}</span>
+                      <span className="text-[12px] font-semibold text-foreground">{ct.type}</span>
                     </div>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-[20px] font-light tracking-[-1px] leading-none text-foreground">{ct.count}</span>
@@ -108,15 +108,15 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
 
             {/* BAR CHART BY GEOGRAPHY */}
             <SectionLabel>Records by geography (Top 10 + Rest of World)</SectionLabel>
-            <div className="border border-border rounded-lg p-4 bg-surface">
-              <div className="flex items-end gap-0" style={{ height: 220 }}>
-                <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 28 }}>
+            <div className="border border-border rounded-lg p-3 bg-surface">
+              <div className="flex items-end gap-0" style={{ height: 180 }}>
+                <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 22 }}>
                   {yTicks.slice().reverse().map(t => (
                     <span key={t} className="text-[11px] text-muted-foreground leading-none text-right min-w-[24px]">{t}M</span>
                   ))}
                 </div>
-                <div className="flex-1 flex items-end justify-between gap-[6px]" style={{ height: '100%', paddingBottom: 28, position: 'relative' }}>
-                  <div className="absolute inset-0" style={{ bottom: 28 }}>
+                <div className="flex-1 flex items-end justify-between gap-[6px]" style={{ height: '100%', paddingBottom: 22, position: 'relative' }}>
+                  <div className="absolute inset-0" style={{ bottom: 22 }}>
                     {yTicks.map(t => (
                       <div
                         key={t}
@@ -139,7 +139,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                             background: barGradient,
                           }}
                         />
-                        <span className="text-[11px] text-muted-foreground mt-2 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
+                        <span className="text-[11px] text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
                       </div>
                     );
                   })}
