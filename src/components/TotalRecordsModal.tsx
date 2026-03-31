@@ -53,11 +53,11 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                     key={ct.type}
                     className={`text-left p-2.5 rounded-lg border border-border bg-surface transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm ${i === companyTypes.length - 1 ? 'col-span-2' : ''}`}
                   >
-                    <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[12px] font-semibold text-foreground">{ct.type}</span>
                       <div className="w-[24px] h-[24px] rounded-md bg-surface border border-border flex items-center justify-center shrink-0">
                         <Icon className={`w-3 h-3 ${ct.iconColor}`} />
                       </div>
-                      <span className="text-[12px] font-semibold text-foreground">{ct.type}</span>
                     </div>
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-[20px] font-light tracking-[-1px] leading-none text-foreground">{ct.count}</span>
