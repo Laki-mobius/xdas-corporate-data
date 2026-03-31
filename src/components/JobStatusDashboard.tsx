@@ -208,7 +208,7 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                       </TableCell>
                       <TableCell className="text-right py-1.5">
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <Download className="w-3.5 h-3.5" />
                         </Button>
                       </TableCell>
                     </TableRow>
