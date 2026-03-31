@@ -231,7 +231,7 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
+                      <tr><td colSpan={5} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
                     ) : filtered.map((row, i) => {
                       const fp = freshnessPill(row.ref);
                       const isExpanded = geoExpanded === row.name;
