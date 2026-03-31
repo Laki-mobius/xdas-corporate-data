@@ -6,6 +6,11 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('all');
+  const [segment, setSegment] = useState('all');
+  const [tier, setTier] = useState('all');
+  const [geography, setGeography] = useState('all');
+  const [companySize, setCompanySize] = useState('all');
+  const [revenue, setRevenue] = useState('all');
 
   // Ensure Company Name and Address appear first with 100% coverage
   const adjustedCovData = useMemo(() => {
@@ -139,22 +144,109 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
 
           <div className="flex-1 min-h-0 flex flex-col">
             <SectionLabel>Attribute level completeness</SectionLabel>
-            <FilterToolbar
-              searchId="cov-s"
-              searchPlaceholder="Search attribute..."
-              onSearch={setSearch}
-              groups={dataGroups}
-              selectedGroup={group}
-              onGroupChange={setGroup}
-              pills={[
-                { value: 'all', label: 'All' },
-                { value: 'good', label: '≥80%' },
-                { value: 'warn', label: '60–79%' },
-                { value: 'low', label: '<60%' },
-              ]}
-              activePill={filter}
-              onPillClick={setFilter}
-            />
+            <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+              <div className="relative flex-1 min-w-[130px] max-w-[160px]">
+                <svg viewBox="0 0 14 14" fill="none" className="absolute left-2 top-1/2 -translate-y-1/2 w-[11px] h-[11px] text-muted-foreground pointer-events-none">
+                  <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
+                  <path d="M9.5 9.5l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                <input
+                  className="w-full py-[5px] pr-2 pl-7 border border-border rounded-md text-[11px] bg-card text-foreground outline-none focus:border-brand"
+                  placeholder="Search attribute..."
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              {/* Segment */}
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer focus:border-brand" value={segment} onChange={e => setSegment(e.target.value)}>
+                  <option value="all">All Segments</option>
+                  <option value="public">Public Companies</option>
+                  <option value="private">Private Companies</option>
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+              {/* Tier */}
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer focus:border-brand" value={tier} onChange={e => setTier(e.target.value)}>
+                  <option value="all">All Tiers</option>
+                  <option value="t1">Tier 1</option>
+                  <option value="t2">Tier 2</option>
+                  <option value="t3">Tier 3</option>
+                  <option value="t4">Tier 4</option>
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+              {/* Geography */}
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer focus:border-brand" value={geography} onChange={e => setGeography(e.target.value)}>
+                  <option value="all">All Geographies</option>
+                  <option value="na">North America</option>
+                  <option value="eu">Europe</option>
+                  <option value="apac">APAC</option>
+                  <option value="mena">Middle East</option>
+                  <option value="africa">Africa</option>
+                  <option value="latam">Latin America</option>
+                  <option value="us">United States</option>
+                  <option value="uk">United Kingdom</option>
+                  <option value="de">Germany</option>
+                  <option value="fr">France</option>
+                  <option value="in">India</option>
+                  <option value="cn">China</option>
+                  <option value="jp">Japan</option>
+                  <option value="au">Australia</option>
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+              {/* Data Group */}
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer focus:border-brand" value={group} onChange={e => setGroup(e.target.value)}>
+                  <option value="all">All Data Groups</option>
+                  {dataGroups.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+              {/* Company Size */}
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer focus:border-brand" value={companySize} onChange={e => setCompanySize(e.target.value)}>
+                  <option value="all">All Sizes</option>
+                  <option value="small">Small</option>
+                  <option value="mid">Mid</option>
+                  <option value="large">Large</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+              {/* Revenue */}
+              <div className="relative shrink-0">
+                <select className="appearance-none py-[5px] pl-2.5 pr-6 border border-border rounded-md text-[11px] bg-card text-foreground outline-none cursor-pointer focus:border-brand" value={revenue} onChange={e => setRevenue(e.target.value)}>
+                  <option value="all">All Revenue</option>
+                  <option value="0-1m">$0 – $1M</option>
+                  <option value="1-10m">$1M – $10M</option>
+                  <option value="10-50m">$10M – $50M</option>
+                  <option value="50-250m">$50M – $250M</option>
+                  <option value="250m-1b">$250M – $1B</option>
+                  <option value="1b+">$1B+</option>
+                </select>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[5px] border-l-transparent border-r-transparent border-t-muted-foreground pointer-events-none" />
+              </div>
+              {/* Coverage pills */}
+              <div className="flex gap-[5px] flex-wrap ml-auto">
+                {[
+                  { value: 'all', label: 'All' },
+                  { value: 'good', label: '≥80%' },
+                  { value: 'warn', label: '60–79%' },
+                  { value: 'low', label: '<60%' },
+                ].map(p => (
+                  <button
+                    key={p.value}
+                    className={`py-[3px] px-2 rounded-[20px] border text-[11px] font-medium cursor-pointer ${filter === p.value ? 'bg-gray-900 border-gray-900 text-primary-foreground dark:bg-brand dark:border-brand' : 'bg-card border-border text-muted-foreground'}`}
+                    onClick={() => setFilter(p.value)}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <AttributeTable
               data={filtered.map(a => ({ ...a, status: <StatusPill status={a.st} goodLabel="Good" warnLabel="Medium" /> }))}
               columns={['Attribute', 'Primary source', 'Coverage %', 'Count', 'Last refreshed', 'Status']}
