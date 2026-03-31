@@ -242,9 +242,6 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.cnt}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.ref}</td>
                             <td className="py-1.5 px-2.5 border-b border-border"><span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', fp.cls)}>{fp.label}</span></td>
-                            <td className="py-1.5 px-2.5 border-b border-border">
-                              <svg viewBox="0 0 10 10" className={cn("w-2.5 h-2.5 text-muted-foreground transition-transform", isExpanded && "rotate-90")}><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
-                            </td>
                           </tr>
                           {isExpanded && (
                             <tr key={`${row.name}-geo`}>
