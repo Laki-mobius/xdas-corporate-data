@@ -41,11 +41,11 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
   return (
     <ModalShell id="modal-total" onClose={onClose} inline={inline}>
       <div className="p-[18px_24px] overflow-y-auto flex-1">
-        <div className="flex gap-5">
+        <div className="flex gap-5 items-stretch">
           {/* LEFT PANE — By Segment (30%) */}
           <div className="w-[30%] shrink-0 flex flex-col">
             <SectionLabel>By segment</SectionLabel>
-            <div className="grid grid-cols-2 gap-2 flex-1 content-start">
+            <div className="grid grid-cols-2 gap-2 flex-1 content-stretch auto-rows-fr">
               {companyTypes.map((ct, i) => {
                 const Icon = ct.icon;
                 return (
