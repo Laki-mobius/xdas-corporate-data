@@ -6,6 +6,11 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
   const [filter, setFilter] = useState('all');
+  const [segment, setSegment] = useState('all');
+  const [tier, setTier] = useState('all');
+  const [geography, setGeography] = useState('all');
+  const [companySize, setCompanySize] = useState('all');
+  const [revenue, setRevenue] = useState('all');
 
   // Ensure Company Name and Address appear first with 100% coverage
   const adjustedCovData = useMemo(() => {
