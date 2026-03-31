@@ -108,15 +108,15 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
 
             {/* BAR CHART BY GEOGRAPHY */}
             <SectionLabel>Records by geography (Top 10 + Rest of World)</SectionLabel>
-            <div className="border border-border rounded-lg p-4 bg-surface">
-              <div className="flex items-end gap-0" style={{ height: 220 }}>
-                <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 28 }}>
+            <div className="border border-border rounded-lg p-3 bg-surface">
+              <div className="flex items-end gap-0" style={{ height: 180 }}>
+                <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 22 }}>
                   {yTicks.slice().reverse().map(t => (
                     <span key={t} className="text-[11px] text-muted-foreground leading-none text-right min-w-[24px]">{t}M</span>
                   ))}
                 </div>
-                <div className="flex-1 flex items-end justify-between gap-[6px]" style={{ height: '100%', paddingBottom: 28, position: 'relative' }}>
-                  <div className="absolute inset-0" style={{ bottom: 28 }}>
+                <div className="flex-1 flex items-end justify-between gap-[6px]" style={{ height: '100%', paddingBottom: 22, position: 'relative' }}>
+                  <div className="absolute inset-0" style={{ bottom: 22 }}>
                     {yTicks.map(t => (
                       <div
                         key={t}
@@ -139,7 +139,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                             background: barGradient,
                           }}
                         />
-                        <span className="text-[11px] text-muted-foreground mt-2 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
+                        <span className="text-[11px] text-muted-foreground mt-1.5 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis max-w-[52px]">{g.region}</span>
                       </div>
                     );
                   })}
