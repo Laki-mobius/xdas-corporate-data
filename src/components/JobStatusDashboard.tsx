@@ -184,7 +184,7 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                   <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Status</TableHead>
                   <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Records</TableHead>
                   <TableHead className="w-[20%] text-[11px] py-1.5 h-8">Progress</TableHead>
-                  <TableHead className="w-[8%] text-right text-[11px] py-1.5 h-8">Actions</TableHead>
+                  <TableHead className="w-[8%] text-right text-[11px] py-1.5 h-8">Download</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
