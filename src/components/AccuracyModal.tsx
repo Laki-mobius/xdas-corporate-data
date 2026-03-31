@@ -191,7 +191,7 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
                     const barColor = row.accuracy >= 95 ? '#1A7A4A' : row.accuracy >= 90 ? '#C97A00' : '#C0392B';
                     return (
                       <tr key={i} className="hover:bg-surface">
-                        <td className="py-1.5 px-2.5 border-b border-border font-medium text-foreground whitespace-nowrap text-xs">{row.name}</td>
+                        <td className="py-1.5 px-2.5 border-b border-border text-foreground whitespace-nowrap text-xs">{row.name}</td>
                         <td className="py-1.5 px-2.5 border-b border-border min-w-[100px]">
                           <div className="flex items-center gap-1.5">
                             <div className="flex-1 h-[5px] bg-border rounded-sm overflow-hidden">
