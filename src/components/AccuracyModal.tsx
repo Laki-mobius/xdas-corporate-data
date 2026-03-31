@@ -73,13 +73,9 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
 
   return (
     <ModalShell id="modal-accuracy" onClose={onClose} fullHeight inline={inline}>
-      <div className="flex-1 overflow-y-auto p-[18px_20px] flex flex-col gap-4">
-
-        {/* Section Label above gauges */}
-        <SectionLabel>Attribute level accuracy breakdown (Sample: 100 records)</SectionLabel>
-
-        {/* Three Circular Gauges */}
-        <div className="grid grid-cols-3 gap-3">
+      <div className="flex-1 overflow-y-auto p-[18px_20px] flex gap-4">
+        {/* Left Pane – Donut Charts */}
+        <div className="w-[260px] shrink-0 flex flex-col gap-3">
           <div className="bg-surface border border-border rounded-lg p-2.5 flex items-center">
             <CircularGauge value={97} label="Overall Quality" subtitle="Overall Record Accuracy" color="hsl(var(--brand))" icon={<ShieldCheck size={16} />} />
           </div>
@@ -89,11 +85,39 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
           <div className="bg-surface border border-border rounded-lg p-2.5 flex items-center">
             <CircularGauge value={98} label="Accuracy vs QC Flag" subtitle="Avg Attribute Correctness" color="hsl(var(--purple))" icon={<Target size={16} />} />
           </div>
+
+          {/* Accuracy Split by Company Type */}
+          <SectionLabel>Accuracy split by company type</SectionLabel>
+          <div className="space-y-2.5">
+            {[
+              { label: 'Public Companies', pct: 98, count: '231 records', color: '#185FA5' },
+              { label: 'Private Companies', pct: 96, count: '961 records', color: '#1A7A4A' },
+            ].map(item => (
+              <div key={item.label} className="bg-surface border border-border rounded-md p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium text-foreground">{item.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold font-mono" style={{ color: item.color }}>{item.pct}%</span>
+                    <span className="text-[10px] text-muted-foreground">{item.count}</span>
+                  </div>
+                </div>
+                <div className="h-[8px] bg-border rounded-sm overflow-hidden">
+                  <div className="h-full rounded-sm transition-all" style={{ width: `${item.pct}%`, background: item.color }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center pt-2 border-t border-border text-[10px] text-muted-foreground mt-auto">
+            <span>Last updated: 2026-02-27 &nbsp;|&nbsp; Next QC check: 2026-03-27</span>
+          </div>
         </div>
 
-        {/* Filters below gauges */}
-        <div>
-          <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+        {/* Right Pane – Attribute Level Accuracy Breakdown */}
+        <div className="flex-1 min-w-0 flex flex-col gap-2.5">
+          <SectionLabel>Attribute level accuracy breakdown</SectionLabel>
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
               <svg viewBox="0 0 14 14" fill="none" className="absolute left-2 top-1/2 -translate-y-1/2 w-[11px] h-[11px] text-muted-foreground pointer-events-none">
                 <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
@@ -148,8 +172,8 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
               <option value="gt1b">$1B+</option>
             </select>
           </div>
-          <div className="border border-border rounded-lg overflow-hidden">
-            <div className="overflow-y-auto max-h-[300px]">
+          <div className="border border-border rounded-lg overflow-hidden flex-1">
+            <div className="overflow-y-auto max-h-[500px]">
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr className="bg-surface">
@@ -186,35 +210,6 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
               </table>
             </div>
           </div>
-        </div>
-
-        {/* Accuracy Split by Company Type */}
-        <div>
-          <SectionLabel>Accuracy split by company type</SectionLabel>
-          <div className="space-y-2.5">
-            {[
-              { label: 'Public Companies', pct: 98, count: '231 records', color: '#185FA5' },
-              { label: 'Private Companies', pct: 96, count: '961 records', color: '#1A7A4A' },
-            ].map(item => (
-              <div key={item.label} className="bg-surface border border-border rounded-md p-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-medium text-foreground">{item.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold font-mono" style={{ color: item.color }}>{item.pct}%</span>
-                    <span className="text-[10px] text-muted-foreground">{item.count}</span>
-                  </div>
-                </div>
-                <div className="h-[8px] bg-border rounded-sm overflow-hidden">
-                  <div className="h-full rounded-sm transition-all" style={{ width: `${item.pct}%`, background: item.color }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-border text-[10px] text-muted-foreground">
-          <span>Last updated: 2026-02-27 &nbsp;|&nbsp; Next QC check: 2026-03-27</span>
         </div>
       </div>
     </ModalShell>
