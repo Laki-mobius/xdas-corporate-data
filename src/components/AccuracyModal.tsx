@@ -34,7 +34,7 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
         <div className="text-xs font-semibold text-foreground">{label}</div>
         <div className="text-[10px] text-muted-foreground">{subtitle}</div>
       </div>
-      <div className="relative w-full max-w-[110px] aspect-square shrink-0">
+      <div className="relative w-[70px] h-[70px] shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: `rotate(${rotationDeg}deg)` }}>
           <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
           <circle cx="50" cy="50" r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={`${filledLength} ${circumference - filledLength}`} strokeLinecap="round" />
