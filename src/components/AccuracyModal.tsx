@@ -20,15 +20,13 @@ const qcAttributes = [
 ];
 
 function CircularGauge({ value, label, subtitle, color, icon }: { value: number; label: string; subtitle: string; color: string; icon: React.ReactNode }) {
-  const radius = 42;
-  const strokeWidth = 10;
+  const radius = 40;
+  const strokeWidth = 14;
   const circumference = 2 * Math.PI * radius;
-  // Leave a small gap at the top (270° start with ~8% gap)
   const gapFraction = 0.15;
   const arcLength = circumference * (1 - gapFraction);
   const filledLength = arcLength * (value / 100);
-  const emptyLength = arcLength - filledLength;
-  const rotationDeg = 90 + (gapFraction / 2) * 360; // rotate to center the gap at the top-right
+  const rotationDeg = 90 + (gapFraction / 2) * 360;
 
   return (
     <div className="flex items-center gap-3 w-full">
@@ -36,7 +34,7 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
         <div className="text-xs font-semibold text-foreground">{label}</div>
         <div className="text-[10px] text-muted-foreground">{subtitle}</div>
       </div>
-      <div className="relative w-[90px] h-[90px] shrink-0">
+      <div className="relative w-full max-w-[110px] aspect-square shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: `rotate(${rotationDeg}deg)` }}>
           <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
           <circle cx="50" cy="50" r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={`${filledLength} ${circumference - filledLength}`} strokeLinecap="round" />
