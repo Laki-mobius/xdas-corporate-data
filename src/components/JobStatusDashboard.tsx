@@ -2,7 +2,7 @@ import { useState, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
-  MoreHorizontal, ExternalLink, RotateCcw, StopCircle, Play, Upload, X, FileText,
+  MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
 } from "lucide-react";
 import InsightDrawer from "@/components/InsightDrawer";
 import { Card, CardContent } from "@/components/ui/card";
