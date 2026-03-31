@@ -513,6 +513,19 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
             <p className="text-[11px] text-muted-foreground">
               Accepted: ticker symbols, registration numbers, LEIs, CIK codes
             </p>
+
+            {/* Schedule Button */}
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-[12px] gap-1.5 px-4 border-primary text-primary hover:bg-primary/5"
+                onClick={() => setShowScheduleModal(true)}
+              >
+                <CalendarIcon className="w-3.5 h-3.5" /> Schedule
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -523,6 +536,158 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
           </Button>
           <Button size="sm" className="h-9 text-[12px] gap-1.5 px-5 bg-emerald-700 hover:bg-emerald-800 text-white" disabled={!canSubmit} onClick={handleSubmit}>
             <Play className="w-3.5 h-3.5" /> Run Job
+          </Button>
+        </div>
+      </DialogContent>
+
+      {/* Schedule Modal */}
+      <ScheduleModal open={showScheduleModal} onOpenChange={setShowScheduleModal} />
+    </Dialog>
+  );
+}
+
+/* ── Schedule Modal ── */
+function ScheduleModal({ open, onOpenChange }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const [project, setProject] = useState('');
+  const [timezone, setTimezone] = useState('(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi');
+  const [frequency, setFrequency] = useState<'ONCE' | 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY'>('ONCE');
+  const [startDate, setStartDate] = useState<Date>();
+  const [startTime, setStartTime] = useState('');
+
+  const handleSchedule = () => {
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[520px] z-[200]" onClick={(e) => e.stopPropagation()}>
+        <DialogHeader>
+          <DialogTitle className="text-base font-bold">Add Schedule</DialogTitle>
+          <DialogDescription className="sr-only">Configure job scheduling</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 pt-2">
+          {/* Projects */}
+          <div className="flex items-center gap-4">
+            <Label className="text-[13px] font-semibold w-28 shrink-0">Projects</Label>
+            <Select value={project} onValueChange={setProject}>
+              <SelectTrigger className="h-9 text-[13px] flex-1">
+                <SelectValue placeholder="Select project" />
+              </SelectTrigger>
+              <SelectContent className="z-[300]">
+                <SelectItem value="initiatives">Initiatives</SelectItem>
+                <SelectItem value="compliance">Compliance</SelectItem>
+                <SelectItem value="enrichment">Enrichment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Input */}
+          <div className="flex items-center gap-4">
+            <Label className="text-[13px] font-semibold w-28 shrink-0">Input</Label>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-8 text-[11px] px-4 border-primary text-primary">
+                Upload Options
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 text-[11px] px-4 border-primary text-primary">
+                Download Template
+              </Button>
+            </div>
+          </div>
+
+          {/* Timezone */}
+          <div className="flex items-center gap-4">
+            <Label className="text-[13px] font-semibold w-28 shrink-0">Timezone</Label>
+            <Select value={timezone} onValueChange={setTimezone}>
+              <SelectTrigger className="h-9 text-[13px] flex-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="z-[300]">
+                <SelectItem value="(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi">(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi</SelectItem>
+                <SelectItem value="(UTC+00:00) London, Dublin">(UTC+00:00) London, Dublin</SelectItem>
+                <SelectItem value="(UTC-05:00) Eastern Time">(UTC-05:00) Eastern Time</SelectItem>
+                <SelectItem value="(UTC-08:00) Pacific Time">(UTC-08:00) Pacific Time</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Frequency */}
+          <div className="flex items-center gap-4">
+            <Label className="text-[13px] font-semibold w-28 shrink-0">Frequency</Label>
+            <div className="flex gap-2">
+              {(['ONCE', 'HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY'] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFrequency(f)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-md text-[11px] font-semibold border transition-colors",
+                    frequency === f
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background text-foreground border-border hover:border-primary"
+                  )}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Start Date */}
+          <div className="flex items-center gap-4">
+            <Label className="text-[13px] font-semibold w-28 shrink-0">Start Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[180px] h-9 justify-start text-left text-[13px] font-normal",
+                    !startDate && "text-muted-foreground"
+                  )}
+                >
+                  {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-[300]" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center cursor-pointer">
+              <CalendarIcon className="w-4 h-4 text-primary-foreground" />
+            </div>
+          </div>
+
+          {/* Start Time */}
+          <div className="flex items-center gap-4">
+            <Label className="text-[13px] font-semibold w-28 shrink-0">Start Time</Label>
+            <Input
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-[180px] h-9 text-[13px]"
+            />
+            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
+              <Timer className="w-4 h-4 text-primary-foreground" />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 pt-4 border-t border-border mt-2">
+          <Button variant="outline" size="sm" className="h-9 text-[12px] px-5" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" className="h-9 text-[12px] px-5 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSchedule}>
+            Schedule
           </Button>
         </div>
       </DialogContent>
