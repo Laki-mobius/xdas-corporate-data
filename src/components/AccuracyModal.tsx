@@ -31,22 +31,20 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
   const rotationDeg = 90 + (gapFraction / 2) * 360; // rotate to center the gap at the top-right
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative w-[120px] h-[120px]">
+    <div className="flex items-center gap-3 w-full">
+      <div className="text-left flex-1 min-w-0">
+        <div className="text-xs font-semibold text-foreground">{label}</div>
+        <div className="text-[10px] text-muted-foreground">{subtitle}</div>
+      </div>
+      <div className="relative w-[90px] h-[90px] shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: `rotate(${rotationDeg}deg)` }}>
-          {/* Background track */}
           <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
-          {/* Filled arc */}
           <circle cx="50" cy="50" r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={`${filledLength} ${circumference - filledLength}`} strokeLinecap="round" />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="text-muted-foreground mb-0.5" style={{ color }}>{icon}</div>
           <div className="text-xl font-bold text-foreground leading-none">{value}%</div>
         </div>
-      </div>
-      <div className="text-left">
-        <div className="text-xs font-semibold text-foreground">{label}</div>
-        <div className="text-[10px] text-muted-foreground">{subtitle}</div>
       </div>
     </div>
   );
