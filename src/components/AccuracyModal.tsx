@@ -93,15 +93,15 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
         </div>
 
         {/* Three Circular Gauges */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-start">
-            <CircularGauge value={97} label="Overall Quality" subtitle="Overall Record Accuracy" color="hsl(var(--brand))" icon={<ShieldCheck size={20} />} />
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-surface border border-border rounded-lg p-2.5 flex items-center">
+            <CircularGauge value={97} label="Overall Quality" subtitle="Overall Record Accuracy" color="hsl(var(--brand))" icon={<ShieldCheck size={16} />} />
           </div>
-          <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-start">
-            <CircularGauge value={99} label="Attribute Fill Rate" subtitle="System Completeness" color="hsl(var(--blue))" icon={<BarChart3 size={20} />} />
+          <div className="bg-surface border border-border rounded-lg p-2.5 flex items-center">
+            <CircularGauge value={99} label="Attribute Fill Rate" subtitle="System Completeness" color="hsl(var(--blue))" icon={<BarChart3 size={16} />} />
           </div>
-          <div className="bg-surface border border-border rounded-xl p-4 flex flex-col items-start">
-            <CircularGauge value={98} label="Accuracy vs QC Flag" subtitle="Avg Attribute Correctness" color="hsl(var(--purple))" icon={<Target size={20} />} />
+          <div className="bg-surface border border-border rounded-lg p-2.5 flex items-center">
+            <CircularGauge value={98} label="Accuracy vs QC Flag" subtitle="Avg Attribute Correctness" color="hsl(var(--purple))" icon={<Target size={16} />} />
           </div>
         </div>
 
