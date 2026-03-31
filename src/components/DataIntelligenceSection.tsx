@@ -250,22 +250,6 @@ export default function DataIntelligenceSection() {
             </div>
           </div>
 
-          {/* ── Selection Summary ── */}
-          <div className="flex items-center gap-4 bg-surface rounded-lg px-4 py-3 border border-border">
-            <div className="flex-1">
-              <p className="text-[11px] text-muted-foreground uppercase font-semibold tracking-wide">Selection Summary</p>
-              <p className="text-[14px] font-bold text-foreground tabular-nums mt-0.5">
-                {formatCount(group.totalRecords)} records · {group.label}
-              </p>
-              {appliedCount > 0 ? (
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  {appliedCount} filter{appliedCount > 1 ? 's' : ''} applied
-                </p>
-              ) : (
-                <p className="text-[11px] text-muted-foreground mt-1">No filters applied — full dataset selected</p>
-              )}
-            </div>
-          </div>
 
           {/* ── Preview Table ── */}
           {searched && (
