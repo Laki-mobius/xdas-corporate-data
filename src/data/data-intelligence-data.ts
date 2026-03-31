@@ -33,7 +33,7 @@ export const dataGroups: DataGroup[] = [
     filters: [
       { key: 'geography', label: 'Geography', options: ['All Regions', 'North America', 'Europe', 'APAC', 'Middle East', 'Latin America'] },
       { key: 'companyType', label: 'Company Type', options: ['All Companies', 'Public', 'Private'] },
-      { key: 'tier', label: 'Tier', options: ['All Tiers', 'Tier 1', 'Tier 2', 'Tier 3'] },
+      { key: 'tier', label: 'Tier', options: ['All Tiers', 'Tier 1', 'Tier 2', 'Tier 3', 'Tier 4'] },
     ],
     columns: [
       { key: 'parentName', label: 'Parent Name' },
