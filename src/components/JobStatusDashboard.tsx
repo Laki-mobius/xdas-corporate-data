@@ -315,6 +315,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const [manualInput, setManualInput] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileEntities, setFileEntities] = useState<string[]>([]);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const entityCount = inputMode === 'text'
