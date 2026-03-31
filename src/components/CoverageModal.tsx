@@ -49,52 +49,46 @@ export default function CoverageModal({ onClose, inline = false }: { onClose: ()
       <div className="grid grid-cols-[280px_1fr] flex-1 overflow-hidden min-h-0">
         {/* Left Pane */}
         <div className="p-[18px_20px] overflow-y-auto border-r border-border">
-          {/* Overall card — matching Total Records metric box style */}
-          <div className="rounded-lg border border-border bg-surface p-2.5 mb-3.5 transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[12px] font-semibold text-foreground">Overall</span>
-              <div className="relative w-[40px] h-[40px] shrink-0">
-                <svg viewBox="0 0 40 40" className="w-[40px] h-[40px] -rotate-90">
-                  <circle cx="20" cy="20" r="16" fill="none" stroke="hsl(var(--border))" strokeWidth="3.5" />
-                  <circle cx="20" cy="20" r="16" fill="none" stroke="hsl(var(--brand))" strokeWidth="3.5" strokeDasharray={2 * Math.PI * 16} strokeDashoffset={2 * Math.PI * 16 * (1 - 94.2 / 100)} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[9px] font-semibold text-brand">94%</div>
-              </div>
+          {/* Overall card — bg-surface style, original text sizing */}
+          <div className="rounded-[11px] border border-border bg-surface p-3.5 flex items-center justify-between mb-3.5 transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm">
+            <div>
+              <div className="text-[10px] font-semibold text-brand uppercase tracking-[0.06em] mb-[3px]">Overall</div>
+              <div className="text-[30px] font-light text-brand tracking-[-1.5px] leading-none">94.2%</div>
+              <div className="text-[11px] text-muted-foreground mt-[3px]">+1.4% vs last month</div>
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[16px] font-light tracking-[-0.5px] leading-none text-foreground">94.2%</span>
-              <span className="text-[10px] text-muted-foreground leading-snug">+1.4% vs last month</span>
+            <div className="relative w-[66px] h-[66px] shrink-0">
+              <svg viewBox="0 0 66 66" className="w-[66px] h-[66px] -rotate-90">
+                <circle cx="33" cy="33" r="26" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
+                <circle cx="33" cy="33" r="26" fill="none" stroke="hsl(var(--brand))" strokeWidth="6" strokeDasharray={2 * Math.PI * 26} strokeDashoffset={2 * Math.PI * 26 * (1 - 94.2 / 100)} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-brand">94%</div>
             </div>
           </div>
           <div className="mb-4">
             <SectionLabel>By segment</SectionLabel>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="rounded-lg border border-border bg-surface p-2.5 transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[12px] font-semibold text-foreground">Public</span>
-                  <div className="w-[24px] h-[24px] rounded-md bg-surface border border-border flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><path d="M2 9h8M3 9V5.5L6 3l3 2.5V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground" /></svg>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="rounded-[10px] p-3 border border-border bg-surface transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-status-blue">Public</span>
+                  <div className="w-[19px] h-[19px] rounded-[5px] bg-surface border border-border flex items-center justify-center">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5"><path d="M2 9h8M3 9V5.5L6 3l3 2.5V9" stroke="#185FA5" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[16px] font-light tracking-[-0.5px] leading-none text-foreground">96.8%</span>
-                  <span className="text-[10px] text-muted-foreground leading-snug">Daily</span>
-                </div>
+                <div className="text-[21px] font-light tracking-[-1px] leading-none text-status-blue mb-0.5">96.8%</div>
+                <div className="text-[10px] text-muted-foreground">Daily</div>
                 <div className="h-[3px] bg-border rounded-sm overflow-hidden mt-1.5">
                   <div className="h-full rounded-sm bg-status-blue" style={{ width: '96.8%' }} />
                 </div>
               </div>
-              <div className="rounded-lg border border-border bg-surface p-2.5 transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[12px] font-semibold text-foreground">Private</span>
-                  <div className="w-[24px] h-[24px] rounded-md bg-surface border border-border flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3"><rect x="2" y="5" width="8" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" className="text-muted-foreground" /><path d="M4 5V4a2 2 0 1 1 4 0v1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-muted-foreground" /></svg>
+              <div className="rounded-[10px] p-3 border border-border bg-surface transition-all hover:border-brand/40 hover:bg-brand-light hover:shadow-sm">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.06em] text-brand">Private</span>
+                  <div className="w-[19px] h-[19px] rounded-[5px] bg-surface border border-border flex items-center justify-center">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5"><rect x="2" y="5" width="8" height="6" rx="1" stroke="#1A7A4A" strokeWidth="1.2" /><path d="M4 5V4a2 2 0 1 1 4 0v1" stroke="#1A7A4A" strokeWidth="1.2" strokeLinecap="round" /></svg>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[16px] font-light tracking-[-0.5px] leading-none text-foreground">93.1%</span>
-                  <span className="text-[10px] text-muted-foreground leading-snug">Weekly</span>
-                </div>
+                <div className="text-[21px] font-light tracking-[-1px] leading-none text-brand mb-0.5">93.1%</div>
+                <div className="text-[10px] text-muted-foreground">Weekly</div>
                 <div className="h-[3px] bg-border rounded-sm overflow-hidden mt-1.5">
                   <div className="h-full rounded-sm bg-brand" style={{ width: '93.1%' }} />
                 </div>
