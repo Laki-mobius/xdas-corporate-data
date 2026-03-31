@@ -12,7 +12,7 @@ export function ModalShell({ children, id, onClose, wide = true, fullHeight = fa
 }) {
   if (inline) {
     return (
-      <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm min-h-[420px]">
+      <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col shadow-sm">
         {children}
       </div>
     );
