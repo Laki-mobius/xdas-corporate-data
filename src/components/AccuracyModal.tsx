@@ -49,8 +49,6 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
 }
 
 export default function AccuracyModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
-  const [companyType, setCompanyType] = useState('all');
-  const [tier, setTier] = useState('all');
   const [search, setSearch] = useState('');
   const [segment, setSegment] = useState('all');
   const [filterTier, setFilterTier] = useState('all');
