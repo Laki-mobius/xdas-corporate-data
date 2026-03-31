@@ -52,6 +52,12 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
   const [companyType, setCompanyType] = useState('all');
   const [tier, setTier] = useState('all');
   const [search, setSearch] = useState('');
+  const [segment, setSegment] = useState('all');
+  const [filterTier, setFilterTier] = useState('all');
+  const [geography, setGeography] = useState('all');
+  const [dataGroup, setDataGroup] = useState('all');
+  const [companySize, setCompanySize] = useState('all');
+  const [revenue, setRevenue] = useState('all');
 
   const filtered = useMemo(() => {
     return qcAttributes.filter(a =>
@@ -64,6 +70,8 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
     const label = status === 'passed' ? 'PASSED' : status === 'warning' ? 'WARNING' : 'FAILED';
     return <span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-bold whitespace-nowrap inline-block uppercase', cls)}>{label}</span>;
   };
+
+  const selectCls = "py-[5px] px-2 border border-border rounded-md text-[11px] bg-card text-foreground outline-none focus:border-brand";
 
   return (
     <ModalShell id="modal-accuracy" onClose={onClose} fullHeight inline={inline}>
@@ -92,6 +100,9 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
           </div>
         </div>
 
+        {/* Section Label above gauges */}
+        <SectionLabel>Attribute level accuracy breakdown (Sample: 100 records)</SectionLabel>
+
         {/* Three Circular Gauges */}
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-surface border border-border rounded-lg p-2.5 flex items-center">
@@ -105,17 +116,62 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
           </div>
         </div>
 
-        {/* Attribute Level Accuracy Breakdown Table */}
+        {/* Filters below gauges */}
         <div>
-          <SectionLabel>Attribute level accuracy breakdown (Sample: 100 records)</SectionLabel>
-          <div className="mb-2.5">
-            <div className="relative max-w-[200px]">
+          <div className="flex items-center gap-2 mb-2.5 flex-wrap">
+            <div className="relative">
               <svg viewBox="0 0 14 14" fill="none" className="absolute left-2 top-1/2 -translate-y-1/2 w-[11px] h-[11px] text-muted-foreground pointer-events-none">
                 <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
                 <path d="M9.5 9.5l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
               </svg>
-              <input className="w-full py-[5px] pr-2 pl-7 border border-border rounded-md text-[11px] bg-card text-foreground outline-none focus:border-brand" placeholder="Search attribute..." onChange={e => setSearch(e.target.value)} />
+              <input className="w-[140px] py-[5px] pr-2 pl-7 border border-border rounded-md text-[11px] bg-card text-foreground outline-none focus:border-brand" placeholder="Search attribute..." onChange={e => setSearch(e.target.value)} />
             </div>
+            <select value={segment} onChange={e => setSegment(e.target.value)} className={selectCls}>
+              <option value="all">All Segments</option>
+              <option value="public">Public Companies</option>
+              <option value="private">Private Companies</option>
+            </select>
+            <select value={filterTier} onChange={e => setFilterTier(e.target.value)} className={selectCls}>
+              <option value="all">All Tiers</option>
+              <option value="t1">Tier 1</option>
+              <option value="t2">Tier 2</option>
+              <option value="t3">Tier 3</option>
+              <option value="t4">Tier 4</option>
+            </select>
+            <select value={geography} onChange={e => setGeography(e.target.value)} className={selectCls}>
+              <option value="all">All Geographies</option>
+              <option value="na">North America</option>
+              <option value="eu">Europe</option>
+              <option value="apac">APAC</option>
+              <option value="latam">LATAM</option>
+              <option value="mea">MEA</option>
+              <option value="us">United States</option>
+              <option value="uk">United Kingdom</option>
+              <option value="de">Germany</option>
+              <option value="jp">Japan</option>
+              <option value="in">India</option>
+            </select>
+            <select value={dataGroup} onChange={e => setDataGroup(e.target.value)} className={selectCls}>
+              <option value="all">All Data Groups</option>
+              <option value="basic">Basic Data</option>
+              <option value="financial">Financial Data</option>
+              <option value="hierarchy">Corporate Hierarchy Data</option>
+            </select>
+            <select value={companySize} onChange={e => setCompanySize(e.target.value)} className={selectCls}>
+              <option value="all">All Sizes</option>
+              <option value="small">Small</option>
+              <option value="mid">Mid</option>
+              <option value="large">Large</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+            <select value={revenue} onChange={e => setRevenue(e.target.value)} className={selectCls}>
+              <option value="all">All Revenue</option>
+              <option value="lt1m">&lt; $1M</option>
+              <option value="1m10m">$1M – $10M</option>
+              <option value="10m100m">$10M – $100M</option>
+              <option value="100m1b">$100M – $1B</option>
+              <option value="gt1b">$1B+</option>
+            </select>
           </div>
           <div className="border border-border rounded-lg overflow-hidden">
             <div className="overflow-y-auto max-h-[300px]">
