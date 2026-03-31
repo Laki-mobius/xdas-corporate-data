@@ -44,7 +44,7 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
           <div className="text-xl font-bold text-foreground leading-none">{value}%</div>
         </div>
       </div>
-      <div className="text-center">
+      <div className="text-left">
         <div className="text-xs font-semibold text-foreground">{label}</div>
         <div className="text-[10px] text-muted-foreground">{subtitle}</div>
       </div>
