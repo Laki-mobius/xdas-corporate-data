@@ -6,22 +6,22 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const currentnessData = [
-  { name: 'Company Name', g: 'Basic Data', ref: '2026-03-14', cnt: '98.5M', geo: { US: '42.1M', UK: '8.2M', Europe: '22.4M', APAC: '18.6M', Other: '7.2M' } },
-  { name: 'Country', g: 'Basic Data', ref: '2026-03-14', cnt: '97.9M', geo: { US: '41.8M', UK: '8.1M', Europe: '22.1M', APAC: '18.3M', Other: '7.6M' } },
-  { name: 'Street Address', g: 'Basic Data', ref: '2026-03-13', cnt: '90.3M', geo: { US: '38.7M', UK: '7.5M', Europe: '20.4M', APAC: '16.9M', Other: '6.8M' } },
-  { name: 'City', g: 'Basic Data', ref: '2026-03-13', cnt: '91.2M', geo: { US: '39.1M', UK: '7.6M', Europe: '20.6M', APAC: '17.1M', Other: '6.8M' } },
-  { name: 'Foundation Year', g: 'Basic Data', ref: '2026-03-08', cnt: '83.1M', geo: { US: '35.6M', UK: '6.9M', Europe: '18.8M', APAC: '15.6M', Other: '6.2M' } },
-  { name: 'Phone Number', g: 'Basic Data', ref: '2026-03-07', cnt: '70.5M', geo: { US: '30.2M', UK: '5.9M', Europe: '15.9M', APAC: '13.2M', Other: '5.3M' } },
-  { name: 'NAICS Code', g: 'Basic Data', ref: '2026-03-12', cnt: '82.9M', geo: { US: '35.5M', UK: '6.9M', Europe: '18.7M', APAC: '15.5M', Other: '6.3M' } },
-  { name: 'Website', g: 'Basic Data', ref: '2026-02-22', cnt: '54.9M', geo: { US: '23.5M', UK: '4.6M', Europe: '12.4M', APAC: '10.3M', Other: '4.1M' } },
-  { name: 'Revenue', g: 'Financial Data', ref: '2026-03-12', cnt: '81.6M', geo: { US: '34.9M', UK: '6.8M', Europe: '18.4M', APAC: '15.3M', Other: '6.2M' } },
-  { name: 'Assets', g: 'Financial Data', ref: '2026-03-10', cnt: '73.3M', geo: { US: '31.4M', UK: '6.1M', Europe: '16.6M', APAC: '13.7M', Other: '5.5M' } },
-  { name: 'Net Income', g: 'Financial Data', ref: '2026-03-09', cnt: '67.7M', geo: { US: '29.0M', UK: '5.6M', Europe: '15.3M', APAC: '12.7M', Other: '5.1M' } },
-  { name: 'Ticker and Exchange', g: 'Financial Data', ref: '2026-03-14', cnt: '94.0M', geo: { US: '40.3M', UK: '7.8M', Europe: '21.2M', APAC: '17.6M', Other: '7.1M' } },
-  { name: 'Executive Name', g: 'Corporate Hierarchy & Governance', ref: '2026-03-06', cnt: '62.6M', geo: { US: '26.8M', UK: '5.2M', Europe: '14.1M', APAC: '11.7M', Other: '4.8M' } },
-  { name: 'Board of Directors', g: 'Corporate Hierarchy & Governance', ref: '2026-02-28', cnt: '57.6M', geo: { US: '24.7M', UK: '4.8M', Europe: '13.0M', APAC: '10.8M', Other: '4.3M' } },
-  { name: 'Parent Company', g: 'Corporate Hierarchy & Governance', ref: '2026-02-25', cnt: '54.1M', geo: { US: '23.2M', UK: '4.5M', Europe: '12.2M', APAC: '10.1M', Other: '4.1M' } },
-  { name: 'Mergers & Acquisition', g: 'Corporate Hierarchy & Governance', ref: '2026-02-20', cnt: '46.6M', geo: { US: '20.0M', UK: '3.9M', Europe: '10.5M', APAC: '8.7M', Other: '3.5M' } },
+  { name: 'Company Name', g: 'Basic Data', ref: '2026-03-14', cnt: '98.5M', pct: '98.2%', geo: { US: '42.1M', UK: '8.2M', Europe: '22.4M', APAC: '18.6M', Other: '7.2M' } },
+  { name: 'Country', g: 'Basic Data', ref: '2026-03-14', cnt: '97.9M', pct: '97.6%', geo: { US: '41.8M', UK: '8.1M', Europe: '22.1M', APAC: '18.3M', Other: '7.6M' } },
+  { name: 'Street Address', g: 'Basic Data', ref: '2026-03-13', cnt: '90.3M', pct: '90.1%', geo: { US: '38.7M', UK: '7.5M', Europe: '20.4M', APAC: '16.9M', Other: '6.8M' } },
+  { name: 'City', g: 'Basic Data', ref: '2026-03-13', cnt: '91.2M', pct: '91.0%', geo: { US: '39.1M', UK: '7.6M', Europe: '20.6M', APAC: '17.1M', Other: '6.8M' } },
+  { name: 'Foundation Year', g: 'Basic Data', ref: '2026-03-08', cnt: '83.1M', pct: '82.9%', geo: { US: '35.6M', UK: '6.9M', Europe: '18.8M', APAC: '15.6M', Other: '6.2M' } },
+  { name: 'Phone Number', g: 'Basic Data', ref: '2026-03-07', cnt: '70.5M', pct: '70.3%', geo: { US: '30.2M', UK: '5.9M', Europe: '15.9M', APAC: '13.2M', Other: '5.3M' } },
+  { name: 'NAICS Code', g: 'Basic Data', ref: '2026-03-12', cnt: '82.9M', pct: '82.7%', geo: { US: '35.5M', UK: '6.9M', Europe: '18.7M', APAC: '15.5M', Other: '6.3M' } },
+  { name: 'Website', g: 'Basic Data', ref: '2026-02-22', cnt: '54.9M', pct: '54.8%', geo: { US: '23.5M', UK: '4.6M', Europe: '12.4M', APAC: '10.3M', Other: '4.1M' } },
+  { name: 'Revenue', g: 'Financial Data', ref: '2026-03-12', cnt: '81.6M', pct: '81.4%', geo: { US: '34.9M', UK: '6.8M', Europe: '18.4M', APAC: '15.3M', Other: '6.2M' } },
+  { name: 'Assets', g: 'Financial Data', ref: '2026-03-10', cnt: '73.3M', pct: '73.1%', geo: { US: '31.4M', UK: '6.1M', Europe: '16.6M', APAC: '13.7M', Other: '5.5M' } },
+  { name: 'Net Income', g: 'Financial Data', ref: '2026-03-09', cnt: '67.7M', pct: '67.5%', geo: { US: '29.0M', UK: '5.6M', Europe: '15.3M', APAC: '12.7M', Other: '5.1M' } },
+  { name: 'Ticker and Exchange', g: 'Financial Data', ref: '2026-03-14', cnt: '94.0M', pct: '93.8%', geo: { US: '40.3M', UK: '7.8M', Europe: '21.2M', APAC: '17.6M', Other: '7.1M' } },
+  { name: 'Executive Name', g: 'Corporate Hierarchy & Governance', ref: '2026-03-06', cnt: '62.6M', pct: '62.4%', geo: { US: '26.8M', UK: '5.2M', Europe: '14.1M', APAC: '11.7M', Other: '4.8M' } },
+  { name: 'Board of Directors', g: 'Corporate Hierarchy & Governance', ref: '2026-02-28', cnt: '57.6M', pct: '57.4%', geo: { US: '24.7M', UK: '4.8M', Europe: '13.0M', APAC: '10.8M', Other: '4.3M' } },
+  { name: 'Parent Company', g: 'Corporate Hierarchy & Governance', ref: '2026-02-25', cnt: '54.1M', pct: '54.0%', geo: { US: '23.2M', UK: '4.5M', Europe: '12.2M', APAC: '10.1M', Other: '4.1M' } },
+  { name: 'Mergers & Acquisition', g: 'Corporate Hierarchy & Governance', ref: '2026-02-20', cnt: '46.6M', pct: '46.5%', geo: { US: '20.0M', UK: '3.9M', Europe: '10.5M', APAC: '8.7M', Other: '3.5M' } },
 ];
 
 type DatePreset = 'week' | 'month' | '3months' | 'custom';
