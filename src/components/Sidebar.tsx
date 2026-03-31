@@ -84,15 +84,6 @@ export default function Sidebar({ collapsed, activeItem, onItemClick }: SidebarP
           collapsed={collapsed}
           onClick={() => onItemClick('hitl')}
         />
-        <SidebarItem
-          icon={<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3.5" r="2" stroke="currentColor" strokeWidth="1.3" /><circle cx="3.5" cy="12" r="2" stroke="currentColor" strokeWidth="1.3" /><circle cx="12.5" cy="12" r="2" stroke="currentColor" strokeWidth="1.3" /><path d="M8 5.5v3M5.5 11l2.5-3.5M10.5 11l-2.5-3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>}
-          label="Corporate hierarchy"
-          collapsed={collapsed}
-          onClick={() => {
-            onItemClick('hierarchy');
-            document.getElementById('corporate-hierarchy')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-        />
       </div>
       <div className="p-2 pb-1.5 border-b border-border">
         <div className={cn('text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.07em] px-2.5 pb-[7px] whitespace-nowrap transition-opacity', collapsed && 'opacity-0 h-0 p-0')}>
