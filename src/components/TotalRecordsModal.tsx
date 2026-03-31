@@ -73,10 +73,6 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           <div className="flex-1 min-w-0">
             {/* TOTAL RECORDS BY TIER & SEGMENT */}
             <SectionLabel>Total records by tier &amp; segment (scale proportional)</SectionLabel>
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-[10px] text-muted-foreground">By tier classification</span>
-              <span className="text-[10px] text-muted-foreground italic">hover for details</span>
-            </div>
             <div className="flex h-6 rounded-md overflow-hidden mb-2.5 gap-0.5">
               {tierSegments.map((t, i) => {
                 const pct = ((t.flex / totalTierFlex) * 100).toFixed(1);
