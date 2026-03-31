@@ -226,41 +226,21 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Records Updated</th>
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Last Verified</th>
                       <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border">Freshness</th>
-                      <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-[0.05em] py-[7px] px-2.5 border-b-[1.5px] border-border w-[28px]"></th>
+                      
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={5} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
+                      <tr><td colSpan={4} className="text-center py-4 text-muted-foreground text-xs">No records in selected date range</td></tr>
                     ) : filtered.map((row, i) => {
                       const fp = freshnessPill(row.ref);
-                      const isExpanded = geoExpanded === row.name;
                       return (
-                        <>
-                          <tr key={row.name} className="hover:bg-surface cursor-pointer" onClick={() => setGeoExpanded(isExpanded ? null : row.name)}>
+                          <tr key={row.name} className="hover:bg-surface">
                             <td className="py-1.5 px-2.5 border-b border-border text-foreground whitespace-nowrap text-xs">{row.name}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.cnt}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.ref}</td>
                             <td className="py-1.5 px-2.5 border-b border-border"><span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', fp.cls)}>{fp.label}</span></td>
-                            <td className="py-1.5 px-2.5 border-b border-border">
-                              <svg viewBox="0 0 10 10" className={cn("w-2.5 h-2.5 text-muted-foreground transition-transform", isExpanded && "rotate-90")}><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
-                            </td>
                           </tr>
-                          {isExpanded && (
-                            <tr key={`${row.name}-geo`}>
-                              <td colSpan={5} className="py-2 px-4 border-b border-border bg-surface">
-                                <div className="grid grid-cols-5 gap-2">
-                                  {geoKeys.map(geo => (
-                                    <div key={geo} className="bg-card border border-border rounded-md p-2 text-center">
-                                      <div className="text-[10px] font-bold uppercase tracking-[0.05em] mb-1" style={{ color: geoColors[geo] }}>{geo}</div>
-                                      <div className="text-sm font-semibold text-foreground font-mono">{row.geo[geo]}</div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </>
                       );
                     })}
                   </tbody>
