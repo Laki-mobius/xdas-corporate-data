@@ -7,6 +7,7 @@ export interface DataGroup {
   description: string;
   filters: FilterDef[];
   columns: ColumnDef[];
+  extraColumns: ColumnDef[];
   sampleRows: Record<string, string | number>[];
   totalRecords: number;
 }
