@@ -60,7 +60,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                       <span className="text-[13px] font-semibold text-foreground">{ct.type}</span>
                     </div>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[20px] font-bold tracking-[-1px] leading-none text-foreground">{ct.count}</span>
+                      <span className="text-[20px] font-light tracking-[-1px] leading-none text-foreground">{ct.count}</span>
                       <span className="text-[11px] text-muted-foreground leading-snug">{ct.sub}</span>
                     </div>
                   </div>
