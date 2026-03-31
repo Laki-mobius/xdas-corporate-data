@@ -70,7 +70,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
           </div>
 
           {/* RIGHT PANE — Tier & Geography (75%) */}
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 min-w-0">
             {/* TOTAL RECORDS BY TIER & SEGMENT */}
             <SectionLabel>Total records by tier &amp; segment (scale proportional)</SectionLabel>
             <div className="flex h-6 rounded-md overflow-hidden mb-2.5 gap-0.5">
@@ -104,8 +104,8 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
 
             {/* BAR CHART BY GEOGRAPHY */}
             <SectionLabel>Records by geography (Top 10 + Rest of World)</SectionLabel>
-            <div className="border border-border rounded-lg p-3 bg-surface flex-1 min-h-0">
-              <div className="flex items-end gap-0 h-full">
+            <div className="border border-border rounded-lg p-3 bg-surface">
+              <div className="flex items-end gap-0" style={{ height: 180 }}>
                 <div className="flex flex-col justify-between h-full pr-2 shrink-0" style={{ paddingBottom: 22 }}>
                   {yTicks.slice().reverse().map(t => (
                     <span key={t} className="text-[11px] text-muted-foreground leading-none text-right min-w-[24px]">{t}M</span>
