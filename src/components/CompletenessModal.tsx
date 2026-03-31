@@ -29,6 +29,11 @@ type DatePreset = 'week' | 'month' | '3months' | 'custom';
 export default function CompletenessModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState('all');
+  const [segment, setSegment] = useState('all');
+  const [tier, setTier] = useState('all');
+  const [geography, setGeography] = useState('all');
+  const [companySize, setCompanySize] = useState('all');
+  const [revenue, setRevenue] = useState('all');
   const [datePreset, setDatePreset] = useState<DatePreset>('month');
   const [customFrom, setCustomFrom] = useState<Date | undefined>(subMonths(new Date(), 1));
   const [customTo, setCustomTo] = useState<Date | undefined>(new Date());
