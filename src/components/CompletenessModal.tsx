@@ -237,7 +237,14 @@ export default function CompletenessModal({ onClose, inline = false }: { onClose
                       return (
                           <tr key={row.name} className="hover:bg-surface">
                             <td className="py-1.5 px-2.5 border-b border-border text-foreground whitespace-nowrap text-xs">{row.name}</td>
-                            <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.pct}</td>
+                            <td className="py-1.5 px-2.5 border-b border-border whitespace-nowrap min-w-[120px]">
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 h-[7px] rounded-full bg-secondary overflow-hidden">
+                                  <div className="h-full rounded-full bg-brand transition-all" style={{ width: row.pct }} />
+                                </div>
+                                <span className="text-[11px] text-brand font-semibold font-mono">{row.pct}</span>
+                              </div>
+                            </td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-foreground font-semibold font-mono whitespace-nowrap">{row.cnt}</td>
                             <td className="py-1.5 px-2.5 border-b border-border text-[11px] text-muted-foreground whitespace-nowrap">{row.ref}</td>
                             <td className="py-1.5 px-2.5 border-b border-border"><span className={cn('text-[10px] px-[7px] py-[2px] rounded-[20px] font-medium whitespace-nowrap inline-block', fp.cls)}>{fp.label}</span></td>
