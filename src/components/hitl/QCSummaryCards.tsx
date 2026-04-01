@@ -76,37 +76,37 @@ export default function QCSummaryCards({
       {cards.map((card) => (
         <div
           key={card.label}
-          className="bg-card border border-border rounded-lg p-3.5 shadow-card flex flex-col justify-between"
+          className="bg-card border border-border rounded-lg p-3.5 flex flex-col justify-between cursor-default transition-all duration-150 hover:bg-brand-light hover:border-brand-mid hover:shadow-[0_2px_10px_rgba(26,122,74,0.07)] hover:-translate-y-px"
         >
           <div className="flex items-start justify-between mb-2">
-            <div className="text-[12px] font-medium text-foreground leading-snug">
+            <div className="text-sm font-normal text-foreground leading-tight">
               {card.label}
             </div>
-            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 opacity-50">
+            <div className="text-muted-foreground shrink-0 opacity-55">
               {card.icon}
             </div>
           </div>
           {card.value && (
-            <div className="flex items-baseline gap-2 mb-0.5">
-              <span className="text-[26px] font-normal text-foreground tracking-tight leading-none tabular-nums">
+            <div className="flex items-baseline gap-2 mb-1.5">
+              <span className="text-[28px] font-normal text-foreground tracking-[-1.5px] leading-none">
                 {card.value}
               </span>
               {card.trend === "up" && (
-                <span className="text-[11px] text-brand font-medium flex items-center gap-0.5">
-                  <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
+                <span className="text-[13px] text-brand font-medium flex items-center gap-0.5">
+                  <svg viewBox="0 0 10 10" fill="none" className="w-[11px] h-[11px]">
                     <path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                   </svg>
                 </span>
               )}
               {card.trend === "warning" && (
-                <span className="text-[11px] text-status-amber font-medium">⚠</span>
+                <span className="text-[13px] text-status-amber font-medium">⚠</span>
               )}
               {card.trend === "needs-attention" && (
-                <span className="text-[11px] text-status-amber font-medium">●</span>
+                <span className="text-[13px] text-status-amber font-medium">●</span>
               )}
             </div>
           )}
-          <div className="text-[11px] text-muted-foreground">{card.subtitle}</div>
+          <div className="text-xs text-muted-foreground">{card.subtitle}</div>
           {card.action && (
             <button
               onClick={card.action}
