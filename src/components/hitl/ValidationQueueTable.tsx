@@ -91,7 +91,7 @@ export default function ValidationQueueTable({
 
       {/* Table */}
       <div className="overflow-auto flex-1">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[12px] table-auto">
           <thead>
             <tr className="bg-muted/50 border-b border-border">
               <th className="px-3 py-2 text-left w-8">
