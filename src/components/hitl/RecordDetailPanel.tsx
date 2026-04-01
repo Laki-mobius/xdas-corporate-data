@@ -96,8 +96,8 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
                       autoFocus
                       onKeyDown={e => { if (e.key === "Enter") saveEdit(idx); if (e.key === "Escape") setEditingIdx(null); }}
                     />
-                    <button onClick={() => saveEdit(idx)} className="text-[10px] text-brand font-medium">Save</button>
-                    <button onClick={() => setEditingIdx(null)} className="text-[10px] text-muted-foreground">Cancel</button>
+                    <button onClick={() => saveEdit(idx)} className="text-[11px] text-brand font-medium">Save</button>
+                    <button onClick={() => setEditingIdx(null)} className="text-[11px] text-muted-foreground">Cancel</button>
                   </div>
                 ) : (
                   <span className="text-foreground">{attr.currentValue}</span>
