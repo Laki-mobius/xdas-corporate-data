@@ -95,32 +95,6 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
 
         {/* RHS: Record Fields with clickable sources */}
         <div className="w-1/2 flex flex-col overflow-hidden">
-          {/* Root Identification */}
-          <div className="px-3 py-2.5 border-b border-border bg-muted/20">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Root Identification</p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px]">
-              <div>
-                <span className="text-muted-foreground">Record ID:</span>
-                <span className="ml-1 font-mono text-foreground">{record.id}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Entity:</span>
-                <span className="ml-1 text-foreground">{record.companyName}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Existing Value:</span>
-                <span className="ml-1 text-foreground">{record.existingValue}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Suggested Value:</span>
-                <span className="ml-1 font-medium text-brand">{record.suggestedValue}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Confidence:</span>
-                <span className="ml-1 text-foreground">{record.confidenceScore}%</span>
-              </div>
-            </div>
-          </div>
 
           {/* Attributes */}
           <div className="flex-1 overflow-auto px-3 py-2">
