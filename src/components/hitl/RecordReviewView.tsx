@@ -125,72 +125,71 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
           {/* Attributes */}
           <div className="flex-1 overflow-auto px-3 py-2">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Attributes for Review</p>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {record.attributes.map((attr, idx) => (
                 <div
                   key={attr.name}
-                  className={`px-2 py-1.5 rounded text-[11px] border ${
+                  className={`px-3 py-2 rounded text-[13px] border ${
                     attr.qcFlag ? "border-destructive/30 bg-destructive-light" : "border-border bg-background"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 shrink-0">{statusIcon[attr.status]}</div>
-                    <div className="w-24 shrink-0 text-muted-foreground truncate">{attr.name}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 shrink-0">{statusIcon[attr.status]}</div>
+                    <div className="w-28 shrink-0 text-muted-foreground">{attr.name}</div>
                     <div className="flex-1">
                       {editingIdx === idx ? (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           <input
                             value={editValue}
                             onChange={e => setEditValue(e.target.value)}
-                            className="flex-1 px-1.5 py-0.5 text-[11px] bg-card border border-ring rounded focus:outline-none"
+                            className="flex-1 px-2 py-0.5 text-[13px] bg-card border border-ring rounded focus:outline-none"
                             autoFocus
                             onKeyDown={e => { if (e.key === "Enter") saveEdit(idx); if (e.key === "Escape") setEditingIdx(null); }}
                           />
-                          <button onClick={() => saveEdit(idx)} className="text-[10px] text-brand font-medium">Save</button>
-                          <button onClick={() => setEditingIdx(null)} className="text-[10px] text-muted-foreground">Cancel</button>
+                          <button onClick={() => saveEdit(idx)} className="text-[12px] text-brand font-medium">Save</button>
+                          <button onClick={() => setEditingIdx(null)} className="text-[12px] text-muted-foreground">Cancel</button>
                         </div>
                       ) : (
                         <span className="text-foreground">{attr.currentValue}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "validated", qcFlag: false })}
                         className="p-0.5 hover:bg-brand-light rounded transition-colors" title="Accept"
                       >
-                        <CheckCircle2 className="w-3 h-3 text-brand" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-brand" />
                       </button>
                       <button
                         onClick={() => startEdit(idx, attr.currentValue)}
                         className="p-0.5 hover:bg-status-blue-light rounded transition-colors" title="Edit"
                       >
-                        <Edit3 className="w-3 h-3 text-status-blue" />
+                        <Edit3 className="w-3.5 h-3.5 text-status-blue" />
                       </button>
                       <button
                         onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "flagged", qcFlag: true })}
                         className="p-0.5 hover:bg-destructive-light rounded transition-colors" title="Flag"
                       >
-                        <Flag className="w-3 h-3 text-destructive" />
+                        <Flag className="w-3.5 h-3.5 text-destructive" />
                       </button>
                     </div>
-                  </div>
-                  {/* Clickable source names */}
-                  <div className="flex items-center gap-1 mt-1 ml-6">
-                    <span className="text-[10px] text-muted-foreground">Sources:</span>
-                    {attr.sourceRefs.map((src, si) => (
-                      <button
-                        key={si}
-                        onClick={() => setActiveSourceUrl(src.url)}
-                        className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${
-                          activeSourceUrl === src.url
-                            ? "bg-status-blue-light text-status-blue font-medium"
-                            : "text-status-blue hover:bg-muted hover:underline"
-                        }`}
-                        title={`Load ${src.name}`}
-                      >
-                        {src.name}
-                      </button>
-                    ))}
+                    {/* Source names inline after actions */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {attr.sourceRefs.map((src, si) => (
+                        <button
+                          key={si}
+                          onClick={() => setActiveSourceUrl(src.url)}
+                          className={`text-[12px] px-1 py-0.5 rounded transition-colors ${
+                            activeSourceUrl === src.url
+                              ? "bg-status-blue-light text-status-blue font-medium"
+                              : "text-muted-foreground hover:text-status-blue hover:underline"
+                          }`}
+                          title={`Load ${src.name}`}
+                        >
+                          {src.name}{si < attr.sourceRefs.length - 1 ? "," : ""}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
