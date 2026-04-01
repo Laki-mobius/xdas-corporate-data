@@ -88,7 +88,7 @@ export default function HITLReviewScreen() {
   }, []);
 
   const handleDistribute = useCallback(() => {
-    toast.success("Records distributed to reviewers");
+    setDistributeOpen(true);
   }, []);
 
   const handleOpenReview = useCallback((id: string) => {
