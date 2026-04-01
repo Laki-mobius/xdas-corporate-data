@@ -37,7 +37,7 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
       </div>
       <div className="relative w-[70px] h-[70px] shrink-0">
         <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: `rotate(${rotationDeg}deg)` }}>
-          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
           <circle cx="50" cy="50" r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={`${filledLength} ${circumference - filledLength}`} strokeLinecap="round" />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -90,8 +90,8 @@ export default function AccuracyModal({ onClose, inline = false }: { onClose: ()
           <SectionLabel>Accuracy split by company type</SectionLabel>
           <div className="space-y-2.5">
             {[
-              { label: 'Public Companies', pct: 98, count: '231 records', color: '#185FA5' },
-              { label: 'Private Companies', pct: 96, count: '961 records', color: '#1A7A4A' },
+              { label: 'Public Companies', pct: 98, count: '231 records', color: 'hsl(var(--blue))' },
+              { label: 'Private Companies', pct: 96, count: '961 records', color: 'hsl(var(--brand))' },
             ].map(item => (
               <div key={item.label} className="bg-surface border border-border rounded-md p-3">
                 <div className="flex items-center justify-between mb-1.5">
