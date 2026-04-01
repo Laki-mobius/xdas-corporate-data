@@ -80,7 +80,7 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
           {record.attributes.map((attr, idx) => (
             <div
               key={attr.name}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded text-[11px] border ${
+              className={`flex items-center gap-2 px-2 py-1.5 rounded text-[12px] border ${
                 attr.qcFlag ? "border-destructive/30 bg-destructive-light" : "border-border bg-background"
               }`}
             >
