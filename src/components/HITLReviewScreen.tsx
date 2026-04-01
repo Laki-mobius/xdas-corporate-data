@@ -17,6 +17,7 @@ export default function HITLReviewScreen() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [samplingOpen, setSamplingOpen] = useState(false);
   const [reviewingRecordId, setReviewingRecordId] = useState<string | null>(null);
+  const [distributeOpen, setDistributeOpen] = useState(false);
 
   const filtered = useMemo(() => {
     return records.filter(r => {
