@@ -743,19 +743,19 @@ export default function JobStatusDashboard() {
           {statChips.map((chip) => {
             const Icon = chip.icon;
             return (
-              <div key={chip.label} className="bg-card rounded-lg p-3.5 shadow-card border border-border">
+              <div key={chip.label} className="bg-card border border-border rounded-lg p-3.5 cursor-default transition-all duration-150 hover:bg-brand-light hover:border-brand-mid hover:shadow-[0_2px_10px_rgba(26,122,74,0.07)] hover:-translate-y-px">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-[12px] font-medium text-foreground leading-snug">{chip.label}</div>
-                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 opacity-50">
-                    <Icon className="w-4 h-4" />
+                  <div className="text-sm font-normal text-foreground leading-tight">{chip.label}</div>
+                  <div className="text-muted-foreground shrink-0 opacity-55">
+                    <Icon className="w-[18px] h-[18px]" />
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2 mb-0.5">
-                  <div className={`text-[26px] font-normal tracking-tight leading-none tabular-nums ${chip.color}`}>
+                <div className="flex items-baseline gap-2 mb-1.5">
+                  <div className="text-[28px] font-normal text-foreground tracking-[-1.5px] leading-none">
                     {chip.value}
                   </div>
                 </div>
-                {chip.sub && <div className="text-[11px] text-muted-foreground">{chip.sub}</div>}
+                {chip.sub && <div className="text-xs text-muted-foreground">{chip.sub}</div>}
               </div>
             );
           })}
