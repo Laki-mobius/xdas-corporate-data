@@ -76,17 +76,17 @@ export default function QCSummaryCards({
       {cards.map((card) => (
         <div
           key={card.label}
-          className="bg-card border border-border rounded-lg p-3 flex flex-col justify-between min-h-[90px]"
+          className="bg-card border border-border rounded-lg px-2.5 py-2 flex flex-col justify-between min-h-[72px]"
         >
-          <div className="flex items-start justify-between mb-1.5">
+          <div className="flex items-start justify-between mb-1">
             <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide leading-tight">
               {card.label}
             </span>
             <span className="text-muted-foreground opacity-60">{card.icon}</span>
           </div>
           {card.value && (
-            <div className="flex items-baseline gap-1.5 mb-1">
-              <span className="text-[22px] font-normal text-foreground tracking-tight leading-none">
+            <div className="flex items-baseline gap-1.5 mb-0.5">
+              <span className="text-[20px] font-normal text-foreground tracking-tight leading-none">
                 {card.value}
               </span>
               {card.trend === "up" && (
@@ -104,11 +104,11 @@ export default function QCSummaryCards({
               )}
             </div>
           )}
-          <span className="text-[11px] text-muted-foreground">{card.subtitle}</span>
+          <span className="text-[10px] text-muted-foreground">{card.subtitle}</span>
           {card.action && (
             <button
               onClick={card.action}
-              className="mt-2 text-[11px] font-medium text-primary-foreground bg-primary hover:bg-primary-dark rounded px-2.5 py-1 transition-colors"
+              className="mt-1.5 text-[11px] font-medium text-primary-foreground bg-primary hover:bg-primary-dark rounded px-2.5 py-1 transition-colors"
             >
               {card.actionLabel}
             </button>
