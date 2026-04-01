@@ -39,7 +39,7 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
         <div>
           <h3 className="text-[13px] font-semibold text-foreground">Record Detail</h3>
-          <p className="text-[11px] text-muted-foreground mt-0.5">{record.id} · {record.companyName}</p>
+          <p className="text-[12px] text-muted-foreground mt-0.5">{record.id} · {record.companyName}</p>
         </div>
         <button onClick={onClose} className="p-1 hover:bg-muted rounded transition-colors">
           <X className="w-4 h-4 text-muted-foreground" />
