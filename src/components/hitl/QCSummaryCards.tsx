@@ -76,17 +76,19 @@ export default function QCSummaryCards({
       {cards.map((card) => (
         <div
           key={card.label}
-          className="bg-card border border-border rounded-lg px-2.5 py-2 flex flex-col justify-between min-h-[72px]"
+          className="bg-card border border-border rounded-lg p-3.5 shadow-card flex flex-col justify-between"
         >
-          <div className="flex items-start justify-between mb-1">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide leading-tight">
+          <div className="flex items-start justify-between mb-2">
+            <div className="text-[12px] font-medium text-foreground leading-snug">
               {card.label}
-            </span>
-            <span className="text-muted-foreground opacity-60">{card.icon}</span>
+            </div>
+            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 opacity-50">
+              {card.icon}
+            </div>
           </div>
           {card.value && (
-            <div className="flex items-baseline gap-1.5 mb-0.5">
-              <span className="text-[20px] font-normal text-foreground tracking-tight leading-none">
+            <div className="flex items-baseline gap-2 mb-0.5">
+              <span className="text-[26px] font-normal text-foreground tracking-tight leading-none tabular-nums">
                 {card.value}
               </span>
               {card.trend === "up" && (
@@ -104,7 +106,7 @@ export default function QCSummaryCards({
               )}
             </div>
           )}
-          <span className="text-[10px] text-muted-foreground">{card.subtitle}</span>
+          <div className="text-[11px] text-muted-foreground">{card.subtitle}</div>
           {card.action && (
             <button
               onClick={card.action}
