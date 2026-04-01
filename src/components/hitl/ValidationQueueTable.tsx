@@ -127,9 +127,9 @@ export default function ValidationQueueTable({
                       onCheckedChange={() => onToggleSelect(record.id)}
                     />
                   </td>
-                  <td className="px-3 py-2 font-mono text-muted-foreground">{record.id}</td>
-                  <td className="px-3 py-2 text-foreground">{record.companyName}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{record.attributeType}</td>
+                  <td className="px-3 py-2 font-mono text-muted-foreground whitespace-nowrap">{record.id}</td>
+                  <td className="px-3 py-2 text-foreground whitespace-nowrap">{record.companyName}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.attributeType}</td>
                   <td className="px-3 py-2">
                     <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${sc.bg} ${sc.text}`}>
                       {sc.label}
