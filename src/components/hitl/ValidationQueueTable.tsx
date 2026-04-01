@@ -19,7 +19,6 @@ interface ValidationQueueTableProps {
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   pending: { label: "Pending", bg: "bg-status-amber-light", text: "text-status-amber" },
   in_review: { label: "In Review", bg: "bg-status-blue-light", text: "text-status-blue" },
-  approved: { label: "Approved", bg: "bg-brand-light", text: "text-brand" },
   rejected: { label: "Rejected", bg: "bg-destructive-light", text: "text-destructive" },
 };
 
@@ -55,10 +54,9 @@ export default function ValidationQueueTable({
   const columns = [
     { key: "id", label: "Record ID", sortable: true },
     { key: "companyName", label: "Entity Name", sortable: true },
-    { key: "attributeType", label: "Attribute Type", sortable: true },
     { key: "status", label: "Status", sortable: true },
     { key: "confidenceScore", label: "Confidence", sortable: true },
-    { key: "source", label: "Source", sortable: false },
+    { key: "sourceList", label: "Source", sortable: false },
     { key: "lastUpdated", label: "Last Updated", sortable: true },
   ];
 
@@ -84,7 +82,6 @@ export default function ValidationQueueTable({
           <option value="all">All Statuses</option>
           <option value="pending">Pending</option>
           <option value="in_review">In Review</option>
-          <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
         </select>
       </div>
@@ -129,7 +126,6 @@ export default function ValidationQueueTable({
                   </td>
                   <td className="px-3 py-2 font-mono text-muted-foreground whitespace-nowrap">{record.id}</td>
                   <td className="px-3 py-2 text-foreground whitespace-nowrap">{record.companyName}</td>
-                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.attributeType}</td>
                   <td className="px-3 py-2">
                     <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${sc.bg} ${sc.text}`}>
                       {sc.label}
@@ -149,14 +145,14 @@ export default function ValidationQueueTable({
                       <span className="text-muted-foreground">{record.confidenceScore}%</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.source}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.sourceList.join(", ")}</td>
                   <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.lastUpdated}</td>
                 </tr>
               );
             })}
             {sorted.length === 0 && (
               <tr>
-               <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground text-[12px]">
+               <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground text-[12px]">
                   No records match your filters.
                 </td>
               </tr>

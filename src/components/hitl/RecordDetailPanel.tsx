@@ -123,8 +123,8 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
                   <Flag className="w-3 h-3 text-destructive" />
                 </button>
               </div>
-              <span className="text-[10px] text-muted-foreground shrink-0 w-16 truncate text-right" title={attr.sourceRef}>
-                {attr.sourceRef}
+              <span className="text-[10px] text-muted-foreground shrink-0 w-20 truncate text-right" title={attr.sourceRefs.map(s => s.name).join(", ")}>
+                {attr.sourceRefs.map(s => s.name).join(", ")}
               </span>
             </div>
           ))}

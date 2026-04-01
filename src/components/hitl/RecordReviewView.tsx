@@ -20,8 +20,7 @@ const statusIcon: Record<string, React.ReactNode> = {
 export default function RecordReviewView({ record, onClose, onUpdateAttribute, onApprove, onReject }: RecordReviewViewProps) {
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
-
-  const sourceUrl = record.sources[0]?.url || "";
+  const [activeSourceUrl, setActiveSourceUrl] = useState<string>(record.sources[0]?.url || "");
 
   const startEdit = (idx: number, val: string) => {
     setEditingIdx(idx);
@@ -71,30 +70,30 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
         <div className="w-1/2 border-r border-border flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-border bg-muted/20 flex items-center gap-2">
             <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-[11px] text-muted-foreground truncate flex-1">{sourceUrl || "No source URL"}</span>
-            {sourceUrl && (
-              <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-status-blue hover:underline shrink-0">
+            <span className="text-[11px] text-muted-foreground truncate flex-1">{activeSourceUrl || "No source URL"}</span>
+            {activeSourceUrl && (
+              <a href={activeSourceUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-status-blue hover:underline shrink-0">
                 Open in new tab
               </a>
             )}
           </div>
           <div className="flex-1 overflow-hidden">
-            {sourceUrl ? (
+            {activeSourceUrl ? (
               <iframe
-                src={sourceUrl}
+                src={activeSourceUrl}
                 title="Source page"
                 className="w-full h-full border-0"
                 sandbox="allow-same-origin allow-scripts"
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-[12px] text-muted-foreground">No source URL available</p>
+                <p className="text-[12px] text-muted-foreground">Click a source name to load its page</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* RHS: Record Fields */}
+        {/* RHS: Record Fields with clickable sources */}
         <div className="w-1/2 flex flex-col overflow-hidden">
           {/* Root Identification */}
           <div className="px-3 py-2.5 border-b border-border bg-muted/20">
@@ -130,52 +129,69 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
               {record.attributes.map((attr, idx) => (
                 <div
                   key={attr.name}
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-[11px] border ${
+                  className={`px-2 py-1.5 rounded text-[11px] border ${
                     attr.qcFlag ? "border-destructive/30 bg-destructive-light" : "border-border bg-background"
                   }`}
                 >
-                  <div className="w-4 shrink-0">{statusIcon[attr.status]}</div>
-                  <div className="w-24 shrink-0 text-muted-foreground truncate">{attr.name}</div>
-                  <div className="flex-1">
-                    {editingIdx === idx ? (
-                      <div className="flex items-center gap-1">
-                        <input
-                          value={editValue}
-                          onChange={e => setEditValue(e.target.value)}
-                          className="flex-1 px-1.5 py-0.5 text-[11px] bg-card border border-ring rounded focus:outline-none"
-                          autoFocus
-                          onKeyDown={e => { if (e.key === "Enter") saveEdit(idx); if (e.key === "Escape") setEditingIdx(null); }}
-                        />
-                        <button onClick={() => saveEdit(idx)} className="text-[10px] text-brand font-medium">Save</button>
-                        <button onClick={() => setEditingIdx(null)} className="text-[10px] text-muted-foreground">Cancel</button>
-                      </div>
-                    ) : (
-                      <span className="text-foreground">{attr.currentValue}</span>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 shrink-0">{statusIcon[attr.status]}</div>
+                    <div className="w-24 shrink-0 text-muted-foreground truncate">{attr.name}</div>
+                    <div className="flex-1">
+                      {editingIdx === idx ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            value={editValue}
+                            onChange={e => setEditValue(e.target.value)}
+                            className="flex-1 px-1.5 py-0.5 text-[11px] bg-card border border-ring rounded focus:outline-none"
+                            autoFocus
+                            onKeyDown={e => { if (e.key === "Enter") saveEdit(idx); if (e.key === "Escape") setEditingIdx(null); }}
+                          />
+                          <button onClick={() => saveEdit(idx)} className="text-[10px] text-brand font-medium">Save</button>
+                          <button onClick={() => setEditingIdx(null)} className="text-[10px] text-muted-foreground">Cancel</button>
+                        </div>
+                      ) : (
+                        <span className="text-foreground">{attr.currentValue}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "validated", qcFlag: false })}
+                        className="p-0.5 hover:bg-brand-light rounded transition-colors" title="Accept"
+                      >
+                        <CheckCircle2 className="w-3 h-3 text-brand" />
+                      </button>
+                      <button
+                        onClick={() => startEdit(idx, attr.currentValue)}
+                        className="p-0.5 hover:bg-status-blue-light rounded transition-colors" title="Edit"
+                      >
+                        <Edit3 className="w-3 h-3 text-status-blue" />
+                      </button>
+                      <button
+                        onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "flagged", qcFlag: true })}
+                        className="p-0.5 hover:bg-destructive-light rounded transition-colors" title="Flag"
+                      >
+                        <Flag className="w-3 h-3 text-destructive" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "validated", qcFlag: false })}
-                      className="p-0.5 hover:bg-brand-light rounded transition-colors" title="Accept"
-                    >
-                      <CheckCircle2 className="w-3 h-3 text-brand" />
-                    </button>
-                    <button
-                      onClick={() => startEdit(idx, attr.currentValue)}
-                      className="p-0.5 hover:bg-status-blue-light rounded transition-colors" title="Edit"
-                    >
-                      <Edit3 className="w-3 h-3 text-status-blue" />
-                    </button>
-                    <button
-                      onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "flagged", qcFlag: true })}
-                      className="p-0.5 hover:bg-destructive-light rounded transition-colors" title="Flag"
-                    >
-                      <Flag className="w-3 h-3 text-destructive" />
-                    </button>
+                  {/* Clickable source names */}
+                  <div className="flex items-center gap-1 mt-1 ml-6">
+                    <span className="text-[10px] text-muted-foreground">Sources:</span>
+                    {attr.sourceRefs.map((src, si) => (
+                      <button
+                        key={si}
+                        onClick={() => setActiveSourceUrl(src.url)}
+                        className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+                          activeSourceUrl === src.url
+                            ? "bg-status-blue-light text-status-blue font-medium"
+                            : "text-status-blue hover:bg-muted hover:underline"
+                        }`}
+                        title={`Load ${src.name}`}
+                      >
+                        {src.name}
+                      </button>
+                    ))}
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0 w-16 truncate text-right" title={attr.sourceRef}>
-                    {attr.sourceRef}
-                  </span>
                 </div>
               ))}
             </div>

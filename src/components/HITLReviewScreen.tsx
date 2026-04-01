@@ -19,6 +19,7 @@ export default function HITLReviewScreen() {
 
   const filtered = useMemo(() => {
     return records.filter(r => {
+      if (r.status === "approved") return false;
       if (search && !r.companyName.toLowerCase().includes(search.toLowerCase()) && !r.id.toLowerCase().includes(search.toLowerCase())) return false;
       if (statusFilter !== "all" && r.status !== statusFilter) return false;
       return true;
