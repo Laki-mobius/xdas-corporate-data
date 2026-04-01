@@ -104,7 +104,7 @@ export default function QCSummaryCards({
               )}
             </div>
           )}
-          <span className="text-[11px] text-muted-foreground">{card.subtitle}</span>
+          <span className="text-[10px] text-muted-foreground">{card.subtitle}</span>
           {card.action && (
             <button
               onClick={card.action}
