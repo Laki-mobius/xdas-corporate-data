@@ -131,23 +131,6 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
         </div>
       </div>
 
-      {/* Source References */}
-      <div className="px-3 py-2 border-t border-border">
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Sources</p>
-        <div className="space-y-1">
-          {record.sources.map((src, i) => (
-            <div key={i} className="flex items-start gap-1.5 text-[11px]">
-              <ExternalLink className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <span className="text-status-blue truncate block">{src.url}</span>
-                <span className="text-muted-foreground text-[10px] line-clamp-1">{src.snippet}</span>
-              </div>
-              <span className="text-[10px] px-1 py-0.5 bg-muted rounded text-muted-foreground shrink-0">{src.type}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Actions */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-t border-border">
         <button
@@ -156,18 +139,6 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
         >
           <Eye className="w-3.5 h-3.5" />
           Review
-        </button>
-        <button
-          onClick={() => onApprove(record.id)}
-          className="flex-1 py-1.5 text-[11px] font-medium text-primary-foreground bg-primary hover:bg-primary-dark rounded transition-colors"
-        >
-          Approve
-        </button>
-        <button
-          onClick={() => onReject(record.id)}
-          className="flex-1 py-1.5 text-[11px] font-medium text-destructive-foreground bg-destructive hover:opacity-90 rounded transition-colors"
-        >
-          Reject
         </button>
       </div>
     </div>
