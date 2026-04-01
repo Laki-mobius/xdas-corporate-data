@@ -126,7 +126,7 @@ export default function HITLReviewScreen() {
               onStatusFilter={setStatusFilter}
             />
           </div>
-          <AuditTrailPanel actions={auditActions} />
+          
         </div>
 
         {/* Right: Record Detail */}
