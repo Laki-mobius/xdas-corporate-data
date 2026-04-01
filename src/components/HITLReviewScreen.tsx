@@ -6,6 +6,7 @@ import BulkActionToolbar from "./hitl/BulkActionToolbar";
 import RecordDetailPanel from "./hitl/RecordDetailPanel";
 import RecordReviewView from "./hitl/RecordReviewView";
 import SamplingModal from "./hitl/SamplingModal";
+import DistributeModal from "./hitl/DistributeModal";
 import { toast } from "sonner";
 
 export default function HITLReviewScreen() {
@@ -16,6 +17,7 @@ export default function HITLReviewScreen() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [samplingOpen, setSamplingOpen] = useState(false);
   const [reviewingRecordId, setReviewingRecordId] = useState<string | null>(null);
+  const [distributeOpen, setDistributeOpen] = useState(false);
 
   const filtered = useMemo(() => {
     return records.filter(r => {
@@ -86,7 +88,7 @@ export default function HITLReviewScreen() {
   }, []);
 
   const handleDistribute = useCallback(() => {
-    toast.success("Records distributed to reviewers");
+    setDistributeOpen(true);
   }, []);
 
   const handleOpenReview = useCallback((id: string) => {
@@ -175,6 +177,12 @@ export default function HITLReviewScreen() {
         onClose={() => setSamplingOpen(false)}
         onSample={handleSample}
         totalRecords={metrics.total}
+      />
+      <DistributeModal
+        open={distributeOpen}
+        onClose={() => setDistributeOpen(false)}
+        onConfirm={() => toast.success("Records distributed to reviewers")}
+        totalPending={metrics.pending}
       />
     </div>
   );
