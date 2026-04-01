@@ -429,16 +429,6 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
                 </button>
               ))}
             </div>
-            {tier && (
-              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2">
-                <p className="text-[12px] text-blue-700 dark:text-blue-300">
-                  {tier === '1' && 'Company Data Extraction workflow will be used for this job.'}
-                  {tier === '2' && 'Registry Data Extraction workflow will be used for this job.'}
-                  {tier === '3' && 'SEC Data workflow will be used for this job.'}
-                  {tier === '4' && 'Stock Exchanges workflow will be used for this job.'}
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Entity Input */}
