@@ -3,6 +3,7 @@ import { ShieldCheck, BarChart3, Target } from 'lucide-react';
 import { ModalShell, ModalHeader, SectionLabel, FilterToolbar } from './ModalParts';
 import { dataGroups } from '@/data/dashboard-data';
 import { cn } from '@/lib/utils';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const qcAttributes = [
   { name: 'Company Name', accuracy: 99, correct: 99, total: 100, status: 'passed' as const, issues: '1 Minor Typo' },
