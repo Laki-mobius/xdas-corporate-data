@@ -60,7 +60,6 @@ export default function ValidationQueueTable({
     { key: "confidenceScore", label: "Confidence", sortable: true },
     { key: "source", label: "Source", sortable: false },
     { key: "lastUpdated", label: "Last Updated", sortable: true },
-    { key: "action", label: "Action", sortable: false },
   ];
 
   return (
