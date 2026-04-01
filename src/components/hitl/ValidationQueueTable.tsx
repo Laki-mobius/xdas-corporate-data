@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type ValidationRecord } from "@/data/hitl-validation-data";
-import { Search, ArrowUpDown, Eye } from "lucide-react";
+import { Search, ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface ValidationQueueTableProps {
