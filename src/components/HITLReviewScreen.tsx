@@ -76,10 +76,9 @@ export default function HITLReviewScreen() {
 
   const bulkReject = useCallback(() => {
     setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "rejected" as const } : r));
-    selectedIds.forEach(id => addAudit("Record Rejected", id));
     toast.error(`${selectedIds.length} records rejected`);
     setSelectedIds([]);
-  }, [selectedIds, addAudit]);
+  }, [selectedIds]);
 
   const handleSample = useCallback((method: string, value: number) => {
     toast.success(`Sampling complete: ${method === "percentage" ? `${value}% sampled` : method === "random" ? `${value} records sampled` : "Category-based sampling done"}`);
