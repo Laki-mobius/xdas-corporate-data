@@ -450,21 +450,21 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
               <div className="flex gap-1">
                 <Button
                   type="button"
-                  variant={inputMode === 'text' ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-7 text-[11px] rounded-full px-3"
-                  onClick={() => setInputMode('text')}
-                >
-                  Manual Entry
-                </Button>
-                <Button
-                  type="button"
                   variant={inputMode === 'file' ? 'default' : 'outline'}
                   size="sm"
                   className="h-7 text-[11px] rounded-full px-3"
                   onClick={() => setInputMode('file')}
                 >
                   Upload File
+                </Button>
+                <Button
+                  type="button"
+                  variant={inputMode === 'text' ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-7 text-[11px] rounded-full px-3"
+                  onClick={() => setInputMode('text')}
+                >
+                  Manual Entry
                 </Button>
               </div>
             </div>
