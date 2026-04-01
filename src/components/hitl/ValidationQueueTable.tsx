@@ -147,7 +147,7 @@ export default function ValidationQueueTable({
                       <span className="text-muted-foreground">{record.confidenceScore}%</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.source}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.sourceList.join(", ")}</td>
                   <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.lastUpdated}</td>
                 </tr>
               );
