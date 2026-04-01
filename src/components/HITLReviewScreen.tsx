@@ -4,7 +4,7 @@ import QCSummaryCards from "./hitl/QCSummaryCards";
 import ValidationQueueTable from "./hitl/ValidationQueueTable";
 import BulkActionToolbar from "./hitl/BulkActionToolbar";
 import RecordDetailPanel from "./hitl/RecordDetailPanel";
-
+import RecordReviewView from "./hitl/RecordReviewView";
 import SamplingModal from "./hitl/SamplingModal";
 import { toast } from "sonner";
 
@@ -15,7 +15,7 @@ export default function HITLReviewScreen() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [samplingOpen, setSamplingOpen] = useState(false);
-  
+  const [reviewingRecordId, setReviewingRecordId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     return records.filter(r => {
@@ -26,6 +26,7 @@ export default function HITLReviewScreen() {
   }, [records, search, statusFilter]);
 
   const activeRecord = activeRecordId ? records.find(r => r.id === activeRecordId) : null;
+  const reviewingRecord = reviewingRecordId ? records.find(r => r.id === reviewingRecordId) : null;
 
   const metrics = useMemo(() => ({
     total: records.length,
@@ -34,7 +35,6 @@ export default function HITLReviewScreen() {
     rejected: records.filter(r => r.status === "rejected").length,
     preHitlScore: 82,
   }), [records]);
-
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -88,6 +88,14 @@ export default function HITLReviewScreen() {
     toast.success("Records distributed to reviewers");
   }, []);
 
+  const handleOpenReview = useCallback((id: string) => {
+    setReviewingRecordId(id);
+  }, []);
+
+  const handleCloseReview = useCallback(() => {
+    setReviewingRecordId(null);
+  }, []);
+
   return (
     <div className="flex flex-col h-full -m-3 overflow-hidden">
       {/* Top Metrics */}
@@ -103,45 +111,61 @@ export default function HITLReviewScreen() {
         />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex gap-2.5 px-3 pb-3 overflow-hidden min-h-0">
-        {/* Left: Queue + Audit */}
-        <div className="flex-1 flex flex-col gap-2 overflow-hidden min-w-0">
-          <BulkActionToolbar
-            selectedCount={selectedIds.length}
-            onBulkApprove={bulkApprove}
-            onBulkReject={bulkReject}
+      {/* Main Content - either queue+detail or review view */}
+      {reviewingRecord ? (
+        <div className="flex-1 px-3 pb-3 overflow-hidden min-h-0">
+          <RecordReviewView
+            record={reviewingRecord}
+            onClose={handleCloseReview}
+            onUpdateAttribute={updateAttribute}
+            onApprove={approveRecord}
+            onReject={rejectRecord}
           />
-          <div className="flex-1 overflow-hidden">
-            <ValidationQueueTable
-              records={filtered}
-              selectedIds={selectedIds}
-              onToggleSelect={toggleSelect}
-              onToggleAll={toggleAll}
-              onReview={handleReview}
-              activeRecordId={activeRecordId}
-              search={search}
-              onSearchChange={setSearch}
-              statusFilter={statusFilter}
-              onStatusFilter={setStatusFilter}
-            />
-          </div>
-          
         </div>
-
-        {/* Right: Record Detail */}
-        {activeRecord && (
-          <div className="w-[340px] shrink-0 overflow-hidden">
-            <RecordDetailPanel
-              record={activeRecord}
-              onClose={() => setActiveRecordId(null)}
-              onUpdateAttribute={updateAttribute}
-              onApprove={approveRecord}
-              onReject={rejectRecord}
+      ) : (
+        <div className="flex-1 flex gap-2.5 px-3 pb-3 overflow-hidden min-h-0">
+          {/* Left Pane: Queue */}
+          <div className="w-1/2 flex flex-col gap-2 overflow-hidden min-w-0">
+            <BulkActionToolbar
+              selectedCount={selectedIds.length}
+              onBulkApprove={bulkApprove}
+              onBulkReject={bulkReject}
             />
+            <div className="flex-1 overflow-hidden">
+              <ValidationQueueTable
+                records={filtered}
+                selectedIds={selectedIds}
+                onToggleSelect={toggleSelect}
+                onToggleAll={toggleAll}
+                onReview={handleReview}
+                activeRecordId={activeRecordId}
+                search={search}
+                onSearchChange={setSearch}
+                statusFilter={statusFilter}
+                onStatusFilter={setStatusFilter}
+              />
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Right Pane: Record Detail */}
+          <div className="w-1/2 overflow-hidden">
+            {activeRecord ? (
+              <RecordDetailPanel
+                record={activeRecord}
+                onClose={() => setActiveRecordId(null)}
+                onUpdateAttribute={updateAttribute}
+                onApprove={approveRecord}
+                onReject={rejectRecord}
+                onReview={handleOpenReview}
+              />
+            ) : (
+              <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
+                <p className="text-[12px] text-muted-foreground">Select a record to view details</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <SamplingModal
         open={samplingOpen}
