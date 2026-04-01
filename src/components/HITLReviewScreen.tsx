@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { sampleRecords, auditTrail, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
+import { sampleRecords, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import QCSummaryCards from "./hitl/QCSummaryCards";
 import ValidationQueueTable from "./hitl/ValidationQueueTable";
 import BulkActionToolbar from "./hitl/BulkActionToolbar";
