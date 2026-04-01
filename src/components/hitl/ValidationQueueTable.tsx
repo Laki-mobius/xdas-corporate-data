@@ -156,7 +156,7 @@ export default function ValidationQueueTable({
             })}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-muted-foreground text-[12px]">
+               <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground text-[12px]">
                   No records match your filters.
                 </td>
               </tr>
