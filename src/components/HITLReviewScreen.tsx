@@ -98,18 +98,20 @@ export default function HITLReviewScreen() {
 
   return (
     <div className="flex flex-col h-full -m-3 overflow-hidden">
-      {/* Top Metrics */}
-      <div className="px-3 pt-3 pb-2">
-        <QCSummaryCards
-          totalRecords={metrics.total}
-          pendingReview={metrics.pending}
-          approvedToday={metrics.approved}
-          rejected={metrics.rejected}
-          preHitlScore={metrics.preHitlScore}
-          onSample={() => setSamplingOpen(true)}
-          onDistribute={handleDistribute}
-        />
-      </div>
+      {/* Top Metrics - collapse when reviewing */}
+      {!reviewingRecord && (
+        <div className="px-3 pt-3 pb-2">
+          <QCSummaryCards
+            totalRecords={metrics.total}
+            pendingReview={metrics.pending}
+            approvedToday={metrics.approved}
+            rejected={metrics.rejected}
+            preHitlScore={metrics.preHitlScore}
+            onSample={() => setSamplingOpen(true)}
+            onDistribute={handleDistribute}
+          />
+        </div>
+      )}
 
       {/* Main Content - either queue+detail or review view */}
       {reviewingRecord ? (

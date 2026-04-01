@@ -91,7 +91,7 @@ export default function ValidationQueueTable({
 
       {/* Table */}
       <div className="overflow-auto flex-1">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[12px] table-auto">
           <thead>
             <tr className="bg-muted/50 border-b border-border">
               <th className="px-3 py-2 text-left w-8">
@@ -100,7 +100,7 @@ export default function ValidationQueueTable({
               {columns.map(col => (
                 <th
                   key={col.key}
-                  className={`px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide text-[10px] ${col.sortable ? "cursor-pointer select-none hover:text-foreground" : ""}`}
+                  className={`px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide text-[10px] whitespace-nowrap ${col.sortable ? "cursor-pointer select-none hover:text-foreground" : ""}`}
                   onClick={() => col.sortable && handleSort(col.key)}
                 >
                   <span className="flex items-center gap-1">
@@ -127,9 +127,9 @@ export default function ValidationQueueTable({
                       onCheckedChange={() => onToggleSelect(record.id)}
                     />
                   </td>
-                  <td className="px-3 py-2 font-mono text-muted-foreground">{record.id}</td>
-                  <td className="px-3 py-2 text-foreground">{record.companyName}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{record.attributeType}</td>
+                  <td className="px-3 py-2 font-mono text-muted-foreground whitespace-nowrap">{record.id}</td>
+                  <td className="px-3 py-2 text-foreground whitespace-nowrap">{record.companyName}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.attributeType}</td>
                   <td className="px-3 py-2">
                     <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${sc.bg} ${sc.text}`}>
                       {sc.label}
@@ -149,8 +149,8 @@ export default function ValidationQueueTable({
                       <span className="text-muted-foreground">{record.confidenceScore}%</span>
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground">{record.source}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{record.lastUpdated}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.source}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{record.lastUpdated}</td>
                 </tr>
               );
             })}
