@@ -6,6 +6,7 @@ import BulkActionToolbar from "./hitl/BulkActionToolbar";
 import RecordDetailPanel from "./hitl/RecordDetailPanel";
 import RecordReviewView from "./hitl/RecordReviewView";
 import SamplingModal from "./hitl/SamplingModal";
+import DistributeModal from "./hitl/DistributeModal";
 import { toast } from "sonner";
 
 export default function HITLReviewScreen() {
