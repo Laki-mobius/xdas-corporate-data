@@ -405,14 +405,14 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
           {/* Source Selection (was Tier Mapping) */}
           <div className="space-y-2">
             <Label className="text-[13px] font-semibold">
-              Source Selection <span className="text-muted-foreground font-normal">— dictates source priority</span>
+              Workflow Selection
             </Label>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { value: '1', label: 'Registry + SEC (Priority)' },
-                { value: '2', label: 'SEC + Web Crawl' },
-                { value: '3', label: 'Web Sources Primary' },
-                { value: '4', label: 'Web Aggregators Only' },
+                { value: '1', label: 'Company Data Extraction' },
+                { value: '2', label: 'Registry Data Extraction' },
+                { value: '3', label: 'SEC Data' },
+                { value: '4', label: 'Stock Exchanges' },
               ].map((opt) => (
                 <button
                   key={opt.value}
