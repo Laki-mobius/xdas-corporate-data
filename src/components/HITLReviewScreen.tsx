@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from "react";
-import { sampleRecords, auditTrail, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
+import { sampleRecords, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import QCSummaryCards from "./hitl/QCSummaryCards";
 import ValidationQueueTable from "./hitl/ValidationQueueTable";
 import BulkActionToolbar from "./hitl/BulkActionToolbar";
 import RecordDetailPanel from "./hitl/RecordDetailPanel";
-import AuditTrailPanel from "./hitl/AuditTrailPanel";
+
 import SamplingModal from "./hitl/SamplingModal";
 import { toast } from "sonner";
 
@@ -15,7 +15,7 @@ export default function HITLReviewScreen() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [samplingOpen, setSamplingOpen] = useState(false);
-  const [auditActions, setAuditActions] = useState(auditTrail);
+  
 
   const filtered = useMemo(() => {
     return records.filter(r => {
@@ -35,15 +35,6 @@ export default function HITLReviewScreen() {
     preHitlScore: 82,
   }), [records]);
 
-  const addAudit = useCallback((action: string, recordRef: string) => {
-    setAuditActions(prev => [{
-      id: `A${Date.now()}`,
-      user: "Current User",
-      action,
-      timestamp: new Date().toLocaleString("sv-SE", { hour12: false }).slice(0, 16),
-      recordRef,
-    }, ...prev]);
-  }, []);
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -69,29 +60,25 @@ export default function HITLReviewScreen() {
 
   const approveRecord = useCallback((id: string) => {
     setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "approved" as const, completionPct: 100 } : r));
-    addAudit("Record Approved", id);
     toast.success(`Record ${id} approved`);
-  }, [addAudit]);
+  }, []);
 
   const rejectRecord = useCallback((id: string) => {
     setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "rejected" as const } : r));
-    addAudit("Record Rejected", id);
     toast.error(`Record ${id} rejected`);
-  }, [addAudit]);
+  }, []);
 
   const bulkApprove = useCallback(() => {
     setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "approved" as const, completionPct: 100 } : r));
-    selectedIds.forEach(id => addAudit("Record Approved", id));
     toast.success(`${selectedIds.length} records approved`);
     setSelectedIds([]);
-  }, [selectedIds, addAudit]);
+  }, [selectedIds]);
 
   const bulkReject = useCallback(() => {
     setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "rejected" as const } : r));
-    selectedIds.forEach(id => addAudit("Record Rejected", id));
     toast.error(`${selectedIds.length} records rejected`);
     setSelectedIds([]);
-  }, [selectedIds, addAudit]);
+  }, [selectedIds]);
 
   const handleSample = useCallback((method: string, value: number) => {
     toast.success(`Sampling complete: ${method === "percentage" ? `${value}% sampled` : method === "random" ? `${value} records sampled` : "Category-based sampling done"}`);
@@ -139,7 +126,7 @@ export default function HITLReviewScreen() {
               onStatusFilter={setStatusFilter}
             />
           </div>
-          <AuditTrailPanel actions={auditActions} />
+          
         </div>
 
         {/* Right: Record Detail */}
