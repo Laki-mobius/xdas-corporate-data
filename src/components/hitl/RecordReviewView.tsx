@@ -133,10 +133,10 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
                     attr.qcFlag ? "border-destructive/30 bg-destructive-light" : "border-border bg-background"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 shrink-0">{statusIcon[attr.status]}</div>
+                  <div className="flex items-center gap-3 whitespace-nowrap">
+                    <div className="w-5 shrink-0 flex items-center justify-center">{statusIcon[attr.status]}</div>
                     <div className="w-28 shrink-0 text-muted-foreground">{attr.name}</div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       {editingIdx === idx ? (
                         <div className="flex items-center gap-1.5">
                           <input
@@ -150,10 +150,10 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
                           <button onClick={() => setEditingIdx(null)} className="text-[12px] text-muted-foreground">Cancel</button>
                         </div>
                       ) : (
-                        <span className="text-foreground">{attr.currentValue}</span>
+                        <span className="text-foreground truncate block">{attr.currentValue}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "validated", qcFlag: false })}
                         className="p-0.5 hover:bg-brand-light rounded transition-colors" title="Accept"
@@ -173,13 +173,12 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
                         <Flag className="w-3.5 h-3.5 text-destructive" />
                       </button>
                     </div>
-                    {/* Source names inline after actions */}
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center shrink-0 text-[12px] text-muted-foreground">
                       {attr.sourceRefs.map((src, si) => (
                         <button
                           key={si}
                           onClick={() => setActiveSourceUrl(src.url)}
-                          className={`text-[12px] px-1 py-0.5 rounded transition-colors ${
+                          className={`px-1 py-0.5 rounded transition-colors ${
                             activeSourceUrl === src.url
                               ? "bg-status-blue-light text-status-blue font-medium"
                               : "text-muted-foreground hover:text-status-blue hover:underline"
