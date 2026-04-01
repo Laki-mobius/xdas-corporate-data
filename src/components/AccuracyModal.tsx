@@ -21,13 +21,10 @@ const qcAttributes = [
 ];
 
 function CircularGauge({ value, label, subtitle, color, icon }: { value: number; label: string; subtitle: string; color: string; icon: React.ReactNode }) {
-  const radius = 40;
-  const strokeWidth = 14;
-  const circumference = 2 * Math.PI * radius;
-  const gapFraction = 0.15;
-  const arcLength = circumference * (1 - gapFraction);
-  const filledLength = arcLength * (value / 100);
-  const rotationDeg = 90 + (gapFraction / 2) * 360;
+  const donutData = [
+    { name: 'Filled', value: value, fill: color },
+    { name: 'Empty', value: 100 - value, fill: 'hsl(var(--border))' },
+  ];
 
   return (
     <div className="flex items-center gap-3 w-full">
@@ -37,12 +34,30 @@ function CircularGauge({ value, label, subtitle, color, icon }: { value: number;
         <div className="text-xl font-bold text-foreground leading-none mt-1">{value}%</div>
       </div>
       <div className="relative w-[70px] h-[70px] shrink-0">
-        <svg viewBox="0 0 100 100" className="w-full h-full" style={{ transform: `rotate(${rotationDeg}deg)` }}>
-          <circle cx="50" cy="50" r={radius} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeWidth} strokeDasharray={`${arcLength} ${circumference - arcLength}`} strokeLinecap="round" />
-          <circle cx="50" cy="50" r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={`${filledLength} ${circumference - filledLength}`} strokeLinecap="round" />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-muted-foreground" style={{ color }}>{icon}</div>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={donutData}
+              dataKey="value"
+              cx="50%"
+              cy="50%"
+              innerRadius={22}
+              outerRadius={33}
+              strokeWidth={2}
+              stroke="hsl(var(--card))"
+              startAngle={90}
+              endAngle={-270}
+            >
+              {donutData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Pie>
+            <Tooltip
+              contentStyle={{ fontSize: 11, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+              formatter={(v: number) => [`${v}%`, ""]}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div style={{ color }}>{icon}</div>
         </div>
       </div>
     </div>
