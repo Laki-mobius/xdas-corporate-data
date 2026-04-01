@@ -133,7 +133,7 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
                     attr.qcFlag ? "border-destructive/30 bg-destructive-light" : "border-border bg-background"
                   }`}
                 >
-                  <div className="flex items-center gap-3 whitespace-nowrap">
+                  <div className="flex items-center gap-3 overflow-x-auto">
                     <div className="w-5 shrink-0 flex items-center justify-center">{statusIcon[attr.status]}</div>
                     <div className="w-28 shrink-0 text-muted-foreground">{attr.name}</div>
                     <div className="flex-1 min-w-0">
@@ -173,7 +173,7 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
                         <Flag className="w-3.5 h-3.5 text-destructive" />
                       </button>
                     </div>
-                    <div className="flex items-center shrink-0 text-[12px] text-muted-foreground">
+                    <div className="flex items-center shrink-0 text-[12px] text-muted-foreground whitespace-nowrap">
                       {attr.sourceRefs.map((src, si) => (
                         <button
                           key={si}
