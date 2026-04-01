@@ -1,5 +1,5 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
-import { CheckCircle2, AlertTriangle, Edit3, Flag, ExternalLink, X } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Edit3, Flag, ExternalLink, X, Eye } from "lucide-react";
 import { useState } from "react";
 
 interface RecordDetailPanelProps {
@@ -8,6 +8,7 @@ interface RecordDetailPanelProps {
   onUpdateAttribute: (recordId: string, attrIndex: number, attr: ValidationAttribute) => void;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
+  onReview: (id: string) => void;
 }
 
 const statusIcon: Record<string, React.ReactNode> = {
@@ -17,7 +18,7 @@ const statusIcon: Record<string, React.ReactNode> = {
   edited: <Edit3 className="w-3.5 h-3.5 text-status-blue" />,
 };
 
-export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, onApprove, onReject }: RecordDetailPanelProps) {
+export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, onApprove, onReject, onReview }: RecordDetailPanelProps) {
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -64,10 +65,6 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
           <div>
             <span className="text-muted-foreground">Suggested Value:</span>
             <span className="ml-1 font-medium text-brand">{record.suggestedValue}</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Source:</span>
-            <span className="ml-1 text-foreground">{record.source}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Confidence:</span>
@@ -154,16 +151,23 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
       {/* Actions */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-t border-border">
         <button
+          onClick={() => onReview(record.id)}
+          className="flex-1 py-1.5 text-[11px] font-medium text-primary-foreground bg-status-blue hover:opacity-90 rounded transition-colors flex items-center justify-center gap-1.5"
+        >
+          <Eye className="w-3.5 h-3.5" />
+          Review
+        </button>
+        <button
           onClick={() => onApprove(record.id)}
           className="flex-1 py-1.5 text-[11px] font-medium text-primary-foreground bg-primary hover:bg-primary-dark rounded transition-colors"
         >
-          Approve Record
+          Approve
         </button>
         <button
           onClick={() => onReject(record.id)}
           className="flex-1 py-1.5 text-[11px] font-medium text-destructive-foreground bg-destructive hover:opacity-90 rounded transition-colors"
         >
-          Reject Record
+          Reject
         </button>
       </div>
     </div>
