@@ -70,10 +70,9 @@ export default function HITLReviewScreen() {
 
   const bulkApprove = useCallback(() => {
     setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "approved" as const, completionPct: 100 } : r));
-    selectedIds.forEach(id => addAudit("Record Approved", id));
     toast.success(`${selectedIds.length} records approved`);
     setSelectedIds([]);
-  }, [selectedIds, addAudit]);
+  }, [selectedIds]);
 
   const bulkReject = useCallback(() => {
     setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "rejected" as const } : r));
