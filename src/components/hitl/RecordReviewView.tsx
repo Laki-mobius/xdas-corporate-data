@@ -173,7 +173,7 @@ export default function RecordReviewView({ record, onClose, onUpdateAttribute, o
                         <Flag className="w-3.5 h-3.5 text-destructive" />
                       </button>
                     </div>
-                    <div className="flex items-center shrink-0 text-[12px] text-muted-foreground">
+                    <div className="flex items-center shrink-0 text-[12px] text-muted-foreground whitespace-nowrap">
                       {attr.sourceRefs.map((src, si) => (
                         <button
                           key={si}
