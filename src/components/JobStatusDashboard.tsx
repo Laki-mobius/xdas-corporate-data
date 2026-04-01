@@ -405,14 +405,14 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
           {/* Source Selection (was Tier Mapping) */}
           <div className="space-y-2">
             <Label className="text-[13px] font-semibold">
-              Source Selection <span className="text-muted-foreground font-normal">— dictates source priority</span>
+              Workflow Selection
             </Label>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { value: '1', label: 'Registry + SEC (Priority)' },
-                { value: '2', label: 'SEC + Web Crawl' },
-                { value: '3', label: 'Web Sources Primary' },
-                { value: '4', label: 'Web Aggregators Only' },
+                { value: '1', label: 'Company Data Extraction' },
+                { value: '2', label: 'Registry Data Extraction' },
+                { value: '3', label: 'SEC Data' },
+                { value: '4', label: 'Stock Exchanges' },
               ].map((opt) => (
                 <button
                   key={opt.value}
@@ -432,10 +432,10 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
             {tier && (
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md px-3 py-2">
                 <p className="text-[12px] text-blue-700 dark:text-blue-300">
-                  {tier === '1' && 'Registry + SEC (Priority) will be used as the primary enrichment source for this job.'}
-                  {tier === '2' && 'SEC + Web Crawl will be used as the primary enrichment source for this job.'}
-                  {tier === '3' && 'Web Sources will be used as the primary enrichment source for this job.'}
-                  {tier === '4' && 'Web Aggregators Only will be used as the primary enrichment source for this job.'}
+                  {tier === '1' && 'Company Data Extraction workflow will be used for this job.'}
+                  {tier === '2' && 'Registry Data Extraction workflow will be used for this job.'}
+                  {tier === '3' && 'SEC Data workflow will be used for this job.'}
+                  {tier === '4' && 'Stock Exchanges workflow will be used for this job.'}
                 </p>
               </div>
             )}
@@ -450,21 +450,21 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
               <div className="flex gap-1">
                 <Button
                   type="button"
-                  variant={inputMode === 'text' ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-7 text-[11px] rounded-full px-3"
-                  onClick={() => setInputMode('text')}
-                >
-                  Manual Entry
-                </Button>
-                <Button
-                  type="button"
                   variant={inputMode === 'file' ? 'default' : 'outline'}
                   size="sm"
                   className="h-7 text-[11px] rounded-full px-3"
                   onClick={() => setInputMode('file')}
                 >
                   Upload File
+                </Button>
+                <Button
+                  type="button"
+                  variant={inputMode === 'text' ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-7 text-[11px] rounded-full px-3"
+                  onClick={() => setInputMode('text')}
+                >
+                  Manual Entry
                 </Button>
               </div>
             </div>
