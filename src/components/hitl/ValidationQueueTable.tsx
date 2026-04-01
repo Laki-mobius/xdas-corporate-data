@@ -19,7 +19,6 @@ interface ValidationQueueTableProps {
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   pending: { label: "Pending", bg: "bg-status-amber-light", text: "text-status-amber" },
   in_review: { label: "In Review", bg: "bg-status-blue-light", text: "text-status-blue" },
-  approved: { label: "Approved", bg: "bg-brand-light", text: "text-brand" },
   rejected: { label: "Rejected", bg: "bg-destructive-light", text: "text-destructive" },
 };
 
