@@ -35,15 +35,6 @@ export default function HITLReviewScreen() {
     preHitlScore: 82,
   }), [records]);
 
-  const addAudit = useCallback((action: string, recordRef: string) => {
-    setAuditActions(prev => [{
-      id: `A${Date.now()}`,
-      user: "Current User",
-      action,
-      timestamp: new Date().toLocaleString("sv-SE", { hour12: false }).slice(0, 16),
-      recordRef,
-    }, ...prev]);
-  }, []);
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
