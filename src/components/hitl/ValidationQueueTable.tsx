@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type ValidationRecord } from "@/data/hitl-validation-data";
-import { Search, ArrowUpDown, Eye } from "lucide-react";
+import { Search, ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface ValidationQueueTableProps {
@@ -60,7 +60,6 @@ export default function ValidationQueueTable({
     { key: "confidenceScore", label: "Confidence", sortable: true },
     { key: "source", label: "Source", sortable: false },
     { key: "lastUpdated", label: "Last Updated", sortable: true },
-    { key: "action", label: "Action", sortable: false },
   ];
 
   return (
@@ -119,9 +118,10 @@ export default function ValidationQueueTable({
               return (
                 <tr
                   key={record.id}
-                  className={`border-b border-border transition-colors hover:bg-muted/30 ${isActive ? "bg-brand-light/50" : ""}`}
+                  onClick={() => onReview(record.id)}
+                  className={`border-b border-border transition-colors hover:bg-muted/30 cursor-pointer ${isActive ? "bg-brand-light/50" : ""}`}
                 >
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2" onClick={e => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedIds.includes(record.id)}
                       onCheckedChange={() => onToggleSelect(record.id)}
@@ -151,21 +151,12 @@ export default function ValidationQueueTable({
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">{record.source}</td>
                   <td className="px-3 py-2 text-muted-foreground">{record.lastUpdated}</td>
-                  <td className="px-3 py-2">
-                    <button
-                      onClick={() => onReview(record.id)}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-primary bg-brand-light hover:bg-brand-mid/30 rounded transition-colors"
-                    >
-                      <Eye className="w-3 h-3" />
-                      Review
-                    </button>
-                  </td>
                 </tr>
               );
             })}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-muted-foreground text-[12px]">
+               <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground text-[12px]">
                   No records match your filters.
                 </td>
               </tr>
