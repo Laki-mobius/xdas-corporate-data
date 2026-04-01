@@ -75,7 +75,7 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
 
       {/* Attributes */}
       <div className="flex-1 overflow-auto px-3 py-2">
-        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Attributes</p>
+        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Attributes</p>
         <div className="space-y-1.5">
           {record.attributes.map((attr, idx) => (
             <div
