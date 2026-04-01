@@ -55,10 +55,9 @@ export default function ValidationQueueTable({
   const columns = [
     { key: "id", label: "Record ID", sortable: true },
     { key: "companyName", label: "Entity Name", sortable: true },
-    { key: "attributeType", label: "Attribute Type", sortable: true },
     { key: "status", label: "Status", sortable: true },
     { key: "confidenceScore", label: "Confidence", sortable: true },
-    { key: "source", label: "Source", sortable: false },
+    { key: "sourceList", label: "Source", sortable: false },
     { key: "lastUpdated", label: "Last Updated", sortable: true },
   ];
 
