@@ -100,7 +100,7 @@ export default function ValidationQueueTable({
               {columns.map(col => (
                 <th
                   key={col.key}
-                  className={`px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide text-[10px] ${col.sortable ? "cursor-pointer select-none hover:text-foreground" : ""}`}
+                  className={`px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide text-[10px] whitespace-nowrap ${col.sortable ? "cursor-pointer select-none hover:text-foreground" : ""}`}
                   onClick={() => col.sortable && handleSort(col.key)}
                 >
                   <span className="flex items-center gap-1">
