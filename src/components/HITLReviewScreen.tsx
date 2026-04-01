@@ -4,7 +4,7 @@ import QCSummaryCards from "./hitl/QCSummaryCards";
 import ValidationQueueTable from "./hitl/ValidationQueueTable";
 import BulkActionToolbar from "./hitl/BulkActionToolbar";
 import RecordDetailPanel from "./hitl/RecordDetailPanel";
-import AuditTrailPanel from "./hitl/AuditTrailPanel";
+
 import SamplingModal from "./hitl/SamplingModal";
 import { toast } from "sonner";
 
