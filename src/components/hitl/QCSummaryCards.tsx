@@ -108,7 +108,7 @@ export default function QCSummaryCards({
           {card.action && (
             <button
               onClick={card.action}
-              className="mt-2 text-[11px] font-medium text-primary-foreground bg-primary hover:bg-primary-dark rounded px-2.5 py-1 transition-colors"
+              className="mt-1.5 text-[11px] font-medium text-primary-foreground bg-primary hover:bg-primary-dark rounded px-2.5 py-1 transition-colors"
             >
               {card.actionLabel}
             </button>
