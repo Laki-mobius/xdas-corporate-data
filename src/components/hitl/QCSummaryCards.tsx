@@ -85,8 +85,8 @@ export default function QCSummaryCards({
             <span className="text-muted-foreground opacity-60">{card.icon}</span>
           </div>
           {card.value && (
-            <div className="flex items-baseline gap-1.5 mb-1">
-              <span className="text-[22px] font-normal text-foreground tracking-tight leading-none">
+            <div className="flex items-baseline gap-1.5 mb-0.5">
+              <span className="text-[20px] font-normal text-foreground tracking-tight leading-none">
                 {card.value}
               </span>
               {card.trend === "up" && (
