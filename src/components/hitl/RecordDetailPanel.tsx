@@ -92,7 +92,7 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
                     <input
                       value={editValue}
                       onChange={e => setEditValue(e.target.value)}
-                      className="flex-1 px-1.5 py-0.5 text-[11px] bg-card border border-ring rounded focus:outline-none"
+                      className="flex-1 px-1.5 py-0.5 text-[12px] bg-card border border-ring rounded focus:outline-none"
                       autoFocus
                       onKeyDown={e => { if (e.key === "Enter") saveEdit(idx); if (e.key === "Escape") setEditingIdx(null); }}
                     />
