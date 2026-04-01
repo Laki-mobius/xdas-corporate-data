@@ -1,133 +1,167 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { sampleRecords, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
-import ValidationHeader from "./hitl/ValidationHeader";
-import RecordQueue from "./hitl/RecordQueue";
-import AttributeValidation from "./hitl/AttributeValidation";
-import SourceViewer from "./hitl/SourceViewer";
-import ValidationMetrics from "./hitl/ValidationMetrics";
+import { useState, useMemo, useCallback } from "react";
+import { sampleRecords, auditTrail, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
+import QCSummaryCards from "./hitl/QCSummaryCards";
+import ValidationQueueTable from "./hitl/ValidationQueueTable";
+import BulkActionToolbar from "./hitl/BulkActionToolbar";
+import RecordDetailPanel from "./hitl/RecordDetailPanel";
+import AuditTrailPanel from "./hitl/AuditTrailPanel";
+import SamplingModal from "./hitl/SamplingModal";
 import { toast } from "sonner";
 
 export default function HITLReviewScreen() {
   const [records, setRecords] = useState<ValidationRecord[]>(sampleRecords);
-  const [selectedId, setSelectedId] = useState(sampleRecords[0].id);
-  const [selectedAttrIndex, setSelectedAttrIndex] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [completenessFilter, setCompletenessFilter] = useState("all");
-  const [qcFilter, setQcFilter] = useState("all");
+  const [samplingOpen, setSamplingOpen] = useState(false);
+  const [auditActions, setAuditActions] = useState(auditTrail);
 
   const filtered = useMemo(() => {
     return records.filter(r => {
       if (search && !r.companyName.toLowerCase().includes(search.toLowerCase()) && !r.id.toLowerCase().includes(search.toLowerCase())) return false;
       if (statusFilter !== "all" && r.status !== statusFilter) return false;
-      if (completenessFilter === "complete" && r.completionPct !== 100) return false;
-      if (completenessFilter === "partial" && (r.completionPct <= 0 || r.completionPct >= 100)) return false;
-      if (completenessFilter === "none" && r.completionPct !== 0) return false;
-      if (qcFilter === "flagged" && !r.attributes.some(a => a.qcFlag)) return false;
-      if (qcFilter === "clean" && r.attributes.some(a => a.qcFlag)) return false;
       return true;
     });
-  }, [records, search, statusFilter, completenessFilter, qcFilter]);
+  }, [records, search, statusFilter]);
 
-  const currentIndex = filtered.findIndex(r => r.id === selectedId);
-  const currentRecord = filtered[currentIndex] || filtered[0];
+  const activeRecord = activeRecordId ? records.find(r => r.id === activeRecordId) : null;
 
-  const updateAttribute = useCallback((index: number, attr: ValidationAttribute) => {
+  const metrics = useMemo(() => ({
+    total: records.length,
+    pending: records.filter(r => r.status === "pending" || r.status === "in_review").length,
+    approved: records.filter(r => r.status === "approved").length,
+    rejected: records.filter(r => r.status === "rejected").length,
+    preHitlScore: 82,
+  }), [records]);
+
+  const addAudit = useCallback((action: string, recordRef: string) => {
+    setAuditActions(prev => [{
+      id: `A${Date.now()}`,
+      user: "Current User",
+      action,
+      timestamp: new Date().toLocaleString("sv-SE", { hour12: false }).slice(0, 16),
+      recordRef,
+    }, ...prev]);
+  }, []);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  }, []);
+
+  const toggleAll = useCallback(() => {
+    setSelectedIds(prev => prev.length === filtered.length ? [] : filtered.map(r => r.id));
+  }, [filtered]);
+
+  const handleReview = useCallback((id: string) => {
+    setActiveRecordId(id);
+  }, []);
+
+  const updateAttribute = useCallback((recordId: string, attrIndex: number, attr: ValidationAttribute) => {
     setRecords(prev => prev.map(r => {
-      if (r.id !== currentRecord?.id) return r;
+      if (r.id !== recordId) return r;
       const newAttrs = [...r.attributes];
-      newAttrs[index] = attr;
+      newAttrs[attrIndex] = attr;
       const validated = newAttrs.filter(a => a.status === "validated" || a.status === "edited").length;
       return { ...r, attributes: newAttrs, completionPct: Math.round((validated / newAttrs.length) * 100) };
     }));
-  }, [currentRecord?.id]);
-
-  const handleApprove = useCallback(() => {
-    if (!currentRecord) return;
-    setRecords(prev => prev.map(r => r.id === currentRecord.id ? { ...r, status: "approved" as const, completionPct: 100 } : r));
-    toast.success(`Record ${currentRecord.id} approved`);
-  }, [currentRecord]);
-
-  const handleReject = useCallback(() => {
-    if (!currentRecord) return;
-    setRecords(prev => prev.map(r => r.id === currentRecord.id ? { ...r, status: "rejected" as const } : r));
-    toast.error(`Record ${currentRecord.id} rejected`);
-  }, [currentRecord]);
-
-  const handleSave = useCallback(() => {
-    toast.success("Progress saved");
   }, []);
 
-  const goTo = useCallback((dir: number) => {
-    const next = currentIndex + dir;
-    if (next >= 0 && next < filtered.length) {
-      setSelectedId(filtered[next].id);
-      setSelectedAttrIndex(0);
-    }
-  }, [currentIndex, filtered]);
+  const approveRecord = useCallback((id: string) => {
+    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "approved" as const, completionPct: 100 } : r));
+    addAudit("Record Approved", id);
+    toast.success(`Record ${id} approved`);
+  }, [addAudit]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === "a" || e.key === "A") {
-        if (currentRecord) updateAttribute(selectedAttrIndex, { ...currentRecord.attributes[selectedAttrIndex], status: "validated", qcFlag: false });
-      }
-      if (e.key === "e" || e.key === "E") { /* edit handled by component */ }
-      if (e.key === "f" || e.key === "F") {
-        if (currentRecord) updateAttribute(selectedAttrIndex, { ...currentRecord.attributes[selectedAttrIndex], status: "flagged", qcFlag: true });
-      }
-      if (e.key === "ArrowRight") {
-        if (currentRecord && selectedAttrIndex < currentRecord.attributes.length - 1) setSelectedAttrIndex(i => i + 1);
-      }
-      if (e.key === "ArrowLeft") {
-        if (selectedAttrIndex > 0) setSelectedAttrIndex(i => i - 1);
-      }
-      if (e.ctrlKey && e.key === "Enter") handleApprove();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [currentRecord, selectedAttrIndex, updateAttribute, handleApprove]);
+  const rejectRecord = useCallback((id: string) => {
+    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "rejected" as const } : r));
+    addAudit("Record Rejected", id);
+    toast.error(`Record ${id} rejected`);
+  }, [addAudit]);
 
-  if (!currentRecord) {
-    return <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No records match filters.</div>;
-  }
+  const bulkApprove = useCallback(() => {
+    setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "approved" as const, completionPct: 100 } : r));
+    selectedIds.forEach(id => addAudit("Record Approved", id));
+    toast.success(`${selectedIds.length} records approved`);
+    setSelectedIds([]);
+  }, [selectedIds, addAudit]);
+
+  const bulkReject = useCallback(() => {
+    setRecords(prev => prev.map(r => selectedIds.includes(r.id) ? { ...r, status: "rejected" as const } : r));
+    selectedIds.forEach(id => addAudit("Record Rejected", id));
+    toast.error(`${selectedIds.length} records rejected`);
+    setSelectedIds([]);
+  }, [selectedIds, addAudit]);
+
+  const handleSample = useCallback((method: string, value: number) => {
+    toast.success(`Sampling complete: ${method === "percentage" ? `${value}% sampled` : method === "random" ? `${value} records sampled` : "Category-based sampling done"}`);
+  }, []);
+
+  const handleDistribute = useCallback(() => {
+    toast.success("Records distributed to reviewers");
+  }, []);
 
   return (
-    <div className="flex flex-col h-full -m-3">
-      <ValidationHeader
-        records={filtered}
-        currentIndex={Math.max(currentIndex, 0)}
-        search={search}
-        onSearchChange={setSearch}
-        statusFilter={statusFilter}
-        onStatusFilter={setStatusFilter}
-        completenessFilter={completenessFilter}
-        onCompletenessFilter={setCompletenessFilter}
-        qcFilter={qcFilter}
-        onQcFilter={setQcFilter}
-        onPrev={() => goTo(-1)}
-        onNext={() => goTo(1)}
-        onSave={handleSave}
-        onApprove={handleApprove}
-        onReject={handleReject}
-      />
-      <div className="flex flex-1 overflow-hidden">
-        <RecordQueue records={filtered} selectedId={currentRecord.id} onSelect={id => { setSelectedId(id); setSelectedAttrIndex(0); }} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <AttributeValidation
-            attributes={currentRecord.attributes}
-            selectedAttrIndex={selectedAttrIndex}
-            onSelectAttr={setSelectedAttrIndex}
-            onUpdateAttribute={updateAttribute}
-          />
-          <ValidationMetrics attributes={currentRecord.attributes} />
-        </div>
-        <SourceViewer
-          sources={currentRecord.sources}
-          highlightText={currentRecord.attributes[selectedAttrIndex]?.extractedValue}
+    <div className="flex flex-col h-full -m-3 overflow-hidden">
+      {/* Top Metrics */}
+      <div className="px-3 pt-3 pb-2">
+        <QCSummaryCards
+          totalRecords={metrics.total}
+          pendingReview={metrics.pending}
+          approvedToday={metrics.approved}
+          rejected={metrics.rejected}
+          preHitlScore={metrics.preHitlScore}
+          onSample={() => setSamplingOpen(true)}
+          onDistribute={handleDistribute}
         />
       </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex gap-2.5 px-3 pb-3 overflow-hidden min-h-0">
+        {/* Left: Queue + Audit */}
+        <div className="flex-1 flex flex-col gap-2 overflow-hidden min-w-0">
+          <BulkActionToolbar
+            selectedCount={selectedIds.length}
+            onBulkApprove={bulkApprove}
+            onBulkReject={bulkReject}
+          />
+          <div className="flex-1 overflow-hidden">
+            <ValidationQueueTable
+              records={filtered}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
+              onToggleAll={toggleAll}
+              onReview={handleReview}
+              activeRecordId={activeRecordId}
+              search={search}
+              onSearchChange={setSearch}
+              statusFilter={statusFilter}
+              onStatusFilter={setStatusFilter}
+            />
+          </div>
+          <AuditTrailPanel actions={auditActions} />
+        </div>
+
+        {/* Right: Record Detail */}
+        {activeRecord && (
+          <div className="w-[340px] shrink-0 overflow-hidden">
+            <RecordDetailPanel
+              record={activeRecord}
+              onClose={() => setActiveRecordId(null)}
+              onUpdateAttribute={updateAttribute}
+              onApprove={approveRecord}
+              onReject={rejectRecord}
+            />
+          </div>
+        )}
+      </div>
+
+      <SamplingModal
+        open={samplingOpen}
+        onClose={() => setSamplingOpen(false)}
+        onSample={handleSample}
+        totalRecords={metrics.total}
+      />
     </div>
   );
 }
