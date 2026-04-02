@@ -297,6 +297,18 @@ export default function AttributeCategoryView() {
           </div>
         </div>
       </div>
+      <SamplingModal
+        open={samplingOpen}
+        onClose={() => setSamplingOpen(false)}
+        onSample={handleSample}
+        totalRecords={metrics.total}
+      />
+      <DistributeModal
+        open={distributeOpen}
+        onClose={() => setDistributeOpen(false)}
+        onConfirm={() => toast.success("Records distributed to reviewers")}
+        totalPending={metrics.pending}
+      />
     </div>
   );
 }
