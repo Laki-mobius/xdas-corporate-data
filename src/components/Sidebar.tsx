@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -42,20 +43,19 @@ function SidebarItem({ icon, label, active, badge, collapsed, onClick }: Sidebar
           {badge.value}
         </span>
       )}
-      {collapsed && (
-        <div className="absolute left-[60px] bg-gray-900 text-primary-foreground text-[12px] py-1 px-2.5 rounded-[5px] whitespace-nowrap z-[100] hidden group-hover:block pointer-events-none">
-          {label}
-        </div>
-      )}
     </div>
   );
 }
 
 export default function Sidebar({ collapsed, activeItem, onItemClick }: SidebarProps) {
+  const [hitlFlyoutOpen, setHitlFlyoutOpen] = useState(false);
+
+  const isHitlActive = activeItem === 'hitl' || activeItem === 'hitl-attribute';
+
   return (
     <nav
       className={cn(
-        'bg-card border-r border-border flex flex-col shrink-0 transition-[width] duration-[220ms] overflow-hidden',
+        'bg-card border-r border-border flex flex-col shrink-0 transition-[width] duration-[220ms] overflow-visible',
         collapsed ? 'w-[56px]' : 'w-[220px]'
       )}
     >
@@ -77,15 +77,60 @@ export default function Sidebar({ collapsed, activeItem, onItemClick }: SidebarP
           collapsed={collapsed}
           onClick={() => onItemClick('jobs')}
         />
-        <SidebarItem
-          icon={<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.2" stroke="currentColor" strokeWidth="1.4" /><path d="M3.5 13c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
-          label="HITL review"
-          badge={{ value: 12, variant: 'brand' }}
-          collapsed={collapsed}
-          active={activeItem === 'hitl' || activeItem === 'hitl-attribute'}
-          onClick={() => onItemClick('hitl')}
-        />
-        {!collapsed && (activeItem === 'hitl' || activeItem === 'hitl-attribute') && (
+
+        {/* HITL Review with flyout submenu when collapsed */}
+        <div
+          className="relative"
+          onMouseEnter={() => collapsed && setHitlFlyoutOpen(true)}
+          onMouseLeave={() => collapsed && setHitlFlyoutOpen(false)}
+        >
+          <SidebarItem
+            icon={<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.2" stroke="currentColor" strokeWidth="1.4" /><path d="M3.5 13c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>}
+            label="HITL review"
+            badge={{ value: 12, variant: 'brand' }}
+            collapsed={collapsed}
+            active={isHitlActive}
+            onClick={() => {
+              if (collapsed) {
+                setHitlFlyoutOpen(!hitlFlyoutOpen);
+              } else {
+                onItemClick('hitl-attribute');
+              }
+            }}
+          />
+
+          {/* Flyout popout for collapsed state */}
+          {collapsed && hitlFlyoutOpen && (
+            <div className="absolute left-[56px] top-0 z-[200] ml-0">
+              <div className="bg-card border border-border rounded-md shadow-lg py-1.5 px-1 min-w-[180px]">
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.07em] px-2.5 pb-1 pt-1">
+                  HITL Review
+                </div>
+                <div
+                  onClick={() => { onItemClick('hitl-attribute'); setHitlFlyoutOpen(false); }}
+                  className={cn(
+                    'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
+                    activeItem === 'hitl-attribute' ? 'text-brand font-semibold bg-brand-light' : 'text-muted-foreground hover:text-foreground hover:bg-surface'
+                  )}
+                >
+                  Attribute Category Wise
+                </div>
+                <div
+                  onClick={() => { onItemClick('hitl'); setHitlFlyoutOpen(false); }}
+                  className={cn(
+                    'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
+                    activeItem === 'hitl' ? 'text-brand font-semibold bg-brand-light' : 'text-muted-foreground hover:text-foreground hover:bg-surface'
+                  )}
+                >
+                  Record Wise
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Expanded sub-menu */}
+        {!collapsed && isHitlActive && (
           <div className="ml-7 flex flex-col">
             <div
               onClick={() => onItemClick('hitl-attribute')}
