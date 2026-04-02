@@ -7,7 +7,6 @@ import RecordDetailPanel from "./hitl/RecordDetailPanel";
 import RecordReviewView from "./hitl/RecordReviewView";
 import SamplingModal from "./hitl/SamplingModal";
 import DistributeModal from "./hitl/DistributeModal";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 export default function HITLReviewScreen() {
