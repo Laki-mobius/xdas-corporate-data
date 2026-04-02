@@ -7,6 +7,7 @@ import TotalRecordsModal from '@/components/TotalRecordsModal';
 import CoverageModal from '@/components/CoverageModal';
 import JobStatusDashboard from '@/components/JobStatusDashboard';
 import HITLReviewScreen from '@/components/HITLReviewScreen';
+import AttributeCategoryView from '@/components/hitl/AttributeCategoryView';
 import AccuracyModal from '@/components/AccuracyModal';
 import CompletenessModal from '@/components/CompletenessModal';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -76,11 +77,7 @@ function DashboardContent() {
 
           {activeItem === 'jobs' && <JobStatusDashboard />}
           {activeItem === 'hitl' && <HITLReviewScreen />}
-          {activeItem === 'hitl-attribute' && (
-            <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
-              <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
-            </div>
-          )}
+          {activeItem === 'hitl-attribute' && <AttributeCategoryView />}
         </main>
       </div>
     </div>
