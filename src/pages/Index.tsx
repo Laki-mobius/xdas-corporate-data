@@ -7,6 +7,7 @@ import TotalRecordsModal from '@/components/TotalRecordsModal';
 import CoverageModal from '@/components/CoverageModal';
 import JobStatusDashboard from '@/components/JobStatusDashboard';
 import HITLReviewScreen from '@/components/HITLReviewScreen';
+import AttributeCategoryView from '@/components/hitl/AttributeCategoryView';
 import AccuracyModal from '@/components/AccuracyModal';
 import CompletenessModal from '@/components/CompletenessModal';
 import { ThemeProvider } from '@/contexts/ThemeContext';
