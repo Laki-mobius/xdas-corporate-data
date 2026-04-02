@@ -1,7 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { attributeCategories, attributeCategoryGroups, type AttributeCategory } from "@/data/attribute-category-data";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import QCSummaryCards from "./QCSummaryCards";
+import SamplingModal from "./SamplingModal";
+import DistributeModal from "./DistributeModal";
+import { toast } from "sonner";
 
 const severityColor: Record<string, string> = {
   CRITICAL: "text-red-500",
