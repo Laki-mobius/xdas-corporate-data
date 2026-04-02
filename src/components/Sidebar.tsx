@@ -88,15 +88,6 @@ export default function Sidebar({ collapsed, activeItem, onItemClick }: SidebarP
         {!collapsed && (activeItem === 'hitl' || activeItem === 'hitl-attribute') && (
           <div className="ml-7 flex flex-col">
             <div
-              onClick={() => onItemClick('hitl')}
-              className={cn(
-                'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
-                activeItem === 'hitl' ? 'text-brand font-semibold' : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Record Wise
-            </div>
-            <div
               onClick={() => onItemClick('hitl-attribute')}
               className={cn(
                 'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
@@ -104,6 +95,15 @@ export default function Sidebar({ collapsed, activeItem, onItemClick }: SidebarP
               )}
             >
               Attribute Category Wise
+            </div>
+            <div
+              onClick={() => onItemClick('hitl')}
+              className={cn(
+                'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
+                activeItem === 'hitl' ? 'text-brand font-semibold' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Record Wise
             </div>
           </div>
         )}
