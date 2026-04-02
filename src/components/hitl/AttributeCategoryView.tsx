@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import QCSummaryCards from "./QCSummaryCards";
 import SamplingModal from "./SamplingModal";
 import DistributeModal from "./DistributeModal";
+import AttributeCategoryReviewModal from "./AttributeCategoryReviewModal";
 import { toast } from "sonner";
 
 const severityColor: Record<string, string> = {
@@ -40,6 +41,7 @@ export default function AttributeCategoryView() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [samplingOpen, setSamplingOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
+  const [reviewCategory, setReviewCategory] = useState<AttributeCategory | null>(null);
 
   const metrics = useMemo(() => ({
     total: attributeCategories.reduce((s, c) => s + c.totalChanges, 0),
@@ -285,7 +287,10 @@ export default function AttributeCategoryView() {
                   <span className="font-semibold text-foreground">Note:</span> Includes {Math.round(activeRecord.totalChanges * 0.26)} enterprise number changes, {Math.round(activeRecord.totalChanges * 0.41)} company type reclassifications, and {Math.round(activeRecord.totalChanges * 0.32)} reportage level updates. {Math.round(activeRecord.totalChanges * 0.08)} flagged as potential duplicates requiring manual dedup.
                 </div>
 
-                <button className="w-full text-[12px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark rounded-md py-2 transition-colors">
+                <button
+                  onClick={() => setReviewCategory(activeRecord)}
+                  className="w-full text-[12px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark rounded-md py-2 transition-colors"
+                >
                   REVIEW
                 </button>
               </>
@@ -309,6 +314,12 @@ export default function AttributeCategoryView() {
         onConfirm={() => toast.success("Records distributed to reviewers")}
         totalPending={metrics.pending}
       />
+      {reviewCategory && (
+        <AttributeCategoryReviewModal
+          category={reviewCategory}
+          onClose={() => setReviewCategory(null)}
+        />
+      )}
     </div>
   );
 }
