@@ -118,7 +118,7 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+    <div className="fixed inset-0 z-[300] flex flex-col bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-3">
