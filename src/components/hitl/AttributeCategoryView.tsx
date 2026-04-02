@@ -314,6 +314,12 @@ export default function AttributeCategoryView() {
         onConfirm={() => toast.success("Records distributed to reviewers")}
         totalPending={metrics.pending}
       />
+      {reviewCategory && (
+        <AttributeCategoryReviewModal
+          category={reviewCategory}
+          onClose={() => setReviewCategory(null)}
+        />
+      )}
     </div>
   );
 }
