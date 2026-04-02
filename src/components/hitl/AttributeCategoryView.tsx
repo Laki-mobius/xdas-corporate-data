@@ -41,6 +41,7 @@ export default function AttributeCategoryView() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [samplingOpen, setSamplingOpen] = useState(false);
   const [distributeOpen, setDistributeOpen] = useState(false);
+  const [reviewCategory, setReviewCategory] = useState<AttributeCategory | null>(null);
 
   const metrics = useMemo(() => ({
     total: attributeCategories.reduce((s, c) => s + c.totalChanges, 0),
