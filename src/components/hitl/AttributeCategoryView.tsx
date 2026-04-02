@@ -287,7 +287,10 @@ export default function AttributeCategoryView() {
                   <span className="font-semibold text-foreground">Note:</span> Includes {Math.round(activeRecord.totalChanges * 0.26)} enterprise number changes, {Math.round(activeRecord.totalChanges * 0.41)} company type reclassifications, and {Math.round(activeRecord.totalChanges * 0.32)} reportage level updates. {Math.round(activeRecord.totalChanges * 0.08)} flagged as potential duplicates requiring manual dedup.
                 </div>
 
-                <button className="w-full text-[12px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark rounded-md py-2 transition-colors">
+                <button
+                  onClick={() => setReviewCategory(activeRecord)}
+                  className="w-full text-[12px] font-semibold text-primary-foreground bg-primary hover:bg-primary-dark rounded-md py-2 transition-colors"
+                >
                   REVIEW
                 </button>
               </>
