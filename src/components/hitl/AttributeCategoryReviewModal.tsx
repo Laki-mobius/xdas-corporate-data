@@ -342,7 +342,7 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
                       key={`${rec.id}-primary`}
                       onClick={() => handleRecordClick(rec)}
                       className={cn(
-                        "border-b border-border/40 cursor-pointer transition-colors hover:bg-accent/30",
+                        "border-b border-border/40 cursor-pointer transition-colors hover:bg-accent/30 group/row",
                         isSelected && "bg-primary/5 ring-1 ring-inset ring-primary/20"
                       )}
                     >
