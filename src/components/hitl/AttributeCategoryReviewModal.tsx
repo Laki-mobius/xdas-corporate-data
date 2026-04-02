@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, ExternalLink, Edit3, CheckCircle2, Flag, Settings, MoreVertical } from "lucide-react";
+import { ArrowLeft, ExternalLink, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type AttributeCategory } from "@/data/attribute-category-data";
 
@@ -19,6 +19,15 @@ interface Props {
   onClose: () => void;
 }
 
+const sources = [
+  { name: "SEC Filing", url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany" },
+  { name: "Company Registry", url: "https://www.gleif.org/en/lei/search" },
+  { name: "GLEIF Database", url: "https://search.gleif.org" },
+  { name: "News Feed", url: "https://finance.yahoo.com" },
+  { name: "Stock Exchange", url: "https://www.nyse.com/listings" },
+  { name: "Annual Report", url: "https://www.annualreports.com" },
+];
+
 const generateRecords = (cat: AttributeCategory): CategoryRecord[] => {
   const companies = [
     "Berkshire Hathaway Inc.", "Apple Inc.", "JPMorgan Chase & Co.", "Goldman Sachs Group",
@@ -27,16 +36,7 @@ const generateRecords = (cat: AttributeCategory): CategoryRecord[] => {
     "Visa Inc.", "Mastercard Inc.", "Walt Disney Co.", "Intel Corp.",
     "Cisco Systems Inc.", "Pfizer Inc.", "Coca-Cola Co.", "PepsiCo Inc.",
   ];
-  const sources = [
-    { name: "SEC Filing", url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany" },
-    { name: "Company Registry", url: "https://www.gleif.org/en/lei/search" },
-    { name: "GLEIF Database", url: "https://search.gleif.org" },
-    { name: "News Feed", url: "https://finance.yahoo.com" },
-    { name: "Stock Exchange", url: "https://www.nyse.com/listings" },
-    { name: "Annual Report", url: "https://www.annualreports.com" },
-  ];
   const subAttrs = cat.subAttributes.split(" · ");
-
   const count = Math.min(cat.totalChanges, 20);
   return Array.from({ length: count }, (_, i) => {
     const src = sources[i % sources.length];
@@ -54,30 +54,21 @@ const generateRecords = (cat: AttributeCategory): CategoryRecord[] => {
   });
 };
 
-const statusStyles: Record<string, string> = {
-  pending: "bg-status-amber-light text-status-amber",
-  approved: "bg-brand-light text-brand",
-  rejected: "bg-destructive/10 text-destructive",
-  edited: "bg-status-blue-light text-status-blue",
-};
-
 export default function AttributeCategoryReviewModal({ category, onClose }: Props) {
   const [records, setRecords] = useState(() => generateRecords(category));
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [activeSourceUrl, setActiveSourceUrl] = useState<string>("");
+  const [activeSourceName, setActiveSourceName] = useState<string>("");
 
-  const selectedRecord = records.find(r => r.id === selectedRecordId);
-
-  const handleSourceClick = (url: string) => {
-    setActiveSourceUrl(url);
+  const handleRecordClick = (rec: CategoryRecord) => {
+    setSelectedRecordId(rec.id);
+    setActiveSourceUrl(rec.sourceUrl);
+    setActiveSourceName(rec.source);
   };
 
-  const handleApprove = (id: string) => {
-    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "approved" as const } : r));
-  };
-
-  const handleReject = (id: string) => {
-    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "rejected" as const } : r));
+  const handleSourceClick = (src: { name: string; url: string }) => {
+    setActiveSourceUrl(src.url);
+    setActiveSourceName(src.name);
   };
 
   const stats = useMemo(() => ({
@@ -87,10 +78,18 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
     rejected: records.filter(r => r.status === "rejected").length,
   }), [records]);
 
+  const handleApprove = (id: string) => {
+    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "approved" as const } : r));
+  };
+
+  const handleReject = (id: string) => {
+    setRecords(prev => prev.map(r => r.id === id ? { ...r, status: "rejected" as const } : r));
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card">
         <div className="flex items-center gap-3">
           <button onClick={onClose} className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -99,11 +98,10 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
           <div className="h-4 w-px bg-border" />
           <div>
             <span className="text-[13px] font-semibold text-foreground">{category.name}</span>
-            <span className="text-[11px] text-muted-foreground ml-2">{category.subAttributes}</span>
+            <span className="text-[11px] text-muted-foreground ml-2">Instance Count: {stats.total}</span>
           </div>
         </div>
         <div className="flex items-center gap-3 text-[11px]">
-          <span className="text-muted-foreground">Total: <span className="font-semibold text-foreground">{stats.total}</span></span>
           <span className="text-muted-foreground">Pending: <span className="font-semibold text-status-amber">{stats.pending}</span></span>
           <span className="text-muted-foreground">Approved: <span className="font-semibold text-brand">{stats.approved}</span></span>
           <span className="text-muted-foreground">Rejected: <span className="font-semibold text-destructive">{stats.rejected}</span></span>
@@ -112,19 +110,43 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
 
       {/* Split pane */}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* LHS: Source Webpage */}
+        {/* LHS: Sources list + Webpage */}
         <div className="w-1/2 border-r border-border flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-border bg-muted/20 flex items-center gap-2">
-            <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-[11px] text-muted-foreground truncate flex-1">
-              {activeSourceUrl || "Click a source link to load webpage"}
+          {/* Source list bar */}
+          <div className="px-3 py-1.5 border-b border-border bg-muted/30">
+            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Sources</div>
+            <div className="flex flex-wrap gap-1.5">
+              {sources.map((src) => (
+                <button
+                  key={src.name}
+                  onClick={() => handleSourceClick(src)}
+                  className={cn(
+                    "px-2 py-0.5 text-[10px] rounded border transition-colors",
+                    activeSourceName === src.name
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                  )}
+                >
+                  {src.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* URL bar */}
+          <div className="px-3 py-1.5 border-b border-border bg-muted/10 flex items-center gap-2">
+            <ExternalLink className="w-3 h-3 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground truncate flex-1">
+              {activeSourceUrl || "Click a source or company to load webpage"}
             </span>
             {activeSourceUrl && (
               <a href={activeSourceUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-status-blue hover:underline shrink-0">
-                Open in new tab
+                Open ↗
               </a>
             )}
           </div>
+
+          {/* Iframe */}
           <div className="flex-1 overflow-hidden">
             {activeSourceUrl ? (
               <iframe
@@ -136,91 +158,101 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
-                  <ExternalLink className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-                  <p className="text-[12px] text-muted-foreground">Select a record and click its source to load the webpage</p>
+                  <ExternalLink className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-[12px] text-muted-foreground">Select a company or source to load the webpage</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* RHS: Records list */}
+        {/* RHS: Excel-style spreadsheet */}
         <div className="w-1/2 flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-border bg-muted/20">
-            <span className="text-[11px] font-semibold text-foreground uppercase tracking-wide">
-              Records — {category.name}
-            </span>
-            <span className="text-[10px] text-muted-foreground ml-2">
-              {records.length} of {category.totalChanges.toLocaleString()} records shown
+          {/* Title bar */}
+          <div className="px-3 py-1.5 border-b border-border bg-primary/10 flex items-center justify-between">
+            <span className="text-[12px] font-semibold text-foreground">{category.name}</span>
+            <span className="text-[10px] text-muted-foreground">
+              {records.length} of {category.totalChanges.toLocaleString()} records
             </span>
           </div>
 
-          {/* Column headers */}
-          <div className="grid grid-cols-[40px_1fr_1fr_1fr_70px_80px_90px] gap-1 px-3 py-1.5 border-b border-border text-[9px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/10">
-            <div>#</div>
-            <div>Company</div>
-            <div>Previous Value</div>
-            <div>New Value</div>
-            <div className="text-center">Conf.</div>
-            <div>Source</div>
-            <div className="text-center">Actions</div>
-          </div>
-
-          {/* Scrollable records */}
-          <div className="flex-1 overflow-y-auto">
-            {records.map((rec, idx) => (
-              <div
-                key={rec.id}
-                onClick={() => setSelectedRecordId(rec.id)}
-                className={cn(
-                  "grid grid-cols-[40px_1fr_1fr_1fr_70px_80px_90px] gap-1 px-3 py-2 border-b border-border/50 cursor-pointer transition-colors hover:bg-surface/50 items-center",
-                  selectedRecordId === rec.id && "bg-brand-light"
-                )}
-              >
-                <div className="text-[10px] text-muted-foreground">{idx + 1}</div>
-                <div className="text-[11px] font-medium text-foreground truncate">{rec.companyName}</div>
-                <div className="text-[11px] text-muted-foreground truncate">{rec.oldValue}</div>
-                <div className="text-[11px] text-foreground truncate font-medium">{rec.newValue}</div>
-                <div className="text-center">
-                  <span className={cn(
-                    "text-[10px] font-semibold",
-                    rec.confidence >= 80 ? "text-brand" : rec.confidence >= 60 ? "text-status-amber" : "text-destructive"
-                  )}>
-                    {rec.confidence}%
-                  </span>
-                </div>
-                <div>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleSourceClick(rec.sourceUrl); }}
-                    className="text-[10px] text-status-blue hover:underline truncate"
+          {/* Excel-style table */}
+          <div className="flex-1 overflow-auto">
+            <table className="w-full border-collapse text-[11px]">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-muted/60 border-b border-border">
+                  <th className="text-left px-2 py-1.5 font-semibold text-muted-foreground border-r border-border/50 w-[36px]">#</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-muted-foreground border-r border-border/50">Company Name</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-muted-foreground border-r border-border/50">Previous Value</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-muted-foreground border-r border-border/50">Current Value</th>
+                  <th className="text-center px-2 py-1.5 font-semibold text-muted-foreground border-r border-border/50 w-[70px]">Confidence</th>
+                  <th className="text-center px-2 py-1.5 font-semibold text-muted-foreground w-[90px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((rec, idx) => (
+                  <tr
+                    key={rec.id}
+                    onClick={() => handleRecordClick(rec)}
+                    className={cn(
+                      "border-b border-border/40 cursor-pointer transition-colors hover:bg-accent/30",
+                      selectedRecordId === rec.id && "bg-primary/5 ring-1 ring-inset ring-primary/20"
+                    )}
                   >
-                    {rec.source}
-                  </button>
-                </div>
-                <div className="flex items-center justify-center gap-1">
-                  {rec.status === "pending" ? (
-                    <>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleApprove(rec.id); }}
-                        className="px-1.5 py-0.5 text-[9px] font-medium bg-primary text-primary-foreground rounded hover:bg-primary-dark transition-colors"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleReject(rec.id); }}
-                        className="px-1.5 py-0.5 text-[9px] font-medium bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-colors"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  ) : (
-                    <span className={cn("text-[9px] font-bold uppercase px-1.5 py-0.5 rounded", statusStyles[rec.status])}>
-                      {rec.status}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+                    <td className="px-2 py-1.5 text-muted-foreground border-r border-border/30 text-center">{idx + 1}</td>
+                    <td className="px-2 py-1.5 font-medium text-foreground border-r border-border/30">
+                      <span className="hover:text-primary hover:underline cursor-pointer">{rec.companyName}</span>
+                    </td>
+                    <td className="px-2 py-1.5 text-muted-foreground border-r border-border/30 truncate max-w-[160px]">{rec.oldValue}</td>
+                    <td className="px-2 py-1.5 text-foreground font-medium border-r border-border/30 truncate max-w-[160px]">{rec.newValue}</td>
+                    <td className="px-2 py-1.5 text-center border-r border-border/30">
+                      <span className={cn(
+                        "text-[10px] font-bold",
+                        rec.confidence >= 80 ? "text-brand" : rec.confidence >= 60 ? "text-status-amber" : "text-destructive"
+                      )}>
+                        {rec.confidence}%
+                      </span>
+                    </td>
+                    <td className="px-2 py-1.5 text-center">
+                      {rec.status === "pending" ? (
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleApprove(rec.id); }}
+                            className="px-1.5 py-0.5 text-[9px] font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-colors"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleReject(rec.id); }}
+                            className="px-1.5 py-0.5 text-[9px] font-medium bg-destructive text-destructive-foreground rounded hover:opacity-90 transition-colors"
+                          >
+                            ✗
+                          </button>
+                          <Eye className="w-3 h-3 text-muted-foreground cursor-pointer hover:text-foreground" />
+                        </div>
+                      ) : (
+                        <span className={cn(
+                          "text-[9px] font-bold uppercase px-1.5 py-0.5 rounded",
+                          rec.status === "approved" ? "bg-brand-light text-brand" : "bg-destructive/10 text-destructive"
+                        )}>
+                          {rec.status}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer */}
+          <div className="px-3 py-1.5 border-t border-border bg-muted/20 flex items-center justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-1 text-[11px] font-semibold bg-primary text-primary-foreground rounded hover:opacity-90 transition-colors"
+            >
+              Submit
+            </button>
           </div>
         </div>
       </div>
