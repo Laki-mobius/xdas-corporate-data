@@ -84,7 +84,19 @@ export default function AttributeCategoryView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Filters row */}
+      {/* QC Summary Cards */}
+      <div className="mb-2.5">
+        <QCSummaryCards
+          totalRecords={metrics.total}
+          pendingReview={metrics.pending}
+          approvedToday={metrics.approved}
+          rejected={metrics.rejected}
+          preHitlScore={metrics.preHitlScore}
+          onSample={() => setSamplingOpen(true)}
+          onDistribute={() => setDistributeOpen(true)}
+        />
+      </div>
+
       <div className="flex items-center gap-2 mb-2.5">
         <select
           value={categoryFilter}
