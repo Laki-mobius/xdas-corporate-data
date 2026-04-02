@@ -101,14 +101,16 @@ export default function HITLReviewScreen() {
   }, []);
 
   return (
-    <Tabs defaultValue="record-wise" className="flex flex-col h-full -m-3 overflow-hidden">
+    <div className="flex flex-col h-full -m-3 overflow-hidden">
       <div className="px-3 pt-3 pb-0">
         <TabsList className="mb-2">
-          <TabsTrigger value="record-wise">Record Wise</TabsTrigger>
-          <TabsTrigger value="attribute-category-wise">Attribute Category Wise</TabsTrigger>
+          <TabsTrigger value="record-wise" onClick={() => setActiveTab("record-wise")}>Record Wise</TabsTrigger>
+          <TabsTrigger value="attribute-category-wise" onClick={() => setActiveTab("attribute-category-wise")}>Attribute Category Wise</TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent value="record-wise" className="flex-1 flex flex-col overflow-hidden mt-0 min-h-0" style={{ flexBasis: 0 }}>
+
+      {activeTab === "record-wise" && (
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
       {/* Top Metrics - collapse when reviewing */}
       {!reviewingRecord && (
         <div className="px-3 pt-3 pb-2">
