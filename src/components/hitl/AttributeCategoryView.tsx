@@ -38,6 +38,20 @@ export default function AttributeCategoryView() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [samplingOpen, setSamplingOpen] = useState(false);
+  const [distributeOpen, setDistributeOpen] = useState(false);
+
+  const metrics = useMemo(() => ({
+    total: attributeCategories.reduce((s, c) => s + c.totalChanges, 0),
+    pending: attributeCategories.filter(c => c.severity === "CRITICAL" || c.severity === "HIGH").reduce((s, c) => s + c.totalChanges, 0),
+    approved: 1240,
+    rejected: 86,
+    preHitlScore: 82,
+  }), []);
+
+  const handleSample = useCallback((method: string, value: number) => {
+    toast.success(`Sampling complete: ${method === "percentage" ? `${value}% sampled` : method === "random" ? `${value} records sampled` : "Category-based sampling done"}`);
+  }, []);
 
   const filtered = useMemo(() => {
     return attributeCategories.filter(c => {
