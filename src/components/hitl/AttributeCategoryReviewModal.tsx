@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { ArrowLeft, ExternalLink, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { ArrowLeft, ExternalLink, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Pencil, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type AttributeCategory } from "@/data/attribute-category-data";
 import { toast } from "sonner";
