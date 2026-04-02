@@ -187,15 +187,6 @@ export default function HITLReviewScreen() {
         totalPending={metrics.pending}
       />
       </div>
-      )}
-
-      {activeTab === "attribute-category-wise" && (
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-3 pb-3">
-          <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
-            <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
