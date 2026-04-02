@@ -152,12 +152,14 @@ const generateRecords = (cat: AttributeCategory): CategoryRecord[] => {
 const PAGE_SIZE = 15;
 
 export default function AttributeCategoryReviewModal({ category, onClose }: Props) {
-  const [records] = useState(() => generateRecords(category));
+  const [records, setRecords] = useState(() => generateRecords(category));
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const [expandedRecordIds, setExpandedRecordIds] = useState<Set<string>>(new Set());
   const [activeSourceUrl, setActiveSourceUrl] = useState<string>("");
   const [activeSourceName, setActiveSourceName] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingCell, setEditingCell] = useState<{ recordId: string; changeIdx: number } | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const totalPages = Math.ceil(records.length / PAGE_SIZE);
   const paginatedRecords = useMemo(
