@@ -185,6 +185,27 @@ export default function AttributeCategoryReviewModal({ category, onClose }: Prop
     setActiveSourceName(src.name);
   };
 
+  const startEdit = useCallback((recordId: string, changeIdx: number, currentVal: string) => {
+    setEditingCell({ recordId, changeIdx });
+    setEditValue(currentVal);
+  }, []);
+
+  const saveEdit = useCallback(() => {
+    if (!editingCell) return;
+    setRecords(prev => prev.map(r => {
+      if (r.id !== editingCell.recordId) return r;
+      const newChanges = [...r.changes];
+      newChanges[editingCell.changeIdx] = { ...newChanges[editingCell.changeIdx], newValue: editValue };
+      return { ...r, changes: newChanges };
+    }));
+    toast.success("Value updated");
+    setEditingCell(null);
+  }, [editingCell, editValue]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingCell(null);
+  }, []);
+
   const handleSubmit = () => {
     toast.success(`${records.length} records submitted for ${category.name}`);
     onClose();
