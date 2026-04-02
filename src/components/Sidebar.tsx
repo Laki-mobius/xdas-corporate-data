@@ -82,8 +82,31 @@ export default function Sidebar({ collapsed, activeItem, onItemClick }: SidebarP
           label="HITL review"
           badge={{ value: 12, variant: 'brand' }}
           collapsed={collapsed}
+          active={activeItem === 'hitl' || activeItem === 'hitl-attribute'}
           onClick={() => onItemClick('hitl')}
         />
+        {!collapsed && (activeItem === 'hitl' || activeItem === 'hitl-attribute') && (
+          <div className="ml-7 flex flex-col">
+            <div
+              onClick={() => onItemClick('hitl')}
+              className={cn(
+                'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
+                activeItem === 'hitl' ? 'text-brand font-semibold' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Record Wise
+            </div>
+            <div
+              onClick={() => onItemClick('hitl-attribute')}
+              className={cn(
+                'text-[12px] py-1.5 px-2.5 rounded cursor-pointer transition-colors',
+                activeItem === 'hitl-attribute' ? 'text-brand font-semibold' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Attribute Category Wise
+            </div>
+          </div>
+        )}
       </div>
       <div className="p-2 pb-1.5 border-b border-border">
         <div className={cn('text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.07em] px-2.5 pb-[7px] whitespace-nowrap transition-opacity', collapsed && 'opacity-0 h-0 p-0')}>
