@@ -103,10 +103,20 @@ export default function HITLReviewScreen() {
   return (
     <div className="flex flex-col h-full -m-3 overflow-hidden">
       <div className="px-3 pt-3 pb-0">
-        <TabsList className="mb-2">
-          <TabsTrigger value="record-wise" onClick={() => setActiveTab("record-wise")}>Record Wise</TabsTrigger>
-          <TabsTrigger value="attribute-category-wise" onClick={() => setActiveTab("attribute-category-wise")}>Attribute Category Wise</TabsTrigger>
-        </TabsList>
+        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground mb-2">
+          <button
+            onClick={() => setActiveTab("record-wise")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${activeTab === "record-wise" ? "bg-background text-foreground shadow-sm" : ""}`}
+          >
+            Record Wise
+          </button>
+          <button
+            onClick={() => setActiveTab("attribute-category-wise")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${activeTab === "attribute-category-wise" ? "bg-background text-foreground shadow-sm" : ""}`}
+          >
+            Attribute Category Wise
+          </button>
+        </div>
       </div>
 
       {activeTab === "record-wise" && (
