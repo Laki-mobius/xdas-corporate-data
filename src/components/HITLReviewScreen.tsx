@@ -108,7 +108,7 @@ export default function HITLReviewScreen() {
           <TabsTrigger value="attribute-category-wise">Attribute Category Wise</TabsTrigger>
         </TabsList>
       </div>
-      <TabsContent value="record-wise" className="flex-1 flex flex-col overflow-hidden m-0">
+      <TabsContent value="record-wise" className="flex-1 flex flex-col overflow-hidden m-0 data-[state=active]:flex-1">
       {/* Top Metrics - collapse when reviewing */}
       {!reviewingRecord && (
         <div className="px-3 pt-3 pb-2">
