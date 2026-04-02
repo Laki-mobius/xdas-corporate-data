@@ -77,11 +77,7 @@ function DashboardContent() {
 
           {activeItem === 'jobs' && <JobStatusDashboard />}
           {activeItem === 'hitl' && <HITLReviewScreen />}
-          {activeItem === 'hitl-attribute' && (
-            <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
-              <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
-            </div>
-          )}
+          {activeItem === 'hitl-attribute' && <AttributeCategoryView />}
         </main>
       </div>
     </div>
