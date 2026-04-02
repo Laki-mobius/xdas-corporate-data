@@ -1,7 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { attributeCategories, attributeCategoryGroups, type AttributeCategory } from "@/data/attribute-category-data";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import QCSummaryCards from "./QCSummaryCards";
+import SamplingModal from "./SamplingModal";
+import DistributeModal from "./DistributeModal";
+import { toast } from "sonner";
 
 const severityColor: Record<string, string> = {
   CRITICAL: "text-red-500",
@@ -34,6 +38,20 @@ export default function AttributeCategoryView() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [severityFilter, setSeverityFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [samplingOpen, setSamplingOpen] = useState(false);
+  const [distributeOpen, setDistributeOpen] = useState(false);
+
+  const metrics = useMemo(() => ({
+    total: attributeCategories.reduce((s, c) => s + c.totalChanges, 0),
+    pending: attributeCategories.filter(c => c.severity === "CRITICAL" || c.severity === "HIGH").reduce((s, c) => s + c.totalChanges, 0),
+    approved: 1240,
+    rejected: 86,
+    preHitlScore: 82,
+  }), []);
+
+  const handleSample = useCallback((method: string, value: number) => {
+    toast.success(`Sampling complete: ${method === "percentage" ? `${value}% sampled` : method === "random" ? `${value} records sampled` : "Category-based sampling done"}`);
+  }, []);
 
   const filtered = useMemo(() => {
     return attributeCategories.filter(c => {
@@ -66,7 +84,19 @@ export default function AttributeCategoryView() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Filters row */}
+      {/* QC Summary Cards */}
+      <div className="mb-2.5">
+        <QCSummaryCards
+          totalRecords={metrics.total}
+          pendingReview={metrics.pending}
+          approvedToday={metrics.approved}
+          rejected={metrics.rejected}
+          preHitlScore={metrics.preHitlScore}
+          onSample={() => setSamplingOpen(true)}
+          onDistribute={() => setDistributeOpen(true)}
+        />
+      </div>
+
       <div className="flex items-center gap-2 mb-2.5">
         <select
           value={categoryFilter}
@@ -267,6 +297,18 @@ export default function AttributeCategoryView() {
           </div>
         </div>
       </div>
+      <SamplingModal
+        open={samplingOpen}
+        onClose={() => setSamplingOpen(false)}
+        onSample={handleSample}
+        totalRecords={metrics.total}
+      />
+      <DistributeModal
+        open={distributeOpen}
+        onClose={() => setDistributeOpen(false)}
+        onConfirm={() => toast.success("Records distributed to reviewers")}
+        totalPending={metrics.pending}
+      />
     </div>
   );
 }
