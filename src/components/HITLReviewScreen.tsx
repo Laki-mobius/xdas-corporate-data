@@ -7,7 +7,6 @@ import RecordDetailPanel from "./hitl/RecordDetailPanel";
 import RecordReviewView from "./hitl/RecordReviewView";
 import SamplingModal from "./hitl/SamplingModal";
 import DistributeModal from "./hitl/DistributeModal";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 export default function HITLReviewScreen() {
@@ -19,6 +18,7 @@ export default function HITLReviewScreen() {
   const [samplingOpen, setSamplingOpen] = useState(false);
   const [reviewingRecordId, setReviewingRecordId] = useState<string | null>(null);
   const [distributeOpen, setDistributeOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("record-wise");
 
   const filtered = useMemo(() => {
     return records.filter(r => {
@@ -101,14 +101,26 @@ export default function HITLReviewScreen() {
   }, []);
 
   return (
-    <Tabs defaultValue="record-wise" className="flex flex-col h-full -m-3 overflow-hidden">
+    <div className="flex flex-col h-full -m-3 overflow-hidden">
       <div className="px-3 pt-3 pb-0">
-        <TabsList className="mb-2">
-          <TabsTrigger value="record-wise">Record Wise</TabsTrigger>
-          <TabsTrigger value="attribute-category-wise">Attribute Category Wise</TabsTrigger>
-        </TabsList>
+        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground mb-2">
+          <button
+            onClick={() => setActiveTab("record-wise")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${activeTab === "record-wise" ? "bg-background text-foreground shadow-sm" : ""}`}
+          >
+            Record Wise
+          </button>
+          <button
+            onClick={() => setActiveTab("attribute-category-wise")}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${activeTab === "attribute-category-wise" ? "bg-background text-foreground shadow-sm" : ""}`}
+          >
+            Attribute Category Wise
+          </button>
+        </div>
       </div>
-      <TabsContent value="record-wise" className="flex-1 flex flex-col overflow-hidden mt-0 min-h-0">
+
+      {activeTab === "record-wise" && (
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
       {/* Top Metrics - collapse when reviewing */}
       {!reviewingRecord && (
         <div className="px-3 pt-3 pb-2">
@@ -192,12 +204,16 @@ export default function HITLReviewScreen() {
         onConfirm={() => toast.success("Records distributed to reviewers")}
         totalPending={metrics.pending}
       />
-      </TabsContent>
-      <TabsContent value="attribute-category-wise" className="flex-1 flex flex-col overflow-hidden m-0 px-3 pb-3">
-        <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
-          <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
+      </div>
+      )}
+
+      {activeTab === "attribute-category-wise" && (
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-3 pb-3">
+          <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
+            <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
+          </div>
         </div>
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   );
 }
