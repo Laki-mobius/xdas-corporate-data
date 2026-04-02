@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import QCSummaryCards from "./QCSummaryCards";
 import SamplingModal from "./SamplingModal";
 import DistributeModal from "./DistributeModal";
+import AttributeCategoryReviewModal from "./AttributeCategoryReviewModal";
 import { toast } from "sonner";
 
 const severityColor: Record<string, string> = {
