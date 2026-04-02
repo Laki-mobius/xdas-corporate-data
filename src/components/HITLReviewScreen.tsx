@@ -195,12 +195,16 @@ export default function HITLReviewScreen() {
         onConfirm={() => toast.success("Records distributed to reviewers")}
         totalPending={metrics.pending}
       />
-      </TabsContent>
-      <TabsContent value="attribute-category-wise" className="flex-1 flex flex-col overflow-hidden m-0 px-3 pb-3">
-        <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
-          <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
+      </div>
+      )}
+
+      {activeTab === "attribute-category-wise" && (
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 px-3 pb-3">
+          <div className="bg-card border border-border rounded-lg flex items-center justify-center h-full">
+            <p className="text-sm text-muted-foreground">Attribute Category Wise view — specifications coming soon.</p>
+          </div>
         </div>
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   );
 }
