@@ -49,8 +49,14 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
         <button className="h-[30px] px-3.5 rounded-md border-none bg-brand text-primary-foreground text-[12px] font-semibold cursor-pointer hover:bg-brand-dark transition-colors">
           Export
         </button>
+        <button
+          onClick={signOut}
+          className="h-[30px] px-3.5 rounded-md border border-border bg-card text-foreground text-[12px] font-medium cursor-pointer hover:bg-muted transition-colors"
+        >
+          Sign Out
+        </button>
         <div className="w-[30px] h-[30px] rounded-full bg-brand-light flex items-center justify-center text-[11px] font-bold text-brand cursor-pointer">
-          LN
+          {userInitials}
         </div>
       </div>
     </header>
