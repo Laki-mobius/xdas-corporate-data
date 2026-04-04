@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
@@ -741,7 +741,19 @@ export default function JobStatusDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
-  const [adhocJobs, setAdhocJobs] = useState<Job[]>([]);
+  const [adhocJobs, setAdhocJobs] = useState<Job[]>(() => {
+    try {
+      const stored = localStorage.getItem('adhocJobs');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+
+  // Persist ad-hoc jobs to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('adhocJobs', JSON.stringify(adhocJobs));
+    } catch { /* ignore quota errors */ }
+  }, [adhocJobs]);
 
   const allJobs = useMemo(() => [...adhocJobs, ...jobsData], [adhocJobs]);
 
