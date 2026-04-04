@@ -853,21 +853,11 @@ export default function JobStatusDashboard() {
 
     // Call edge function for real extraction
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-
-      // Get the DB id for this job
-      let currentDbId: string | undefined;
-      setDbIdMap(prev => {
-        currentDbId = prev[job.id];
-        return prev;
-      });
-
       const response = await supabase.functions.invoke('extract-data', {
         body: {
           companies,
           attributes,
-          jobDbId: currentDbId,
+          jobDbId: dbIdResult,
         },
       });
 
