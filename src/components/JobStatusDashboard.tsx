@@ -387,36 +387,9 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       ? fileColumns.join(', ')
       : 'entity identifiers';
 
-    // Generate simulated extracted output data
-    const outputColumns = inputMode === 'file' && fileColumns.length > 0
-      ? ['Company Name', ...fileColumns]
-      : undefined;
-    const outputRows = inputMode === 'file' && fileCsvRows.length > 0
-      ? fileCsvRows.map(row => {
-          const companyName = row[0] || '';
-          // For each attribute column, generate a simulated extracted value
-          const extractedValues = fileColumns.map((col) => {
-            const colLower = col.toLowerCase();
-            if (colLower.includes('phone')) return `+1-${Math.floor(200 + Math.random() * 800)}-${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`;
-            if (colLower.includes('email')) return `info@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
-            if (colLower.includes('website') || colLower.includes('url')) return `https://www.${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
-            if (colLower.includes('address')) return `${Math.floor(100 + Math.random() * 9900)} Business Ave, Suite ${Math.floor(100 + Math.random() * 900)}`;
-            if (colLower.includes('revenue')) return `$${(Math.random() * 500 + 10).toFixed(1)}M`;
-            if (colLower.includes('employee') || colLower.includes('headcount')) return `${Math.floor(50 + Math.random() * 10000)}`;
-            if (colLower.includes('industry') || colLower.includes('sector')) return ['Technology', 'Financial Services', 'Healthcare', 'Manufacturing', 'Energy', 'Consumer Goods'][Math.floor(Math.random() * 6)];
-            if (colLower.includes('country') || colLower.includes('jurisdiction')) return ['United States', 'United Kingdom', 'Germany', 'Japan', 'Canada', 'Australia'][Math.floor(Math.random() * 6)];
-            if (colLower.includes('ceo') || colLower.includes('director') || colLower.includes('officer')) return ['John Smith', 'Sarah Johnson', 'Michael Chen', 'Emily Davis', 'Robert Wilson'][Math.floor(Math.random() * 5)];
-            if (colLower.includes('lei')) return `${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(1000000000000000 + Math.random() * 9000000000000000)}`;
-            if (colLower.includes('ticker') || colLower.includes('symbol')) return companyName.substring(0, 4).toUpperCase();
-            if (colLower.includes('status')) return ['Active', 'Active', 'Active', 'Dormant'][Math.floor(Math.random() * 4)];
-            if (colLower.includes('date') || colLower.includes('founded') || colLower.includes('incorporated')) return `${1980 + Math.floor(Math.random() * 40)}-${String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')}-${String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')}`;
-            // Generic fallback: return any existing value from input or generate placeholder
-            const existingVal = row[fileColumns.indexOf(col) + 1];
-            return existingVal || `Extracted_${col.replace(/\s/g, '_')}`;
-          });
-          return [companyName, ...extractedValues];
-        })
-      : undefined;
+    // Store companies and attributes for AI extraction (will be populated after edge function call)
+    const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : [];
+    const attributesForExtraction = inputMode === 'file' ? [...fileColumns] : [];
 
     const newJob: Job = {
       id: nextId,
@@ -434,9 +407,11 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       ],
       runtime: '0h 00m 00s',
       errorRate: '0.00%',
-      _csvColumns: outputColumns,
-      _csvRows: outputRows,
-    } as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
+      _csvColumns: undefined,
+      _csvRows: undefined,
+      _companiesForExtraction: companiesForExtraction,
+      _attributesForExtraction: attributesForExtraction,
+    } as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
     onSubmit(newJob);
     // reset
     setJobName('');
@@ -818,8 +793,8 @@ export default function JobStatusDashboard() {
 
   const allJobs = useMemo(() => [...adhocJobs, ...jobsData], [adhocJobs]);
 
-  const saveJobToDb = useCallback(async (job: Job & { _csvColumns?: string[]; _csvRows?: string[][] }, dbId?: string) => {
-    if (!session?.user?.id) return;
+  const saveJobToDb = useCallback(async (job: Job & { _csvColumns?: string[]; _csvRows?: string[][] }, dbId?: string): Promise<string | undefined> => {
+    if (!session?.user?.id) return undefined;
     const payload = {
       user_id: session.user.id,
       job_id: job.id,
@@ -837,77 +812,114 @@ export default function JobStatusDashboard() {
     };
     if (dbId) {
       await supabase.from('jobs').update(payload).eq('id', dbId);
+      return dbId;
     } else {
       const { data } = await supabase.from('jobs').insert(payload).select('id').single();
       if (data) {
         setDbIdMap(prev => ({ ...prev, [job.id]: data.id }));
+        return data.id;
       }
     }
+    return undefined;
   }, [session?.user?.id]);
 
-  const handleNewJob = useCallback((job: Job) => {
-    const extJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
+  const handleNewJob = useCallback(async (job: Job) => {
+    const extJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
+    const companies = extJob._companiesForExtraction || [];
+    const attributes = extJob._attributesForExtraction || [];
     setAdhocJobs(prev => [extJob, ...prev]);
-    saveJobToDb(extJob);
+    
+    // Save initial job to DB and get DB id
+    const dbIdResult = await saveJobToDb(extJob);
 
+    // Start progress animation
     const startTime = Date.now();
-    const totalDuration = 8000;
-    const interval = setInterval(() => {
+    const progressInterval = setInterval(() => {
       const elapsed = Date.now() - startTime;
-      const pct = Math.min(Math.round((elapsed / totalDuration) * 100), 100);
-      
-      if (pct < 100) {
-        setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
+      const seconds = Math.floor(elapsed / 1000);
+      setAdhocJobs(prev => prev.map(j => j.id === job.id && j.status === 'Running' ? {
+        ...j,
+        progress: Math.min(90, Math.round((elapsed / 60000) * 90)),
+        flowSteps: [
+          { label: 'Source', state: 'complete' as const },
+          { label: 'Extract', state: seconds < 5 ? 'active' as const : 'complete' as const },
+          { label: 'Transform', state: seconds >= 5 && seconds < 15 ? 'active' as const : seconds >= 15 ? 'complete' as const : 'pending' as const },
+          { label: 'Validate', state: seconds >= 15 && seconds < 25 ? 'active' as const : seconds >= 25 ? 'complete' as const : 'pending' as const },
+          { label: 'Load', state: seconds >= 25 ? 'active' as const : 'pending' as const },
+        ],
+        runtime: `0h ${String(Math.floor(seconds / 60)).padStart(2, '0')}m ${String(seconds % 60).padStart(2, '0')}s`,
+      } : j));
+    }, 1000);
+
+    // Call edge function for real extraction
+    try {
+      const response = await supabase.functions.invoke('extract-data', {
+        body: {
+          companies,
+          attributes,
+          jobDbId: dbIdResult,
+        },
+      });
+
+      clearInterval(progressInterval);
+
+      if (response.error) throw new Error(response.error.message || 'Extraction failed');
+
+      const { columns, rows } = response.data;
+      const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const elapsed = Date.now() - startTime;
+      const seconds = Math.floor(elapsed / 1000);
+
+      setAdhocJobs(prev => {
+        const updated = prev.map(j => j.id === job.id ? {
           ...j,
-          progress: pct,
-          status: 'Running' as JobStatus,
+          progress: 100,
+          status: 'Completed' as JobStatus,
           flowSteps: [
             { label: 'Source', state: 'complete' as const },
-            { label: 'Extract', state: pct < 30 ? 'active' as const : 'complete' as const },
-            { label: 'Transform', state: pct >= 30 && pct < 60 ? 'active' as const : pct >= 60 ? 'complete' as const : 'pending' as const },
-            { label: 'Validate', state: pct >= 60 && pct < 85 ? 'active' as const : pct >= 85 ? 'complete' as const : 'pending' as const },
-            { label: 'Load', state: pct >= 85 ? 'active' as const : 'pending' as const },
+            { label: 'Extract', state: 'complete' as const },
+            { label: 'Transform', state: 'complete' as const },
+            { label: 'Validate', state: 'complete' as const },
+            { label: 'Load', state: 'complete' as const },
           ],
-          runtime: `0h 00m ${String(Math.floor(elapsed / 1000)).padStart(2, '0')}s`,
-        } : j));
-      } else {
-        clearInterval(interval);
-        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
-        setAdhocJobs(prev => {
-          const updated = prev.map(j => j.id === job.id ? {
-            ...j,
-            progress: 100,
-            status: 'Completed' as JobStatus,
-            flowSteps: [
-              { label: 'Source', state: 'complete' as const },
-              { label: 'Extract', state: 'complete' as const },
-              { label: 'Transform', state: 'complete' as const },
-              { label: 'Validate', state: 'complete' as const },
-              { label: 'Load', state: 'complete' as const },
-            ],
-            runtime: `0h 00m ${String(Math.round(totalDuration / 1000)).padStart(2, '0')}s`,
-            errorRate: '0.00%',
-            logs: [
-              ...j.logs,
-              { time: now, level: 'INFO' as const, message: `Extracted ${j.records} records successfully.` },
-              { time: now, level: 'SUCCESS' as const, message: 'All attributes extracted. Job completed.' },
-            ],
-          } : j);
-          // Persist completed state to Supabase
-          const completedJob = updated.find(j => j.id === job.id);
-          if (completedJob) {
-            setDbIdMap(prev => {
-              const dbIdVal = prev[job.id];
-              if (dbIdVal) {
-                saveJobToDb(completedJob as any, dbIdVal);
-              }
-              return prev;
-            });
-          }
-          return updated;
-        });
-      }
-    }, 500);
+          runtime: `0h ${String(Math.floor(seconds / 60)).padStart(2, '0')}m ${String(seconds % 60).padStart(2, '0')}s`,
+          errorRate: '0.00%',
+          _csvColumns: columns,
+          _csvRows: rows,
+          logs: [
+            ...j.logs,
+            { time: nowTime, level: 'INFO' as const, message: `Extracted ${j.records} records successfully.` },
+            { time: nowTime, level: 'SUCCESS' as const, message: 'All attributes extracted. Job completed.' },
+          ],
+        } : j);
+        // Persist completed state
+        const completedJob = updated.find(j => j.id === job.id);
+        if (completedJob) {
+          setDbIdMap(prev => {
+            const dbIdVal = prev[job.id];
+            if (dbIdVal) saveJobToDb(completedJob as any, dbIdVal);
+            return prev;
+          });
+        }
+        return updated;
+      });
+    } catch (err) {
+      clearInterval(progressInterval);
+      const nowTime = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const elapsed = Date.now() - startTime;
+      const seconds = Math.floor(elapsed / 1000);
+      console.error('Extraction error:', err);
+      setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
+        ...j,
+        progress: 100,
+        status: 'Failed' as JobStatus,
+        runtime: `0h ${String(Math.floor(seconds / 60)).padStart(2, '0')}m ${String(seconds % 60).padStart(2, '0')}s`,
+        logs: [
+          ...j.logs,
+          { time: nowTime, level: 'ERROR' as const, message: `Extraction failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
+        ],
+      } : j));
+    }
   }, [saveJobToDb]);
 
   const filtered = useMemo(() => {
