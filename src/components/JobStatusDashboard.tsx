@@ -1,5 +1,7 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
@@ -773,49 +775,83 @@ function ScheduleModal({ open, onOpenChange }: {
 
 /* ── Main component ── */
 export default function JobStatusDashboard() {
+  const { session } = useAuth();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
-  const [adhocJobs, setAdhocJobs] = useState<Job[]>(() => {
-    try {
-      const stored = localStorage.getItem('adhocJobs');
-      return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
-  });
+  const [adhocJobs, setAdhocJobs] = useState<Job[]>([]);
+  const [dbIdMap, setDbIdMap] = useState<Record<string, string>>({});
 
-  // Persist ad-hoc jobs to localStorage whenever they change
+  // Load jobs from Supabase on mount
   useEffect(() => {
-    try {
-      localStorage.setItem('adhocJobs', JSON.stringify(adhocJobs));
-    } catch { /* ignore quota errors */ }
-  }, [adhocJobs]);
+    if (!session?.user?.id) return;
+    const loadJobs = async () => {
+      const { data } = await supabase
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (data) {
+        const mapped: Job[] = data.map((row: any) => ({
+          id: row.job_id,
+          name: row.name,
+          status: row.status as JobStatus,
+          records: row.records,
+          progress: row.progress,
+          group: 'extraction' as const,
+          tier: row.tier,
+          flowSteps: row.flow_steps as FlowStep[],
+          logs: row.logs as any[],
+          runtime: row.runtime,
+          errorRate: row.error_rate,
+          _csvColumns: row.csv_columns,
+          _csvRows: row.csv_rows,
+        }));
+        setAdhocJobs(mapped);
+        const idMap: Record<string, string> = {};
+        data.forEach((row: any) => { idMap[row.job_id] = row.id; });
+        setDbIdMap(idMap);
+      }
+    };
+    loadJobs();
+  }, [session?.user?.id]);
 
   const allJobs = useMemo(() => [...adhocJobs, ...jobsData], [adhocJobs]);
 
-  const filtered = useMemo(() => {
-    return allJobs.filter(j => {
-      const matchSearch = search === '' ||
-        j.id.toLowerCase().includes(search.toLowerCase()) ||
-        j.name.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = statusFilter === 'all' || j.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [search, statusFilter, allJobs]);
+  const saveJobToDb = useCallback(async (job: Job & { _csvColumns?: string[]; _csvRows?: string[][] }, dbId?: string) => {
+    if (!session?.user?.id) return;
+    const payload = {
+      user_id: session.user.id,
+      job_id: job.id,
+      name: job.name,
+      status: job.status,
+      records: job.records,
+      progress: job.progress,
+      tier: job.tier,
+      runtime: job.runtime,
+      error_rate: job.errorRate,
+      flow_steps: job.flowSteps as any,
+      logs: job.logs as any,
+      csv_columns: job._csvColumns || null,
+      csv_rows: job._csvRows || null,
+    };
+    if (dbId) {
+      await supabase.from('jobs').update(payload).eq('id', dbId);
+    } else {
+      const { data } = await supabase.from('jobs').insert(payload).select('id').single();
+      if (data) {
+        setDbIdMap(prev => ({ ...prev, [job.id]: data.id }));
+      }
+    }
+  }, [session?.user?.id]);
 
-  const extractionJobs = filtered.filter(j => j.group === 'extraction');
-  const aggregatorJobs = filtered.filter(j => j.group === 'aggregators');
-  const specializedJobs = filtered.filter(j => j.group === 'specialized');
-  const processingJobs = filtered.filter(j => j.group === 'processing');
+  const handleNewJob = useCallback((job: Job) => {
+    const extJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
+    setAdhocJobs(prev => [extJob, ...prev]);
+    saveJobToDb(extJob);
 
-  const toggleExpand = (id: string) => setExpandedId(prev => prev === id ? null : id);
-
-  const handleNewJob = (job: Job) => {
-    setAdhocJobs(prev => [job, ...prev]);
-
-    // Simulate extraction: progress updates then completion
     const startTime = Date.now();
-    const totalDuration = 8000; // 8 seconds simulation
+    const totalDuration = 8000;
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const pct = Math.min(Math.round((elapsed / totalDuration) * 100), 100);
@@ -837,28 +873,59 @@ export default function JobStatusDashboard() {
       } else {
         clearInterval(interval);
         const now = new Date().toLocaleTimeString('en-US', { hour12: false });
-        setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
-          ...j,
-          progress: 100,
-          status: 'Completed' as JobStatus,
-          flowSteps: [
-            { label: 'Source', state: 'complete' as const },
-            { label: 'Extract', state: 'complete' as const },
-            { label: 'Transform', state: 'complete' as const },
-            { label: 'Validate', state: 'complete' as const },
-            { label: 'Load', state: 'complete' as const },
-          ],
-          runtime: `0h 00m ${String(Math.round(totalDuration / 1000)).padStart(2, '0')}s`,
-          errorRate: '0.00%',
-          logs: [
-            ...j.logs,
-            { time: now, level: 'INFO' as const, message: `Extracted ${j.records} records successfully.` },
-            { time: now, level: 'SUCCESS' as const, message: 'All attributes extracted. Job completed.' },
-          ],
-        } : j));
+        setAdhocJobs(prev => {
+          const updated = prev.map(j => j.id === job.id ? {
+            ...j,
+            progress: 100,
+            status: 'Completed' as JobStatus,
+            flowSteps: [
+              { label: 'Source', state: 'complete' as const },
+              { label: 'Extract', state: 'complete' as const },
+              { label: 'Transform', state: 'complete' as const },
+              { label: 'Validate', state: 'complete' as const },
+              { label: 'Load', state: 'complete' as const },
+            ],
+            runtime: `0h 00m ${String(Math.round(totalDuration / 1000)).padStart(2, '0')}s`,
+            errorRate: '0.00%',
+            logs: [
+              ...j.logs,
+              { time: now, level: 'INFO' as const, message: `Extracted ${j.records} records successfully.` },
+              { time: now, level: 'SUCCESS' as const, message: 'All attributes extracted. Job completed.' },
+            ],
+          } : j);
+          // Persist completed state to Supabase
+          const completedJob = updated.find(j => j.id === job.id);
+          if (completedJob) {
+            setDbIdMap(prev => {
+              const dbIdVal = prev[job.id];
+              if (dbIdVal) {
+                saveJobToDb(completedJob as any, dbIdVal);
+              }
+              return prev;
+            });
+          }
+          return updated;
+        });
       }
     }, 500);
-  };
+  }, [saveJobToDb]);
+
+  const filtered = useMemo(() => {
+    return allJobs.filter(j => {
+      const matchSearch = search === '' ||
+        j.id.toLowerCase().includes(search.toLowerCase()) ||
+        j.name.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === 'all' || j.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [search, statusFilter, allJobs]);
+
+  const extractionJobs = filtered.filter(j => j.group === 'extraction');
+  const aggregatorJobs = filtered.filter(j => j.group === 'aggregators');
+  const specializedJobs = filtered.filter(j => j.group === 'specialized');
+  const processingJobs = filtered.filter(j => j.group === 'processing');
+
+  const toggleExpand = (id: string) => setExpandedId(prev => prev === id ? null : id);
 
   const statChips = [
     { label: 'Total Jobs Today', value: summaryStats.totalToday.toLocaleString(), icon: Clock, color: 'text-foreground', sub: 'All automation workflows' },
