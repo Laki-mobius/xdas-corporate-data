@@ -315,6 +315,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const [manualInput, setManualInput] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileEntities, setFileEntities] = useState<string[]>([]);
+  const [fileColumns, setFileColumns] = useState<string[]>([]);
+  const [fileCsvRows, setFileCsvRows] = useState<string[][]>([]);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -331,34 +333,50 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
-      const lines = text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-      setFileEntities(lines);
+      const rows = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
+      if (rows.length === 0) return;
+      // First row is header
+      const headers = rows[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      setFileColumns(headers);
+      const dataRows = rows.slice(1).filter(r => r.split(',').some(c => c.trim()));
+      setFileEntities(dataRows.map(r => r.split(',')[0]?.trim() || ''));
+      setFileCsvRows(dataRows.map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, ''))));
     };
     reader.readAsText(file);
   };
 
   const handleSubmit = () => {
     const nextId = `JOB-${9000 + Math.floor(Math.random() * 999)}`;
-    const pendingFlow: FlowStep[] = [
-      { label: 'Source', state: 'pending' },
-      { label: 'Extract', state: 'pending' },
+    const runningFlow: FlowStep[] = [
+      { label: 'Source', state: 'complete' },
+      { label: 'Extract', state: 'active' },
       { label: 'Transform', state: 'pending' },
       { label: 'Validate', state: 'pending' },
       { label: 'Load', state: 'pending' },
     ];
+    const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
+    const attrList = inputMode === 'file' && fileColumns.length > 0
+      ? fileColumns.join(', ')
+      : 'entity identifiers';
     const newJob: Job = {
       id: nextId,
       name: jobName,
-      status: 'Pending',
-      records: 0,
-      progress: 0,
+      status: 'Running',
+      records: entityCount,
+      progress: 10,
       group: 'extraction',
       tier: `Tier ${tier}`,
-      flowSteps: pendingFlow,
-      logs: [{ time: new Date().toLocaleTimeString('en-US', { hour12: false }), level: 'INFO', message: `Ad-hoc job queued. ${entityCount} entities targeted.` }],
-      runtime: '—',
-      errorRate: '—',
-    };
+      flowSteps: runningFlow,
+      logs: [
+        { time: now(), level: 'INFO', message: `Job initialized. ${entityCount} entities targeted.` },
+        { time: now(), level: 'INFO', message: `Extracting attributes: ${attrList}` },
+        { time: now(), level: 'SUCCESS', message: 'Connection established. Extraction started.' },
+      ],
+      runtime: '0h 00m 00s',
+      errorRate: '0.00%',
+      _csvColumns: inputMode === 'file' ? fileColumns : undefined,
+      _csvRows: inputMode === 'file' ? fileCsvRows : undefined,
+    } as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
     onSubmit(newJob);
     // reset
     setJobName('');
@@ -366,6 +384,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     setManualInput('');
     setFileName(null);
     setFileEntities([]);
+    setFileColumns([]);
+    setFileCsvRows([]);
     setInputMode('text');
     onOpenChange(false);
   };
