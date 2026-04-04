@@ -211,7 +211,29 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                         </div>
                       </TableCell>
                       <TableCell className="text-right py-1.5">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          disabled={job.status !== 'Completed'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const anyJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
+                            if (anyJob._csvColumns && anyJob._csvRows) {
+                              const csvContent = [
+                                anyJob._csvColumns.join(','),
+                                ...anyJob._csvRows.map(row => row.join(','))
+                              ].join('\n');
+                              const blob = new Blob([csvContent], { type: 'text/csv' });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `${job.id}_output.csv`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            }
+                          }}
+                        >
                           <Download className="w-3.5 h-3.5" />
                         </Button>
                       </TableCell>
