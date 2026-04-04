@@ -384,6 +384,38 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     const attrList = inputMode === 'file' && fileColumns.length > 0
       ? fileColumns.join(', ')
       : 'entity identifiers';
+
+    // Generate simulated extracted output data
+    const outputColumns = inputMode === 'file' && fileColumns.length > 0
+      ? ['Company Name', ...fileColumns]
+      : undefined;
+    const outputRows = inputMode === 'file' && fileCsvRows.length > 0
+      ? fileCsvRows.map(row => {
+          const companyName = row[0] || '';
+          // For each attribute column, generate a simulated extracted value
+          const extractedValues = fileColumns.map((col) => {
+            const colLower = col.toLowerCase();
+            if (colLower.includes('phone')) return `+1-${Math.floor(200 + Math.random() * 800)}-${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`;
+            if (colLower.includes('email')) return `info@${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+            if (colLower.includes('website') || colLower.includes('url')) return `https://www.${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+            if (colLower.includes('address')) return `${Math.floor(100 + Math.random() * 9900)} Business Ave, Suite ${Math.floor(100 + Math.random() * 900)}`;
+            if (colLower.includes('revenue')) return `$${(Math.random() * 500 + 10).toFixed(1)}M`;
+            if (colLower.includes('employee') || colLower.includes('headcount')) return `${Math.floor(50 + Math.random() * 10000)}`;
+            if (colLower.includes('industry') || colLower.includes('sector')) return ['Technology', 'Financial Services', 'Healthcare', 'Manufacturing', 'Energy', 'Consumer Goods'][Math.floor(Math.random() * 6)];
+            if (colLower.includes('country') || colLower.includes('jurisdiction')) return ['United States', 'United Kingdom', 'Germany', 'Japan', 'Canada', 'Australia'][Math.floor(Math.random() * 6)];
+            if (colLower.includes('ceo') || colLower.includes('director') || colLower.includes('officer')) return ['John Smith', 'Sarah Johnson', 'Michael Chen', 'Emily Davis', 'Robert Wilson'][Math.floor(Math.random() * 5)];
+            if (colLower.includes('lei')) return `${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(1000000000000000 + Math.random() * 9000000000000000)}`;
+            if (colLower.includes('ticker') || colLower.includes('symbol')) return companyName.substring(0, 4).toUpperCase();
+            if (colLower.includes('status')) return ['Active', 'Active', 'Active', 'Dormant'][Math.floor(Math.random() * 4)];
+            if (colLower.includes('date') || colLower.includes('founded') || colLower.includes('incorporated')) return `${1980 + Math.floor(Math.random() * 40)}-${String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')}-${String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')}`;
+            // Generic fallback: return any existing value from input or generate placeholder
+            const existingVal = row[fileColumns.indexOf(col) + 1];
+            return existingVal || `Extracted_${col.replace(/\s/g, '_')}`;
+          });
+          return [companyName, ...extractedValues];
+        })
+      : undefined;
+
     const newJob: Job = {
       id: nextId,
       name: jobName,
@@ -400,8 +432,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       ],
       runtime: '0h 00m 00s',
       errorRate: '0.00%',
-      _csvColumns: inputMode === 'file' ? fileColumns : undefined,
-      _csvRows: inputMode === 'file' ? fileCsvRows : undefined,
+      _csvColumns: outputColumns,
+      _csvRows: outputRows,
     } as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
     onSubmit(newJob);
     // reset
