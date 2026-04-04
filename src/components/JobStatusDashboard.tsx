@@ -518,11 +518,11 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
                   onChange={handleFile}
                 />
                 {fileName ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-[12px] font-medium text-foreground">{fileName}</span>
-                    <span className="text-[11px] text-muted-foreground">({fileEntities.length} entities)</span>
-                    <Button
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-[12px] font-medium text-foreground">{fileName}</span>
+                      <Button
                       variant="ghost"
                       size="icon"
                       className="h-5 w-5"
