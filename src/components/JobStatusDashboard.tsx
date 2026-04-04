@@ -735,6 +735,52 @@ export default function JobStatusDashboard() {
 
   const handleNewJob = (job: Job) => {
     setAdhocJobs(prev => [job, ...prev]);
+
+    // Simulate extraction: progress updates then completion
+    const startTime = Date.now();
+    const totalDuration = 8000; // 8 seconds simulation
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(Math.round((elapsed / totalDuration) * 100), 100);
+      
+      if (pct < 100) {
+        setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
+          ...j,
+          progress: pct,
+          status: 'Running' as JobStatus,
+          flowSteps: [
+            { label: 'Source', state: 'complete' as const },
+            { label: 'Extract', state: pct < 30 ? 'active' as const : 'complete' as const },
+            { label: 'Transform', state: pct >= 30 && pct < 60 ? 'active' as const : pct >= 60 ? 'complete' as const : 'pending' as const },
+            { label: 'Validate', state: pct >= 60 && pct < 85 ? 'active' as const : pct >= 85 ? 'complete' as const : 'pending' as const },
+            { label: 'Load', state: pct >= 85 ? 'active' as const : 'pending' as const },
+          ],
+          runtime: `0h 00m ${String(Math.floor(elapsed / 1000)).padStart(2, '0')}s`,
+        } : j));
+      } else {
+        clearInterval(interval);
+        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+        setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
+          ...j,
+          progress: 100,
+          status: 'Completed' as JobStatus,
+          flowSteps: [
+            { label: 'Source', state: 'complete' as const },
+            { label: 'Extract', state: 'complete' as const },
+            { label: 'Transform', state: 'complete' as const },
+            { label: 'Validate', state: 'complete' as const },
+            { label: 'Load', state: 'complete' as const },
+          ],
+          runtime: `0h 00m ${String(Math.round(totalDuration / 1000)).padStart(2, '0')}s`,
+          errorRate: '0.00%',
+          logs: [
+            ...j.logs,
+            { time: now, level: 'INFO' as const, message: `Extracted ${j.records} records successfully.` },
+            { time: now, level: 'SUCCESS' as const, message: 'All attributes extracted. Job completed.' },
+          ],
+        } : j));
+      }
+    }, 500);
   };
 
   const statChips = [
