@@ -7,6 +7,8 @@ interface HeaderProps {
 
 export default function Header({ onToggleSidebar }: HeaderProps) {
   const { dark, toggleTheme } = useTheme();
+  const { signOut, session } = useAuth();
+  const userInitials = session?.user?.email?.substring(0, 2).toUpperCase() || 'U';
 
   return (
     <header className="h-[54px] bg-card border-b border-border flex items-center shrink-0 z-[60]">
