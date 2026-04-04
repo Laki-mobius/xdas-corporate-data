@@ -407,9 +407,11 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       ],
       runtime: '0h 00m 00s',
       errorRate: '0.00%',
-      _csvColumns: outputColumns,
-      _csvRows: outputRows,
-    } as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
+      _csvColumns: undefined,
+      _csvRows: undefined,
+      _companiesForExtraction: companiesForExtraction,
+      _attributesForExtraction: attributesForExtraction,
+    } as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
     onSubmit(newJob);
     // reset
     setJobName('');
