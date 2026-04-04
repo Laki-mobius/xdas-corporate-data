@@ -357,11 +357,15 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       const text = ev.target?.result as string;
       const rows = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
       if (rows.length === 0) return;
-      // First row is header
+      // First row is header: Column A = Company Name, rest = attributes
       const headers = rows[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-      setFileColumns(headers);
+      // Store only attribute columns (exclude Column A which is entity identifier)
+      const attributeColumns = headers.slice(1);
+      setFileColumns(attributeColumns);
       const dataRows = rows.slice(1).filter(r => r.split(',').some(c => c.trim()));
-      setFileEntities(dataRows.map(r => r.split(',')[0]?.trim() || ''));
+      // Column A values are entity identifiers (company names)
+      setFileEntities(dataRows.map(r => r.split(',')[0]?.trim().replace(/^"|"$/g, '') || ''));
+      // Store full rows for output generation
       setFileCsvRows(dataRows.map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, ''))));
     };
     reader.readAsText(file);
