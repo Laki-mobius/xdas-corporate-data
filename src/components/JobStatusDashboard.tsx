@@ -1,5 +1,7 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
