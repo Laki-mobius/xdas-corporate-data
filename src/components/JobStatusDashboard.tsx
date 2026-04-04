@@ -211,7 +211,29 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                         </div>
                       </TableCell>
                       <TableCell className="text-right py-1.5">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          disabled={job.status !== 'Completed'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const anyJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
+                            if (anyJob._csvColumns && anyJob._csvRows) {
+                              const csvContent = [
+                                anyJob._csvColumns.join(','),
+                                ...anyJob._csvRows.map(row => row.join(','))
+                              ].join('\n');
+                              const blob = new Blob([csvContent], { type: 'text/csv' });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `${job.id}_output.csv`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            }
+                          }}
+                        >
                           <Download className="w-3.5 h-3.5" />
                         </Button>
                       </TableCell>
@@ -315,6 +337,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const [manualInput, setManualInput] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileEntities, setFileEntities] = useState<string[]>([]);
+  const [fileColumns, setFileColumns] = useState<string[]>([]);
+  const [fileCsvRows, setFileCsvRows] = useState<string[][]>([]);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -331,34 +355,50 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
-      const lines = text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-      setFileEntities(lines);
+      const rows = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
+      if (rows.length === 0) return;
+      // First row is header
+      const headers = rows[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      setFileColumns(headers);
+      const dataRows = rows.slice(1).filter(r => r.split(',').some(c => c.trim()));
+      setFileEntities(dataRows.map(r => r.split(',')[0]?.trim() || ''));
+      setFileCsvRows(dataRows.map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, ''))));
     };
     reader.readAsText(file);
   };
 
   const handleSubmit = () => {
     const nextId = `JOB-${9000 + Math.floor(Math.random() * 999)}`;
-    const pendingFlow: FlowStep[] = [
-      { label: 'Source', state: 'pending' },
-      { label: 'Extract', state: 'pending' },
+    const runningFlow: FlowStep[] = [
+      { label: 'Source', state: 'complete' },
+      { label: 'Extract', state: 'active' },
       { label: 'Transform', state: 'pending' },
       { label: 'Validate', state: 'pending' },
       { label: 'Load', state: 'pending' },
     ];
+    const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
+    const attrList = inputMode === 'file' && fileColumns.length > 0
+      ? fileColumns.join(', ')
+      : 'entity identifiers';
     const newJob: Job = {
       id: nextId,
       name: jobName,
-      status: 'Pending',
-      records: 0,
-      progress: 0,
+      status: 'Running',
+      records: entityCount,
+      progress: 10,
       group: 'extraction',
       tier: `Tier ${tier}`,
-      flowSteps: pendingFlow,
-      logs: [{ time: new Date().toLocaleTimeString('en-US', { hour12: false }), level: 'INFO', message: `Ad-hoc job queued. ${entityCount} entities targeted.` }],
-      runtime: '—',
-      errorRate: '—',
-    };
+      flowSteps: runningFlow,
+      logs: [
+        { time: now(), level: 'INFO', message: `Job initialized. ${entityCount} entities targeted.` },
+        { time: now(), level: 'INFO', message: `Extracting attributes: ${attrList}` },
+        { time: now(), level: 'SUCCESS', message: 'Connection established. Extraction started.' },
+      ],
+      runtime: '0h 00m 00s',
+      errorRate: '0.00%',
+      _csvColumns: inputMode === 'file' ? fileColumns : undefined,
+      _csvRows: inputMode === 'file' ? fileCsvRows : undefined,
+    } as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
     onSubmit(newJob);
     // reset
     setJobName('');
@@ -366,6 +406,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     setManualInput('');
     setFileName(null);
     setFileEntities([]);
+    setFileColumns([]);
+    setFileCsvRows([]);
     setInputMode('text');
     onOpenChange(false);
   };
@@ -476,18 +518,25 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
                   onChange={handleFile}
                 />
                 {fileName ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-[12px] font-medium text-foreground">{fileName}</span>
-                    <span className="text-[11px] text-muted-foreground">({fileEntities.length} entities)</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => { setFileName(null); setFileEntities([]); }}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-[12px] font-medium text-foreground">{fileName}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => { setFileName(null); setFileEntities([]); setFileColumns([]); setFileCsvRows([]); }}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 text-[11px]">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{fileEntities.length} entities detected</span>
+                      {fileColumns.length > 0 && (
+                        <span className="text-muted-foreground">• {fileColumns.length} attributes: {fileColumns.join(', ')}</span>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div>
@@ -715,6 +764,52 @@ export default function JobStatusDashboard() {
 
   const handleNewJob = (job: Job) => {
     setAdhocJobs(prev => [job, ...prev]);
+
+    // Simulate extraction: progress updates then completion
+    const startTime = Date.now();
+    const totalDuration = 8000; // 8 seconds simulation
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(Math.round((elapsed / totalDuration) * 100), 100);
+      
+      if (pct < 100) {
+        setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
+          ...j,
+          progress: pct,
+          status: 'Running' as JobStatus,
+          flowSteps: [
+            { label: 'Source', state: 'complete' as const },
+            { label: 'Extract', state: pct < 30 ? 'active' as const : 'complete' as const },
+            { label: 'Transform', state: pct >= 30 && pct < 60 ? 'active' as const : pct >= 60 ? 'complete' as const : 'pending' as const },
+            { label: 'Validate', state: pct >= 60 && pct < 85 ? 'active' as const : pct >= 85 ? 'complete' as const : 'pending' as const },
+            { label: 'Load', state: pct >= 85 ? 'active' as const : 'pending' as const },
+          ],
+          runtime: `0h 00m ${String(Math.floor(elapsed / 1000)).padStart(2, '0')}s`,
+        } : j));
+      } else {
+        clearInterval(interval);
+        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+        setAdhocJobs(prev => prev.map(j => j.id === job.id ? {
+          ...j,
+          progress: 100,
+          status: 'Completed' as JobStatus,
+          flowSteps: [
+            { label: 'Source', state: 'complete' as const },
+            { label: 'Extract', state: 'complete' as const },
+            { label: 'Transform', state: 'complete' as const },
+            { label: 'Validate', state: 'complete' as const },
+            { label: 'Load', state: 'complete' as const },
+          ],
+          runtime: `0h 00m ${String(Math.round(totalDuration / 1000)).padStart(2, '0')}s`,
+          errorRate: '0.00%',
+          logs: [
+            ...j.logs,
+            { time: now, level: 'INFO' as const, message: `Extracted ${j.records} records successfully.` },
+            { time: now, level: 'SUCCESS' as const, message: 'All attributes extracted. Job completed.' },
+          ],
+        } : j));
+      }
+    }, 500);
   };
 
   const statChips = [
