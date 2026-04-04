@@ -523,13 +523,20 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
                       <FileText className="w-4 h-4 text-muted-foreground" />
                       <span className="text-[12px] font-medium text-foreground">{fileName}</span>
                       <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => { setFileName(null); setFileEntities([]); }}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => { setFileName(null); setFileEntities([]); setFileColumns([]); setFileCsvRows([]); }}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 text-[11px]">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{fileEntities.length} entities detected</span>
+                      {fileColumns.length > 0 && (
+                        <span className="text-muted-foreground">• {fileColumns.length} attributes: {fileColumns.join(', ')}</span>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div>
