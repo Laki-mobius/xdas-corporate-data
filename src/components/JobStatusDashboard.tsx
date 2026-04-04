@@ -910,6 +910,23 @@ export default function JobStatusDashboard() {
     }, 500);
   }, [saveJobToDb]);
 
+  const filtered = useMemo(() => {
+    return allJobs.filter(j => {
+      const matchSearch = search === '' ||
+        j.id.toLowerCase().includes(search.toLowerCase()) ||
+        j.name.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = statusFilter === 'all' || j.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [search, statusFilter, allJobs]);
+
+  const extractionJobs = filtered.filter(j => j.group === 'extraction');
+  const aggregatorJobs = filtered.filter(j => j.group === 'aggregators');
+  const specializedJobs = filtered.filter(j => j.group === 'specialized');
+  const processingJobs = filtered.filter(j => j.group === 'processing');
+
+  const toggleExpand = (id: string) => setExpandedId(prev => prev === id ? null : id);
+
   const statChips = [
     { label: 'Total Jobs Today', value: summaryStats.totalToday.toLocaleString(), icon: Clock, color: 'text-foreground', sub: 'All automation workflows' },
     { label: 'Running', value: summaryStats.running.toString(), icon: Activity, color: 'text-blue-600 dark:text-blue-400', sub: 'Currently in progress' },
