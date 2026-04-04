@@ -749,7 +749,7 @@ export default function JobStatusDashboard() {
   });
 
   // Persist ad-hoc jobs to localStorage whenever they change
-  React.useEffect(() => {
+  useEffect(() => {
     try {
       localStorage.setItem('adhocJobs', JSON.stringify(adhocJobs));
     } catch { /* ignore quota errors */ }
