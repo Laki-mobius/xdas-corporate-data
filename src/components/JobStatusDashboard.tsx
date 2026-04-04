@@ -793,8 +793,8 @@ export default function JobStatusDashboard() {
 
   const allJobs = useMemo(() => [...adhocJobs, ...jobsData], [adhocJobs]);
 
-  const saveJobToDb = useCallback(async (job: Job & { _csvColumns?: string[]; _csvRows?: string[][] }, dbId?: string) => {
-    if (!session?.user?.id) return;
+  const saveJobToDb = useCallback(async (job: Job & { _csvColumns?: string[]; _csvRows?: string[][] }, dbId?: string): Promise<string | undefined> => {
+    if (!session?.user?.id) return undefined;
     const payload = {
       user_id: session.user.id,
       job_id: job.id,
@@ -812,12 +812,15 @@ export default function JobStatusDashboard() {
     };
     if (dbId) {
       await supabase.from('jobs').update(payload).eq('id', dbId);
+      return dbId;
     } else {
       const { data } = await supabase.from('jobs').insert(payload).select('id').single();
       if (data) {
         setDbIdMap(prev => ({ ...prev, [job.id]: data.id }));
+        return data.id;
       }
     }
+    return undefined;
   }, [session?.user?.id]);
 
   const handleNewJob = useCallback(async (job: Job) => {
