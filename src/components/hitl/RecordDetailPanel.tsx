@@ -73,7 +73,7 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
                   {attr.name}
                 </span>
                 <span className={`text-[12px] font-medium shrink-0 ${getConfidenceColor(attr.status)}`}>
-                  {getConfidencePct(attr.status)}
+                  {getConfidencePct(attr)}
                 </span>
                 <button
                   onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "validated", qcFlag: false })}
