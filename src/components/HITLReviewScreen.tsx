@@ -34,7 +34,7 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
 
       // Compute a pseudo confidence score based on how many attrs have values
       const filledCount = attributes.filter(a => a.extractedValue && a.extractedValue !== "N/A" && a.extractedValue !== "").length;
-      const confidence = attributes.length > 0 ? Math.round((filledCount / attributes.length) * 100) : 0;
+      const confidence = attributes.length > 0 ? Math.round(70 + (filledCount / attributes.length) * 25) : 0;
 
       records.push({
         id: `${job.job_id}-R${String(rowIdx + 1).padStart(3, "0")}`,
