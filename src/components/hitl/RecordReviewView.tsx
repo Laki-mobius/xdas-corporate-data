@@ -19,19 +19,35 @@ const getConfidenceColor = (status: string) => {
   }
 };
 
-const getConfidencePct = (status: string) => {
-  switch (status) {
+const getConfidencePct = (attr: { status: string; currentValue: string; extractedValue: string }) => {
+  switch (attr.status) {
     case "validated": return "95%";
-    case "edited": return "77%";
+    case "edited": return "88%";
     case "flagged": return "50%";
-    default: return "52%";
+    default: {
+      // For pending: if value is filled and non-trivial, show higher confidence
+      const val = attr.currentValue || attr.extractedValue || "";
+      if (val && val !== "N/A" && val !== "" && val.length > 1) return "85%";
+      return "52%";
+    }
   }
 };
 
 export default function RecordReviewView({ record, onClose, onUpdateAttribute, onApprove, onReject }: RecordReviewViewProps) {
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [activeSourceUrl, setActiveSourceUrl] = useState<string>(record.sources[0]?.url || "");
+  const getInitialSourceUrl = () => {
+    const url = record.sources[0]?.url;
+    if (url && url !== "#") return url;
+    // Try to find a real URL from attribute sourceRefs
+    for (const attr of record.attributes) {
+      for (const ref of attr.sourceRefs) {
+        if (ref.url && ref.url !== "#") return ref.url;
+      }
+    }
+    return "";
+  };
+  const [activeSourceUrl, setActiveSourceUrl] = useState<string>(getInitialSourceUrl());
 
   const startEdit = (idx: number, val: string) => {
     setEditingIdx(idx);

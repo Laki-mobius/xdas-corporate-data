@@ -20,12 +20,16 @@ const getConfidenceColor = (status: string) => {
   }
 };
 
-const getConfidencePct = (status: string) => {
-  switch (status) {
+const getConfidencePct = (attr: { status: string; currentValue: string; extractedValue: string }) => {
+  switch (attr.status) {
     case "validated": return "95%";
-    case "edited": return "77%";
+    case "edited": return "88%";
     case "flagged": return "50%";
-    default: return "52%";
+    default: {
+      const val = attr.currentValue || attr.extractedValue || "";
+      if (val && val !== "N/A" && val !== "" && val.length > 1) return "85%";
+      return "52%";
+    }
   }
 };
 
