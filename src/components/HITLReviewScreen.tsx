@@ -1,5 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { sampleRecords, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import QCSummaryCards from "./hitl/QCSummaryCards";
 import ValidationQueueTable from "./hitl/ValidationQueueTable";
 import BulkActionToolbar from "./hitl/BulkActionToolbar";
@@ -9,7 +11,60 @@ import SamplingModal from "./hitl/SamplingModal";
 import DistributeModal from "./hitl/DistributeModal";
 import { toast } from "sonner";
 
+function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
+  const records: ValidationRecord[] = [];
+  for (const job of jobs) {
+    const columns: string[] = job.csv_columns || [];
+    const rows: string[][] = job.csv_rows || [];
+    if (columns.length === 0 || rows.length === 0) continue;
+
+    // columns[0] is "Company" (entity identifier), rest are attributes
+    const attrNames = columns.slice(1);
+
+    rows.forEach((row: string[], rowIdx: number) => {
+      const companyName = row[0] || `Entity ${rowIdx + 1}`;
+      const attributes: ValidationAttribute[] = attrNames.map((attr, i) => ({
+        name: attr,
+        extractedValue: row[i + 1] || "",
+        currentValue: row[i + 1] || "",
+        status: "pending" as const,
+        qcFlag: false,
+        sourceRefs: [{ name: "AI Extraction", url: "#" }],
+      }));
+
+      // Compute a pseudo confidence score based on how many attrs have values
+      const filledCount = attributes.filter(a => a.extractedValue && a.extractedValue !== "N/A" && a.extractedValue !== "").length;
+      const confidence = attributes.length > 0 ? Math.round((filledCount / attributes.length) * 100) : 0;
+
+      records.push({
+        id: `${job.job_id}-R${String(rowIdx + 1).padStart(3, "0")}`,
+        companyName,
+        attributeType: "Extracted",
+        status: "pending",
+        completionPct: 0,
+        confidenceScore: confidence,
+        sourceList: [job.name || "Job Extraction"],
+        lastUpdated: new Date(job.updated_at || job.created_at).toLocaleString("en-US", {
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", hour12: false,
+        }),
+        existingValue: "",
+        suggestedValue: attributes[0]?.extractedValue || "",
+        attributes,
+        sources: [{
+          url: "#",
+          type: "API" as const,
+          snippet: `Extracted via job ${job.job_id}`,
+          highlightedText: companyName,
+        }],
+      });
+    });
+  }
+  return records;
+}
+
 export default function HITLReviewScreen() {
+  const { session } = useAuth();
   const [records, setRecords] = useState<ValidationRecord[]>(sampleRecords);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
@@ -18,7 +73,26 @@ export default function HITLReviewScreen() {
   const [samplingOpen, setSamplingOpen] = useState(false);
   const [reviewingRecordId, setReviewingRecordId] = useState<string | null>(null);
   const [distributeOpen, setDistributeOpen] = useState(false);
-  
+
+  // Load completed jobs from Supabase and convert to validation records
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const loadCompletedJobs = async () => {
+      const { data } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("status", "Completed")
+        .order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        const jobRecords = convertJobsToValidationRecords(data);
+        if (jobRecords.length > 0) {
+          // Merge: job records first, then sample records as fallback
+          setRecords([...jobRecords, ...sampleRecords]);
+        }
+      }
+    };
+    loadCompletedJobs();
+  }, [session?.user?.id]);
 
   const filtered = useMemo(() => {
     return records.filter(r => {
