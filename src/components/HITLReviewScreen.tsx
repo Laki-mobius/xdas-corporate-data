@@ -29,7 +29,7 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
         currentValue: row[i + 1] || "",
         status: "pending" as const,
         qcFlag: false,
-        sourceRefs: [{ name: "AI Extraction", url: "#" }],
+        sourceRefs: [{ name: "Company Website", url: `https://www.${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.com` }],
       }));
 
       // Compute a pseudo confidence score based on how many attrs have values
