@@ -197,10 +197,12 @@ export default function HITLReviewScreen() {
         <div className="flex-1 px-3 pb-3 overflow-hidden min-h-0">
           <RecordReviewView
             record={reviewingRecord}
+            records={filtered}
             onClose={handleCloseReview}
             onUpdateAttribute={updateAttribute}
             onApprove={approveRecord}
             onReject={rejectRecord}
+            onNavigate={(id) => setReviewingRecordId(id)}
           />
         </div>
       ) : (
