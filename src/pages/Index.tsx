@@ -29,7 +29,7 @@ function DashboardContent() {
               <div className="grid grid-cols-4 gap-2.5 mb-3">
                 <KpiCard
                   label="Total records"
-                  value="98.7M"
+                  value="130M"
                   delta="1.2M"
                   subtitle="All segments combined"
                   icon={<svg viewBox="0 0 20 20" fill="none" className="w-[18px] h-[18px]"><ellipse cx="10" cy="6" rx="7" ry="2.5" stroke="currentColor" strokeWidth="1.4" /><path d="M3 6v4c0 1.4 3.1 2.5 7 2.5S17 11.4 17 10V6" stroke="currentColor" strokeWidth="1.4" /><path d="M3 10v4c0 1.4 3.1 2.5 7 2.5S17 15.4 17 14v-4" stroke="currentColor" strokeWidth="1.4" /></svg>}
