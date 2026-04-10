@@ -57,7 +57,7 @@ export default function RecordReviewView({
 }: RecordReviewViewProps) {
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ basic_data: true, financial_data: true, corporate_hierarchy: true });
   const [sectionFilters, setSectionFilters] = useState<Record<string, ConfidenceFilter>>({});
   const [showGlobalFilter, setShowGlobalFilter] = useState(false);
 
