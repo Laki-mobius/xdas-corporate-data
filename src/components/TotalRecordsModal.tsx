@@ -2,18 +2,18 @@ import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
 import { Building2, Building, Network, GitBranch, Landmark } from 'lucide-react';
 
 const companyTypes = [
-  { type: 'Public Companies', count: '60K', sub: '0.05% of total', icon: Building2, iconColor: 'text-muted-foreground' },
-  { type: 'Private Companies', count: '119M', sub: '91.5% of total', icon: Building, iconColor: 'text-muted-foreground' },
-  { type: 'Parent Companies', count: '6.2M', sub: '4.8% of total', icon: Network, iconColor: 'text-muted-foreground' },
-  { type: 'Subsidiaries', count: '4.0M', sub: '3.1% of total', icon: GitBranch, iconColor: 'text-muted-foreground' },
-  { type: 'Government / State-Owned', count: '0.8M', sub: '0.6% of total', icon: Landmark, iconColor: 'text-muted-foreground' },
+  { type: 'Public Companies', count: '43K', sub: '0.03% of total', icon: Building2, iconColor: 'text-muted-foreground' },
+  { type: 'Private Companies', count: '129.5M', sub: '99.6% of total', icon: Building, iconColor: 'text-muted-foreground' },
+  { type: 'Parent Companies', count: '210K', sub: '0.16% of total', icon: Network, iconColor: 'text-muted-foreground' },
+  { type: 'Subsidiaries', count: '148K', sub: '0.11% of total', icon: GitBranch, iconColor: 'text-muted-foreground' },
+  { type: 'Government / State-Owned', count: '99K', sub: '0.08% of total', icon: Landmark, iconColor: 'text-muted-foreground' },
 ];
 
 const tierSegments = [
-  { label: 'Tier 1', name: 'US', value: '28,100', flex: 2, color: '#185FA5' },
-  { label: 'Tier 2', name: 'Non-US', value: '17,200', flex: 1.2, color: '#1A7A4A' },
-  { label: 'Tier 3', name: 'US', value: '54.8M', flex: 5.5, color: '#C97A00' },
-  { label: 'Tier 4', name: 'Non-US', value: '35.4M', flex: 3.5, color: '#534AB7' },
+  { label: 'Tier 1', name: 'US', value: '24,800', flex: 1.8, color: '#185FA5' },
+  { label: 'Tier 2', name: 'Non-US', value: '18,200', flex: 1.2, color: '#1A7A4A' },
+  { label: 'Tier 3', name: 'US', value: '72.5M', flex: 5.6, color: '#C97A00' },
+  { label: 'Tier 4', name: 'Non-US', value: '57.5M', flex: 4.4, color: '#534AB7' },
 ] as const;
 
 const publicCompanyFlex = tierSegments[0].flex + tierSegments[1].flex;
@@ -22,20 +22,20 @@ const totalTierFlex = publicCompanyFlex + privateCompanyFlex;
 const privateCompanyStart = (publicCompanyFlex / totalTierFlex) * 100;
 
 const geographyBars = [
-  { region: 'US', count: 31, label: '31M' },
-  { region: 'Canada', count: 12, label: '12M' },
-  { region: 'UK', count: 7, label: '7M' },
-  { region: 'China', count: 8, label: '8M' },
-  { region: 'India', count: 5, label: '5M' },
-  { region: 'Germany', count: 5, label: '5M' },
-  { region: 'Japan', count: 3, label: '3M' },
-  { region: 'France', count: 3, label: '3M' },
-  { region: 'SE Asia', count: 3, label: '3M' },
-  { region: 'Latin Am.', count: 7, label: '7M' },
-  { region: 'Rest of World', count: 5, label: '5M' },
+  { region: 'US', count: 42, label: '42M' },
+  { region: 'Canada', count: 9, label: '9M' },
+  { region: 'UK', count: 8, label: '8M' },
+  { region: 'China', count: 14, label: '14M' },
+  { region: 'India', count: 12, label: '12M' },
+  { region: 'Germany', count: 7, label: '7M' },
+  { region: 'Japan', count: 6, label: '6M' },
+  { region: 'France', count: 5, label: '5M' },
+  { region: 'SE Asia', count: 9, label: '9M' },
+  { region: 'Latin Am.', count: 10, label: '10M' },
+  { region: 'Rest of World', count: 8, label: '8M' },
 ];
 
-const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
+const yTicks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   return (
@@ -117,7 +117,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                       <div
                         key={t}
                         className="absolute w-full border-t border-border/50"
-                        style={{ bottom: `${(t / 35) * 100}%` }}
+                        style={{ bottom: `${(t / 45) * 100}%` }}
                       />
                     ))}
                   </div>
@@ -130,7 +130,7 @@ export default function TotalRecordsModal({ onClose, inline = false }: { onClose
                         <div
                           className="w-full max-w-[36px] rounded-full shadow-sm"
                           style={{
-                            height: `${(g.count / 35) * 100}%`,
+                            height: `${(g.count / 45) * 100}%`,
                             minHeight: 8,
                             background: barGradient,
                           }}
