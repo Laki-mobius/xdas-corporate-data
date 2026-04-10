@@ -1,5 +1,5 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
-import { categorizeAttributes } from "@/data/workflow-attributes";
+import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ExternalLink, Edit3, CheckCircle2, AlertTriangle, Settings, MoreVertical, X, Filter } from "lucide-react";
 import { useState, useMemo } from "react";
 
@@ -35,6 +35,11 @@ const getConfidenceColor = (score: number) => {
 
 type ConfidenceFilter = "all" | "high" | "medium" | "low";
 
+type DisplayAttribute = {
+  name: string;
+  attr: ValidationAttribute | null;
+};
+
 const confidenceFilterOptions: { value: ConfidenceFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "high", label: "High (90%+)" },
@@ -50,6 +55,22 @@ const filterByConfidence = (attrs: ValidationAttribute[], filter: ConfidenceFilt
     if (filter === "medium") return s >= 51 && s <= 80;
     return s <= 50;
   });
+};
+
+const filterDisplayByConfidence = (attrs: DisplayAttribute[], filter: ConfidenceFilter) => {
+  if (filter === "all") return attrs;
+  return attrs.filter(({ attr }) => {
+    if (!attr) return false;
+    const s = getConfidenceScore(attr);
+    if (filter === "high") return s >= 90;
+    if (filter === "medium") return s >= 51 && s <= 80;
+    return s <= 50;
+  });
+};
+
+const getCategoryLabel = (categoryId: string, fallbackLabel: string) => {
+  if (categoryId === "corporate_hierarchy") return "Corporate Hierarchy Data";
+  return fallbackLabel;
 };
 
 export default function RecordReviewView({
@@ -74,6 +95,27 @@ export default function RecordReviewView({
   const [activeSourceUrl, setActiveSourceUrl] = useState<string>(getInitialSourceUrl());
 
   const categorized = useMemo(() => categorizeAttributes(record.attributes), [record.attributes]);
+
+  const profileSections = useMemo(() => {
+    return profileCategories.map((category) => {
+      const matchedAttrs = (categorized.find(section => section.category.id === category.id)?.attrs as ValidationAttribute[] | undefined) ?? [];
+      const matchedByName = new Map(matchedAttrs.map(attr => [attr.name, attr] as const));
+
+      const orderedAttrs: DisplayAttribute[] = category.attributes.map((name) => ({
+        name,
+        attr: matchedByName.get(name) ?? null,
+      }));
+
+      const extraAttrs: DisplayAttribute[] = matchedAttrs
+        .filter(attr => !category.attributes.includes(attr.name))
+        .map(attr => ({ name: attr.name, attr }));
+
+      return {
+        category,
+        attrs: [...orderedAttrs, ...extraAttrs],
+      };
+    });
+  }, [categorized]);
 
   // Navigation
   const currentIdx = records ? records.findIndex(r => r.id === record.id) : -1;
@@ -195,11 +237,10 @@ export default function RecordReviewView({
 
           {/* Sections */}
           <div className="flex-1 overflow-auto px-3 py-2 space-y-2">
-            {categorized.map(({ category, attrs }) => {
+            {profileSections.map(({ category, attrs }) => {
               const isExpanded = expandedSections[category.id] ?? false;
               const currentFilter = getSectionFilter(category.id);
-              const filteredAttrs = filterByConfidence(attrs as ValidationAttribute[], currentFilter);
-              const filterLabel = confidenceFilterOptions.find(o => o.value === currentFilter)?.label || "All";
+              const filteredAttrs = filterDisplayByConfidence(attrs, currentFilter);
 
               return (
                 <div key={category.id} className="border border-border rounded-lg bg-card overflow-hidden">
@@ -214,7 +255,7 @@ export default function RecordReviewView({
                       ) : (
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       )}
-                      <span className="text-[13px] font-semibold text-status-amber">{category.label}</span>
+                      <span className="text-[13px] font-semibold text-status-amber">{getCategoryLabel(category.id, category.label)}</span>
                     </div>
 
                     {/* Per-section confidence filter */}
@@ -249,41 +290,48 @@ export default function RecordReviewView({
                       {filteredAttrs.length === 0 ? (
                         <p className="text-[11px] text-muted-foreground py-2 text-center italic">No attributes match the selected filter</p>
                       ) : (
-                        <div className="grid grid-cols-3 gap-3">
-                          {filteredAttrs.map((rawAttr) => {
-                            const typedAttr = rawAttr as ValidationAttribute;
-                            const globalIdx = record.attributes.findIndex(a => a.name === typedAttr.name);
-                            const confidence = getConfidenceScore(typedAttr);
+                          <div className="grid grid-cols-3 gap-3">
+                          {filteredAttrs.map(({ name, attr: typedAttr }) => {
+                            const globalIdx = typedAttr ? record.attributes.findIndex(a => a.name === typedAttr.name) : -1;
+                            const confidence = typedAttr ? getConfidenceScore(typedAttr) : null;
 
                             return (
-                              <div key={typedAttr.name} className="flex flex-col">
+                              <div key={name} className="flex flex-col">
                                 {/* Attribute header: name + confidence + actions */}
                                 <div className="flex items-center gap-1 mb-1">
-                                  <span className="text-[11px] text-foreground truncate flex-1" title={typedAttr.name}>
-                                    {typedAttr.name}
+                                  <span className="text-[11px] text-foreground truncate flex-1" title={name}>
+                                    {name}
                                   </span>
-                                  <span className={`text-[11px] font-semibold shrink-0 ${getConfidenceColor(confidence)}`}>
-                                    {confidence}%
-                                  </span>
-                                  <button
-                                    onClick={() => onUpdateAttribute(record.id, globalIdx, { ...typedAttr, status: "validated", qcFlag: false })}
-                                    className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
-                                    title="Validate"
-                                  >
-                                    <Settings className="w-3 h-3 text-muted-foreground" />
-                                  </button>
-                                  <button
-                                    onClick={() => startEdit(globalIdx, typedAttr.currentValue)}
-                                    className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
-                                    title="More options"
-                                  >
-                                    <MoreVertical className="w-3 h-3 text-muted-foreground" />
-                                  </button>
+                                  {confidence !== null ? (
+                                    <span className={`text-[11px] font-semibold shrink-0 ${getConfidenceColor(confidence)}`}>
+                                      {confidence}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-[11px] font-semibold shrink-0 text-muted-foreground">—</span>
+                                  )}
+                                  {typedAttr && globalIdx >= 0 && (
+                                    <>
+                                      <button
+                                        onClick={() => onUpdateAttribute(record.id, globalIdx, { ...typedAttr, status: "validated", qcFlag: false })}
+                                        className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
+                                        title="Validate"
+                                      >
+                                        <Settings className="w-3 h-3 text-muted-foreground" />
+                                      </button>
+                                      <button
+                                        onClick={() => startEdit(globalIdx, typedAttr.currentValue || typedAttr.extractedValue)}
+                                        className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
+                                        title="More options"
+                                      >
+                                        <MoreVertical className="w-3 h-3 text-muted-foreground" />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
 
                                 {/* Value box */}
                                 <div className="border border-border rounded px-2.5 py-1.5 bg-background min-h-[30px] flex items-center">
-                                  {editingIdx === globalIdx ? (
+                                  {typedAttr && editingIdx === globalIdx ? (
                                     <div className="flex items-center gap-1 flex-1">
                                       <input
                                         value={editValue}
@@ -295,28 +343,32 @@ export default function RecordReviewView({
                                       <button onClick={() => saveEdit(globalIdx)} className="text-[10px] text-brand font-semibold">Save</button>
                                     </div>
                                   ) : (
-                                    <span className="text-[12px] text-foreground truncate" title={typedAttr.currentValue}>
-                                      {typedAttr.currentValue || <span className="text-muted-foreground">N/A</span>}
+                                    <span className="text-[12px] text-foreground truncate" title={typedAttr?.currentValue || typedAttr?.extractedValue || "N/A"}>
+                                      {typedAttr?.currentValue || typedAttr?.extractedValue || <span className="text-muted-foreground">N/A</span>}
                                     </span>
                                   )}
                                 </div>
 
                                 {/* Source links */}
                                 <div className="flex flex-wrap gap-2 mt-1">
-                                  {typedAttr.sourceRefs.map((src, si) => (
-                                    <button
-                                      key={si}
-                                      onClick={() => src.url && src.url !== "#" && setActiveSourceUrl(src.url)}
-                                      className={`text-[10px] transition-colors ${
-                                        activeSourceUrl === src.url
-                                          ? "text-status-blue font-semibold"
-                                          : "text-muted-foreground hover:text-status-blue cursor-pointer"
-                                      }`}
-                                      title={`View source: ${src.name}`}
-                                    >
-                                      {src.name}
-                                    </button>
-                                  ))}
+                                  {typedAttr?.sourceRefs.length ? (
+                                    typedAttr.sourceRefs.map((src, si) => (
+                                      <button
+                                        key={si}
+                                        onClick={() => src.url && src.url !== "#" && setActiveSourceUrl(src.url)}
+                                        className={`text-[10px] transition-colors ${
+                                          activeSourceUrl === src.url
+                                            ? "text-status-blue font-semibold"
+                                            : "text-muted-foreground hover:text-status-blue cursor-pointer"
+                                        }`}
+                                        title={`View source: ${src.name}`}
+                                      >
+                                        {src.name}
+                                      </button>
+                                    ))
+                                  ) : (
+                                    <span className="text-[10px] text-muted-foreground">No source available</span>
+                                  )}
                                 </div>
                               </div>
                             );
