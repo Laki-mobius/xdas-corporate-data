@@ -183,9 +183,15 @@ export const sampleRecords: ValidationRecord[] = [
     suggestedValue: "Pacific Holdings LLC",
     attributes: [
       { name: "Company Name", extractedValue: "Pacific Holdings LLC", currentValue: "Pacific Holdings LLC", status: "flagged", qcFlag: true, sourceRefs: [{ name: "U.S. SOS", url: "https://sos.ca.gov/business/pacific-holdings" }, { name: "D&B", url: "https://dnb.com/company/pacific-holdings" }] },
-      { name: "Industry", extractedValue: "Real Estate", currentValue: "Real Estate", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/pacific-holdings" }, { name: "Bloomberg", url: "https://bloomberg.com/profile/pacific" }] },
+      { name: "Industry / Sector", extractedValue: "Real Estate", currentValue: "Real Estate", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/pacific-holdings" }, { name: "Bloomberg", url: "https://bloomberg.com/profile/pacific" }] },
+      { name: "City", extractedValue: "Los Angeles", currentValue: "Los Angeles", status: "edited", qcFlag: false, sourceRefs: [{ name: "Company Website", url: "https://pacificholdings.com/about" }] },
+      { name: "State", extractedValue: "CA", currentValue: "CA", status: "edited", qcFlag: false, sourceRefs: [{ name: "Company Website", url: "https://pacificholdings.com/about" }] },
+      { name: "Country", extractedValue: "United States", currentValue: "United States", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/pacific-holdings" }] },
       { name: "Revenue", extractedValue: "$320M", currentValue: "$320M", status: "flagged", qcFlag: true, sourceRefs: [{ name: "FactSet", url: "https://factset.com/company/pacific-holdings" }, { name: "SEC EDGAR", url: "https://sec.gov/pacific-holdings" }] },
-      { name: "HQ Location", extractedValue: "Los Angeles, CA", currentValue: "Los Angeles, CA", status: "edited", qcFlag: false, sourceRefs: [{ name: "Company Website", url: "https://pacificholdings.com/about" }] },
+      { name: "Net Income", extractedValue: "$28M", currentValue: "$28M", status: "pending", qcFlag: false, sourceRefs: [{ name: "FactSet", url: "https://factset.com/company/pacific-holdings" }] },
+      { name: "Total Assets", extractedValue: "$2.1B", currentValue: "$2.1B", status: "pending", qcFlag: false, sourceRefs: [{ name: "FactSet", url: "https://factset.com/company/pacific-holdings" }] },
+      { name: "Ultimate Parent", extractedValue: "Pacific Group International", currentValue: "Pacific Group International", status: "flagged", qcFlag: true, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/pacific-holdings" }] },
+      { name: "Subsidiary Name", extractedValue: "Pacific Realty Inc", currentValue: "Pacific Realty Inc", status: "pending", qcFlag: false, sourceRefs: [{ name: "U.S. SOS", url: "https://sos.ca.gov/business/pacific-holdings" }] },
     ],
     sources: [
       { url: "https://factset.com/company/pacific-holdings", type: "Database", snippet: "Pacific Holdings LLC | Revenue: $320M (est.) | Sector: Real Estate…", highlightedText: "Revenue: $320M" },
