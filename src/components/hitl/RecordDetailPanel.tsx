@@ -20,15 +20,15 @@ const getConfidenceColor = (status: string) => {
   }
 };
 
-const getConfidencePct = (attr: { status: string; currentValue: string; extractedValue: string }) => {
+const getConfidenceNum = (attr: { status: string; currentValue: string; extractedValue: string }): number => {
   switch (attr.status) {
-    case "validated": return "96%";
-    case "edited": return "98%";
-    case "flagged": return "50%";
+    case "validated": return 96;
+    case "edited": return 98;
+    case "flagged": return 50;
     default: {
       const val = attr.currentValue || attr.extractedValue || "";
-      if (val && val !== "N/A" && val !== "" && val.length > 1) return "85%";
-      return "52%";
+      if (val && val !== "N/A" && val !== "" && val.length > 1) return 85;
+      return 52;
     }
   }
 };
@@ -61,11 +61,14 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
         </button>
       </div>
 
-      {/* Attributes Grid */}
+      {/* Attributes Grid - only show low-confidence (<85%) */}
       <div className="flex-1 overflow-auto px-3 py-2">
-        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Attributes</p>
+        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Low Confidence Attributes (&lt;85%)</p>
         <div className="grid grid-cols-3 gap-2">
-          {record.attributes.map((attr, idx) => (
+          {record.attributes.map((attr, idx) => {
+            const confidence = getConfidenceNum(attr);
+            if (confidence >= 85) return null;
+            return (
             <div key={attr.name} className="flex flex-col">
               {/* Attribute header row */}
               <div className="flex items-center gap-1 mb-1">
@@ -73,7 +76,7 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
                   {attr.name}
                 </span>
                 <span className={`text-[12px] font-medium shrink-0 ${getConfidenceColor(attr.status)}`}>
-                  {getConfidencePct(attr)}
+                  {confidence}%
                 </span>
                 <button
                   onClick={() => onUpdateAttribute(record.id, idx, { ...attr, status: "validated", qcFlag: false })}
@@ -106,7 +109,8 @@ export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, 
                 )}
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
 

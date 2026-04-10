@@ -184,12 +184,11 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
             <Table className="table-fixed w-full">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[10%] text-[11px] py-1.5 h-8">Job ID</TableHead>
-                  <TableHead className="w-[28%] text-[11px] py-1.5 h-8">Workflow Name</TableHead>
-                  <TableHead className="w-[10%] text-[11px] py-1.5 h-8">Tier</TableHead>
-                  <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Status</TableHead>
-                  <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Records</TableHead>
-                  <TableHead className="w-[20%] text-[11px] py-1.5 h-8">Progress</TableHead>
+                  <TableHead className="w-[12%] text-[11px] py-1.5 h-8">Job ID</TableHead>
+                  <TableHead className="w-[30%] text-[11px] py-1.5 h-8">Workflow Name</TableHead>
+                  <TableHead className="w-[14%] text-[11px] py-1.5 h-8">Status</TableHead>
+                  <TableHead className="w-[14%] text-[11px] py-1.5 h-8">Records</TableHead>
+                  <TableHead className="w-[22%] text-[11px] py-1.5 h-8">Progress</TableHead>
                   <TableHead className="w-[8%] text-right text-[11px] py-1.5 h-8">Download</TableHead>
                 </TableRow>
               </TableHeader>
@@ -203,7 +202,6 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                     >
                       <TableCell className="font-mono text-[11px] text-muted-foreground py-1.5">{job.id}</TableCell>
                       <TableCell className="text-[12px] font-normal py-1.5">{job.name}</TableCell>
-                      <TableCell className="text-[11px] text-muted-foreground py-1.5">{job.tier}</TableCell>
                       <TableCell className="py-1.5"><StatusBadge status={job.status} /></TableCell>
                       <TableCell className="text-[12px] tabular-nums py-1.5">{job.records > 0 ? formatNumber(job.records) : '—'}</TableCell>
                       <TableCell className="py-1.5">
@@ -242,7 +240,7 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                     </TableRow>
                     {expandedId === job.id && (
                       <TableRow key={`${job.id}-detail`} className="hover:bg-transparent">
-                        <TableCell colSpan={7} className="p-0">
+                        <TableCell colSpan={6} className="p-0">
                           <div className="grid grid-cols-2 gap-6 p-5 bg-muted/20 border-t border-border">
                             <ExecutionFlow job={job} />
                             <ExecutionLog job={job} />
