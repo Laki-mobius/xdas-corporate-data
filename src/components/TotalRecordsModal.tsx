@@ -2,11 +2,11 @@ import { ModalShell, ModalHeader, SectionLabel } from './ModalParts';
 import { Building2, Building, Network, GitBranch, Landmark } from 'lucide-react';
 
 const companyTypes = [
-  { type: 'Public Companies', count: '45K', sub: '0.05% of total', icon: Building2, iconColor: 'text-muted-foreground' },
-  { type: 'Private Companies', count: '98M', sub: '91.3% of total', icon: Building, iconColor: 'text-muted-foreground' },
-  { type: 'Parent Companies', count: '4.8M', sub: '4.9% of total', icon: Network, iconColor: 'text-muted-foreground' },
-  { type: 'Subsidiaries', count: '3.1M', sub: '3.1% of total', icon: GitBranch, iconColor: 'text-muted-foreground' },
-  { type: 'Government / State-Owned', count: '0.6M', sub: '0.6% of total', icon: Landmark, iconColor: 'text-muted-foreground' },
+  { type: 'Public Companies', count: '60K', sub: '0.05% of total', icon: Building2, iconColor: 'text-muted-foreground' },
+  { type: 'Private Companies', count: '119M', sub: '91.5% of total', icon: Building, iconColor: 'text-muted-foreground' },
+  { type: 'Parent Companies', count: '6.2M', sub: '4.8% of total', icon: Network, iconColor: 'text-muted-foreground' },
+  { type: 'Subsidiaries', count: '4.0M', sub: '3.1% of total', icon: GitBranch, iconColor: 'text-muted-foreground' },
+  { type: 'Government / State-Owned', count: '0.8M', sub: '0.6% of total', icon: Landmark, iconColor: 'text-muted-foreground' },
 ];
 
 const tierSegments = [
