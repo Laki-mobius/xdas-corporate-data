@@ -156,9 +156,15 @@ export const sampleRecords: ValidationRecord[] = [
     suggestedValue: "CAD $1.1B",
     attributes: [
       { name: "Company Name", extractedValue: "Northern Resources Ltd", currentValue: "Northern Resources Ltd", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }] },
-      { name: "Industry", extractedValue: "Mining & Resources", currentValue: "Mining & Resources", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }, { name: "Reuters", url: "https://reuters.com/companies/northern" }] },
+      { name: "Legal Name", extractedValue: "Northern Resources Limited", currentValue: "Northern Resources Limited", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }] },
+      { name: "Industry / Sector", extractedValue: "Mining & Resources", currentValue: "Mining & Resources", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }, { name: "Reuters", url: "https://reuters.com/companies/northern" }] },
+      { name: "Country", extractedValue: "Canada", currentValue: "Canada", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }] },
       { name: "Revenue", extractedValue: "CAD $1.1B", currentValue: "CAD $1.1B", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+ Filing", url: "https://sedarplus.ca/filings/northern-resources" }] },
-      { name: "Employee Count", extractedValue: "5,800", currentValue: "5,800", status: "validated", qcFlag: false, sourceRefs: [{ name: "LinkedIn", url: "https://linkedin.com/company/northern-resources" }] },
+      { name: "Net Income", extractedValue: "CAD $180M", currentValue: "CAD $180M", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+ Filing", url: "https://sedarplus.ca/filings/northern-resources" }] },
+      { name: "Total Assets", extractedValue: "CAD $6.2B", currentValue: "CAD $6.2B", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+ Filing", url: "https://sedarplus.ca/filings/northern-resources" }] },
+      { name: "Ultimate Parent", extractedValue: "Northern Holdings Corp", currentValue: "Northern Holdings Corp", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }] },
+      { name: "Subsidiary Name", extractedValue: "Northern Mining Co", currentValue: "Northern Mining Co", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }] },
+      { name: "Hierarchy Level", extractedValue: "1", currentValue: "1", status: "validated", qcFlag: false, sourceRefs: [{ name: "SEDAR+", url: "https://sedarplus.ca/filings/northern-resources" }] },
     ],
     sources: [
       { url: "https://sedarplus.ca/filings/northern-resources", type: "PDF", snippet: "Northern Resources Ltd — Annual Information Form 2025. Revenue: CAD $1.1 billion…", highlightedText: "Revenue: CAD $1.1 billion" },
