@@ -334,8 +334,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   onSubmit: (job: Job) => void;
 }) {
   const [jobName, setJobName] = useState('');
-  const [tier, setTier] = useState('');
-  const [inputMode, setInputMode] = useState<'text' | 'file'>('text');
+  const [selectedWorkflows, setSelectedWorkflows] = useState<string[]>([]);
+  const [inputMode, setInputMode] = useState<'text' | 'file'>('file');
   const [manualInput, setManualInput] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileEntities, setFileEntities] = useState<string[]>([]);
@@ -344,11 +344,37 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const toggleWorkflow = (id: string) => {
+    setSelectedWorkflows(prev =>
+      prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id]
+    );
+  };
+
   const entityCount = inputMode === 'text'
     ? manualInput.split(/[\n,]+/).filter(s => s.trim()).length
     : fileEntities.length;
 
-  const canSubmit = jobName.trim() && tier && entityCount > 0;
+  const canSubmit = jobName.trim() && selectedWorkflows.length > 0 && entityCount > 0;
+
+  const workflowDefs = [
+    { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data',
+      attributes: ["Company Name","Legal Name","Address","City","State","Zip Code","Phone Number","Email ID","Website URL","Industry / Sector","CEO / Founder","LinkedIn URL","Twitter URL"] },
+    { id: 'registry_data', label: 'Registry Data Extraction', desc: 'Registration & structure',
+      attributes: ["Company Name","Office Address","Registration Number","Incorporation Date","Company Status","Parent Name","Subsidiary Name","Entity Type","Country","Ownership %","Coverage","LEI","Status","SIC Code","Jurisdiction","Ultimate Parent","Hierarchy Level"] },
+    { id: 'sec_data', label: 'SEC Data', desc: 'SEC filings & financials',
+      attributes: ["Company Name","CIK","Ticker Symbol","Revenue","Net Income","EBITDA","Total Assets","Liabilities","Shares Outstanding"] },
+    { id: 'stock_exchange', label: 'Stock Exchange Data', desc: 'Trading & market data',
+      attributes: ["Company Name","Address","Stock Price (Current)","Stock Price (Open)","Stock Price (Close)","Market Capitalization","Exchange Name","Trading Status"] },
+  ];
+
+  const mergedAttributes = useMemo(() => {
+    const attrSet = new Set<string>();
+    for (const id of selectedWorkflows) {
+      const wf = workflowDefs.find(w => w.id === id);
+      if (wf) wf.attributes.forEach(a => attrSet.add(a));
+    }
+    return Array.from(attrSet);
+  }, [selectedWorkflows]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -359,15 +385,11 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       const text = ev.target?.result as string;
       const rows = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
       if (rows.length === 0) return;
-      // First row is header: Column A = Company Name, rest = attributes
       const headers = rows[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-      // Store only attribute columns (exclude Column A which is entity identifier)
       const attributeColumns = headers.slice(1);
       setFileColumns(attributeColumns);
       const dataRows = rows.slice(1).filter(r => r.split(',').some(c => c.trim()));
-      // Column A values are entity identifiers (company names)
       setFileEntities(dataRows.map(r => r.split(',')[0]?.trim().replace(/^"|"$/g, '') || ''));
-      // Store full rows for output generation
       setFileCsvRows(dataRows.map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, ''))));
     };
     reader.readAsText(file);
@@ -383,13 +405,9 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       { label: 'Load', state: 'pending' },
     ];
     const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
-    const attrList = inputMode === 'file' && fileColumns.length > 0
-      ? fileColumns.join(', ')
-      : 'entity identifiers';
-
-    // Store companies and attributes for AI extraction (will be populated after edge function call)
-    const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : [];
-    const attributesForExtraction = inputMode === 'file' ? [...fileColumns] : [];
+    const extractionAttrs = inputMode === 'file' && fileColumns.length > 0 ? fileColumns : mergedAttributes;
+    const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : manualInput.split(/[\n,]+/).filter(s => s.trim());
+    const workflowLabels = selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id);
 
     const newJob: Job = {
       id: nextId,
@@ -398,11 +416,12 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       records: entityCount,
       progress: 10,
       group: 'extraction',
-      tier: `Tier ${tier}`,
+      tier: workflowLabels.join(', '),
       flowSteps: runningFlow,
       logs: [
         { time: now(), level: 'INFO', message: `Job initialized. ${entityCount} entities targeted.` },
-        { time: now(), level: 'INFO', message: `Extracting attributes: ${attrList}` },
+        { time: now(), level: 'INFO', message: `Workflows: ${workflowLabels.join(', ')}` },
+        { time: now(), level: 'INFO', message: `Extracting ${extractionAttrs.length} attributes` },
         { time: now(), level: 'SUCCESS', message: 'Connection established. Extraction started.' },
       ],
       runtime: '0h 00m 00s',
@@ -410,24 +429,23 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       _csvColumns: undefined,
       _csvRows: undefined,
       _companiesForExtraction: companiesForExtraction,
-      _attributesForExtraction: attributesForExtraction,
+      _attributesForExtraction: extractionAttrs,
     } as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
     onSubmit(newJob);
-    // reset
     setJobName('');
-    setTier('');
+    setSelectedWorkflows([]);
     setManualInput('');
     setFileName(null);
     setFileEntities([]);
     setFileColumns([]);
     setFileCsvRows([]);
-    setInputMode('text');
+    setInputMode('file');
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[540px] max-h-[90vh] overflow-y-auto z-[100]">
+      <DialogContent className="sm:max-w-[580px] max-h-[90vh] overflow-y-auto z-[100]">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center">
@@ -436,7 +454,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
             <div>
               <DialogTitle className="text-base font-bold">Run New Job</DialogTitle>
               <DialogDescription className="text-[12px]">
-                Ad-hoc extraction for custom entity list
+                Select workflows and provide entities for extraction
               </DialogDescription>
             </div>
           </div>
@@ -457,33 +475,46 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
             />
           </div>
 
-          {/* Source Selection (was Tier Mapping) */}
+          {/* Workflow Selection - Multi-select */}
           <div className="space-y-2">
             <Label className="text-[13px] font-semibold">
-              Workflow Selection
+              Workflow Selection <span className="text-destructive">*</span>
+              <span className="text-[11px] font-normal text-muted-foreground ml-2">Select one or more</span>
             </Label>
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { value: '1', label: 'Company Data Extraction' },
-                { value: '2', label: 'Registry Data Extraction' },
-                { value: '3', label: 'SEC Data' },
-                { value: '4', label: 'Stock Exchanges' },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setTier(opt.value)}
-                  className={cn(
-                    "rounded-lg border-2 px-3 py-3 text-center transition-colors cursor-pointer",
-                    tier === opt.value
-                      ? "border-primary bg-primary/5 text-primary font-semibold"
-                      : "border-border bg-card text-muted-foreground hover:border-muted-foreground/40"
-                  )}
-                >
-                  <span className="block text-[12px] leading-tight">{opt.label}</span>
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-2">
+              {workflowDefs.map((wf) => {
+                const selected = selectedWorkflows.includes(wf.id);
+                return (
+                  <button
+                    key={wf.id}
+                    type="button"
+                    onClick={() => toggleWorkflow(wf.id)}
+                    className={cn(
+                      "rounded-lg border-2 px-3 py-3 text-left transition-colors cursor-pointer",
+                      selected
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-card hover:border-muted-foreground/40"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0",
+                        selected ? "border-primary bg-primary" : "border-muted-foreground/40"
+                      )}>
+                        {selected && <CheckCircle2 className="w-3 h-3 text-primary-foreground" />}
+                      </div>
+                      <span className={cn("text-[12px] leading-tight", selected ? "text-primary font-semibold" : "text-foreground")}>{wf.label}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1 ml-6">{wf.desc}</p>
+                  </button>
+                );
+              })}
             </div>
+            {selectedWorkflows.length > 0 && (
+              <p className="text-[11px] text-muted-foreground">
+                {mergedAttributes.length} attributes will be extracted
+              </p>
+            )}
           </div>
 
           {/* Entity Input */}
@@ -547,7 +578,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
                     <div className="flex items-center justify-center gap-3 text-[11px]">
                       <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{fileEntities.length} entities detected</span>
                       {fileColumns.length > 0 && (
-                        <span className="text-muted-foreground">• {fileColumns.length} attributes: {fileColumns.join(', ')}</span>
+                        <span className="text-muted-foreground">• {fileColumns.length} attributes</span>
                       )}
                     </div>
                   </div>
