@@ -266,8 +266,15 @@ export const sampleRecords: ValidationRecord[] = [
     suggestedValue: "SilverLine Media Inc",
     attributes: [
       { name: "Company Name", extractedValue: "SilverLine Media Inc", currentValue: "SilverLine Media Inc", status: "pending", qcFlag: false, sourceRefs: [{ name: "Web Crawl", url: "https://silverlinemedia.com/about" }, { name: "D&B", url: "https://dnb.com/company/silverline" }] },
-      { name: "Industry", extractedValue: "Media & Entertainment", currentValue: "Media & Entertainment", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }, { name: "Bloomberg", url: "https://bloomberg.com/profile/silverline" }] },
+      { name: "Industry / Sector", extractedValue: "Media & Entertainment", currentValue: "Media & Entertainment", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }, { name: "Bloomberg", url: "https://bloomberg.com/profile/silverline" }] },
+      { name: "City", extractedValue: "Austin", currentValue: "Austin", status: "pending", qcFlag: false, sourceRefs: [{ name: "Web Crawl", url: "https://silverlinemedia.com/about" }] },
+      { name: "State", extractedValue: "TX", currentValue: "TX", status: "pending", qcFlag: false, sourceRefs: [{ name: "Web Crawl", url: "https://silverlinemedia.com/about" }] },
+      { name: "Country", extractedValue: "United States", currentValue: "United States", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }] },
       { name: "Revenue", extractedValue: "$78M", currentValue: "$78M", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }] },
+      { name: "Net Income", extractedValue: "$5.2M", currentValue: "$5.2M", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }] },
+      { name: "Total Assets", extractedValue: "$210M", currentValue: "$210M", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }] },
+      { name: "Parent Name", extractedValue: "SilverLine Holdings", currentValue: "SilverLine Holdings", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }] },
+      { name: "Hierarchy Level", extractedValue: "3", currentValue: "3", status: "pending", qcFlag: false, sourceRefs: [{ name: "D&B", url: "https://dnb.com/company/silverline" }] },
     ],
     sources: [
       { url: "https://silverlinemedia.com/about", type: "Website", snippet: "SilverLine Media Inc — digital-first media company headquartered in Austin, Texas…", highlightedText: "headquartered in Austin, Texas" },
