@@ -210,9 +210,15 @@ export const sampleRecords: ValidationRecord[] = [
     suggestedValue: "Consumer Retail",
     attributes: [
       { name: "Company Name", extractedValue: "Zenith Retail Group", currentValue: "Zenith Retail Group", status: "pending", qcFlag: false, sourceRefs: [{ name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }, { name: "Orbis", url: "https://orbis.bvdinfo.com/zenith" }] },
-      { name: "Industry", extractedValue: "Consumer Retail", currentValue: "Consumer Retail", status: "pending", qcFlag: true, sourceRefs: [{ name: "Orbis", url: "https://orbis.bvdinfo.com/zenith" }, { name: "D&B", url: "https://dnb.com/company/zenith" }] },
+      { name: "Industry / Sector", extractedValue: "Consumer Retail", currentValue: "Consumer Retail", status: "pending", qcFlag: true, sourceRefs: [{ name: "Orbis", url: "https://orbis.bvdinfo.com/zenith" }, { name: "D&B", url: "https://dnb.com/company/zenith" }] },
+      { name: "City", extractedValue: "London", currentValue: "London", status: "pending", qcFlag: false, sourceRefs: [{ name: "Company Website", url: "https://zenithretail.com/about" }] },
+      { name: "Country", extractedValue: "United Kingdom", currentValue: "United Kingdom", status: "pending", qcFlag: false, sourceRefs: [{ name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }] },
       { name: "Revenue", extractedValue: "£240M", currentValue: "£240M", status: "pending", qcFlag: false, sourceRefs: [{ name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }] },
-      { name: "HQ Location", extractedValue: "London, UK", currentValue: "London, UK", status: "pending", qcFlag: false, sourceRefs: [{ name: "Company Website", url: "https://zenithretail.com/about" }, { name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }] },
+      { name: "Net Income", extractedValue: "£18M", currentValue: "£18M", status: "pending", qcFlag: false, sourceRefs: [{ name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }] },
+      { name: "Total Assets", extractedValue: "£890M", currentValue: "£890M", status: "pending", qcFlag: false, sourceRefs: [{ name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }] },
+      { name: "Ultimate Parent", extractedValue: "Zenith Group plc", currentValue: "Zenith Group plc", status: "pending", qcFlag: false, sourceRefs: [{ name: "Orbis", url: "https://orbis.bvdinfo.com/zenith" }] },
+      { name: "Subsidiary Name", extractedValue: "Zenith Online Ltd", currentValue: "Zenith Online Ltd", status: "pending", qcFlag: false, sourceRefs: [{ name: "Companies House", url: "https://beta.companieshouse.gov.uk/company/zenith-retail" }] },
+      { name: "Hierarchy Level", extractedValue: "1", currentValue: "1", status: "pending", qcFlag: false, sourceRefs: [{ name: "Orbis", url: "https://orbis.bvdinfo.com/zenith" }] },
     ],
     sources: [
       { url: "https://beta.companieshouse.gov.uk/company/zenith-retail", type: "API", snippet: "Zenith Retail Group PLC — Annual turnover: £240M…", highlightedText: "Annual turnover: £240M" },
