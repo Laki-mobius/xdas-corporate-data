@@ -20,15 +20,19 @@ const getConfidenceColor = (status: string) => {
   }
 };
 
-const getConfidenceNum = (attr: { status: string; currentValue: string; extractedValue: string }): number => {
+const getConfidenceNum = (attr: { name: string; status: string; currentValue: string; extractedValue: string }): number => {
   switch (attr.status) {
     case "validated": return 96;
     case "edited": return 98;
     case "flagged": return 50;
     default: {
       const val = attr.currentValue || attr.extractedValue || "";
-      if (val && val !== "N/A" && val !== "" && val.length > 1) return 85;
-      return 52;
+      if (!val || val === "N/A" || val.length <= 1) return 52;
+      // Derive a stable pseudo-random confidence from attribute name
+      let hash = 0;
+      for (let i = 0; i < attr.name.length; i++) hash = ((hash << 5) - hash + attr.name.charCodeAt(i)) | 0;
+      const scores = [62, 68, 71, 74, 78, 82, 85, 88, 91, 93];
+      return scores[Math.abs(hash) % scores.length];
     }
   }
 };
