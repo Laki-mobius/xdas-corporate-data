@@ -35,7 +35,7 @@ const geographyBars = [
   { region: 'Rest of World', count: 8, label: '8M' },
 ];
 
-const yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
+const yTicks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45];
 
 export default function TotalRecordsModal({ onClose, inline = false }: { onClose: () => void; inline?: boolean }) {
   return (
