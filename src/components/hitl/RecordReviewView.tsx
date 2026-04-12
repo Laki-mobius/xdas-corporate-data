@@ -1,6 +1,6 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
-import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ExternalLink, Edit3, CheckCircle2, AlertTriangle, Settings, MoreVertical, X, Filter } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X } from "lucide-react";
 import { useState, useMemo } from "react";
 
 interface RecordReviewViewProps {
@@ -40,22 +40,18 @@ type DisplayAttribute = {
   attr: ValidationAttribute | null;
 };
 
+type EditingField = {
+  name: string;
+  index: number;
+  attr: ValidationAttribute | null;
+};
+
 const confidenceFilterOptions: { value: ConfidenceFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "high", label: "High (90%+)" },
   { value: "medium", label: "Medium (51 - 80%)" },
   { value: "low", label: "Low (0 - 50%)" },
 ];
-
-const filterByConfidence = (attrs: ValidationAttribute[], filter: ConfidenceFilter) => {
-  if (filter === "all") return attrs;
-  return attrs.filter(a => {
-    const s = getConfidenceScore(a);
-    if (filter === "high") return s >= 90;
-    if (filter === "medium") return s >= 51 && s <= 80;
-    return s <= 50;
-  });
-};
 
 const filterDisplayByConfidence = (attrs: DisplayAttribute[], filter: ConfidenceFilter) => {
   if (filter === "all") return attrs;
@@ -76,7 +72,7 @@ const getCategoryLabel = (categoryId: string, fallbackLabel: string) => {
 export default function RecordReviewView({
   record, records, onClose, onUpdateAttribute, onApprove, onReject, onNavigate,
 }: RecordReviewViewProps) {
-  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [editValue, setEditValue] = useState("");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ basic_data: true, financial_data: true, corporate_hierarchy: true });
   const [sectionFilters, setSectionFilters] = useState<Record<string, ConfidenceFilter>>({});
@@ -117,20 +113,46 @@ export default function RecordReviewView({
     });
   }, [categorized]);
 
-  // Navigation
   const currentIdx = records ? records.findIndex(r => r.id === record.id) : -1;
   const hasPrev = currentIdx > 0;
   const hasNext = records ? currentIdx < records.length - 1 : false;
 
-  const startEdit = (idx: number, val: string) => {
-    setEditingIdx(idx);
-    setEditValue(val);
+  const getAttributeValue = (attr: ValidationAttribute | null) => {
+    return attr?.currentValue || attr?.extractedValue || "";
   };
 
-  const saveEdit = (globalIdx: number) => {
-    const attr = record.attributes[globalIdx];
-    onUpdateAttribute(record.id, globalIdx, { ...attr, currentValue: editValue, status: "edited", qcFlag: false });
-    setEditingIdx(null);
+  const startEdit = (name: string, idx: number, attr: ValidationAttribute | null) => {
+    setEditingField({ name, index: idx, attr });
+    setEditValue(getAttributeValue(attr));
+  };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditValue("");
+  };
+
+  const saveEdit = () => {
+    if (!editingField) return;
+
+    const targetIndex = editingField.index >= 0 ? editingField.index : record.attributes.length;
+    const nextAttr: ValidationAttribute = editingField.attr
+      ? {
+          ...editingField.attr,
+          currentValue: editValue,
+          status: "edited",
+          qcFlag: false,
+        }
+      : {
+          name: editingField.name,
+          extractedValue: "",
+          currentValue: editValue,
+          status: "edited",
+          qcFlag: false,
+          sourceRefs: [],
+        };
+
+    onUpdateAttribute(record.id, targetIndex, nextAttr);
+    cancelEdit();
   };
 
   const overallConfidence = useMemo(() => {
@@ -155,7 +177,6 @@ export default function RecordReviewView({
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-card border border-border rounded-lg">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/30">
         <div className="flex items-center gap-3">
           <button onClick={onClose} className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors">
@@ -192,9 +213,7 @@ export default function RecordReviewView({
         </div>
       </div>
 
-      {/* Split: Source (LHS) + Profile (RHS) */}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* LHS: Source View */}
         <div className="w-1/2 border-r border-border flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-border bg-muted/20 flex items-center gap-2">
             <span className="text-[11px] font-semibold text-status-blue uppercase tracking-wide">Source View</span>
@@ -220,9 +239,7 @@ export default function RecordReviewView({
           </div>
         </div>
 
-        {/* RHS: Company Profile */}
         <div className="w-1/2 flex flex-col overflow-hidden">
-          {/* Profile Title Bar */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/20">
             <span className="text-[13px] font-semibold text-foreground tracking-wide uppercase">
               {record.companyName} — Data Profile
@@ -235,7 +252,6 @@ export default function RecordReviewView({
             </button>
           </div>
 
-          {/* Sections */}
           <div className="flex-1 overflow-auto px-3 py-2 space-y-2">
             {profileSections.map(({ category, attrs }) => {
               const isExpanded = expandedSections[category.id] ?? false;
@@ -244,7 +260,6 @@ export default function RecordReviewView({
 
               return (
                 <div key={category.id} className="border border-border rounded-lg bg-card overflow-hidden">
-                  {/* Section Header */}
                   <div
                     className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
                     onClick={() => toggleSection(category.id)}
@@ -258,7 +273,6 @@ export default function RecordReviewView({
                       <span className="text-[13px] font-semibold text-status-amber">{getCategoryLabel(category.id, category.label)}</span>
                     </div>
 
-                    {/* Per-section confidence filter */}
                     <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                       <select
                         value={currentFilter}
@@ -284,20 +298,21 @@ export default function RecordReviewView({
                     </div>
                   </div>
 
-                  {/* Expanded content: 3-column attribute grid */}
                   {isExpanded && (
                     <div className="px-4 pb-3">
                       {filteredAttrs.length === 0 ? (
                         <p className="text-[11px] text-muted-foreground py-2 text-center italic">No attributes match the selected filter</p>
                       ) : (
-                          <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-3 gap-3">
                           {filteredAttrs.map(({ name, attr: typedAttr }) => {
                             const globalIdx = typedAttr ? record.attributes.findIndex(a => a.name === typedAttr.name) : -1;
                             const confidence = typedAttr ? getConfidenceScore(typedAttr) : null;
+                            const displayValue = getAttributeValue(typedAttr);
+                            const isEditing = editingField?.name === name;
+                            const isEmpty = !displayValue || displayValue.trim() === "";
 
                             return (
                               <div key={name} className="flex flex-col">
-                                {/* Attribute header: name + confidence + actions */}
                                 <div className="flex items-center gap-1 mb-1">
                                   <span className="text-[11px] text-foreground truncate flex-1" title={name}>
                                     {name}
@@ -310,46 +325,53 @@ export default function RecordReviewView({
                                     <span className="text-[11px] font-semibold shrink-0 text-muted-foreground">—</span>
                                   )}
                                   {typedAttr && globalIdx >= 0 && (
-                                    <>
-                                      <button
-                                        onClick={() => onUpdateAttribute(record.id, globalIdx, { ...typedAttr, status: "validated", qcFlag: false })}
-                                        className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
-                                        title="Validate"
-                                      >
-                                        <Settings className="w-3 h-3 text-muted-foreground" />
-                                      </button>
-                                      <button
-                                        onClick={() => startEdit(globalIdx, typedAttr.currentValue || typedAttr.extractedValue)}
-                                        className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
-                                        title="More options"
-                                      >
-                                        <MoreVertical className="w-3 h-3 text-muted-foreground" />
-                                      </button>
-                                    </>
+                                    <button
+                                      onClick={() => onUpdateAttribute(record.id, globalIdx, { ...typedAttr, status: "validated", qcFlag: false })}
+                                      className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-60 hover:opacity-100"
+                                      title="Validate"
+                                    >
+                                      <Settings className="w-3 h-3 text-muted-foreground" />
+                                    </button>
                                   )}
+                                  <button
+                                    onClick={() => startEdit(name, globalIdx, typedAttr)}
+                                    className="p-0.5 hover:bg-muted rounded transition-colors shrink-0 opacity-80 hover:opacity-100"
+                                    title={isEmpty ? "Add value" : "Edit value"}
+                                  >
+                                    <Edit3 className={`w-3 h-3 ${isEmpty ? "text-primary" : "text-muted-foreground"}`} />
+                                  </button>
                                 </div>
 
-                                {/* Value box */}
-                                <div className="border border-border rounded px-2.5 py-1.5 bg-background min-h-[30px] flex items-center">
-                                  {typedAttr && editingIdx === globalIdx ? (
-                                    <div className="flex items-center gap-1 flex-1">
+                                <div className={`border rounded px-2.5 py-1.5 min-h-[30px] flex items-center ${isEmpty ? "border-dashed border-border bg-muted/30" : "border-border bg-background"}`}>
+                                  {isEditing ? (
+                                    <div className="flex items-center gap-2 flex-1">
                                       <input
                                         value={editValue}
                                         onChange={e => setEditValue(e.target.value)}
                                         className="flex-1 text-[12px] bg-transparent focus:outline-none text-foreground"
+                                        placeholder={`Enter ${name.toLowerCase()}...`}
                                         autoFocus
-                                        onKeyDown={e => { if (e.key === "Enter") saveEdit(globalIdx); if (e.key === "Escape") setEditingIdx(null); }}
+                                        onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") cancelEdit(); }}
                                       />
-                                      <button onClick={() => saveEdit(globalIdx)} className="text-[10px] text-brand font-semibold">Save</button>
+                                      <button onClick={saveEdit} className="text-[10px] text-primary font-semibold">Save</button>
+                                      <button onClick={cancelEdit} className="p-0.5 hover:bg-muted rounded transition-colors" title="Cancel">
+                                        <X className="w-3 h-3 text-muted-foreground" />
+                                      </button>
                                     </div>
                                   ) : (
-                                    <span className="text-[12px] text-foreground truncate" title={typedAttr?.currentValue || typedAttr?.extractedValue || "N/A"}>
-                                      {typedAttr?.currentValue || typedAttr?.extractedValue || <span className="text-muted-foreground">N/A</span>}
-                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => startEdit(name, globalIdx, typedAttr)}
+                                      className="w-full text-left"
+                                      title={isEmpty ? `Add ${name}` : `Edit ${name}`}
+                                    >
+                                      <span className={`block text-[12px] ${isEmpty ? "text-muted-foreground italic" : "text-foreground truncate"}`}>
+                                        {isEmpty ? "Click to add value" : displayValue}
+                                      </span>
+                                    </button>
                                   )}
                                 </div>
 
-                                {/* Source links */}
                                 <div className="flex flex-wrap gap-2 mt-1">
                                   {typedAttr?.sourceRefs.length ? (
                                     typedAttr.sourceRefs.map((src, si) => (

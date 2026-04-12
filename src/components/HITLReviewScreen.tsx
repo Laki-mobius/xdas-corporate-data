@@ -130,9 +130,18 @@ export default function HITLReviewScreen() {
     setRecords(prev => prev.map(r => {
       if (r.id !== recordId) return r;
       const newAttrs = [...r.attributes];
-      newAttrs[attrIndex] = attr;
+      if (attrIndex >= 0 && attrIndex < newAttrs.length) newAttrs[attrIndex] = attr;
+      else newAttrs.push(attr);
       const validated = newAttrs.filter(a => a.status === "validated" || a.status === "edited").length;
-      return { ...r, attributes: newAttrs, completionPct: Math.round((validated / newAttrs.length) * 100) };
+      const nextCompanyName = attr.name === "Company Name" && attr.currentValue.trim()
+        ? attr.currentValue.trim()
+        : r.companyName;
+      return {
+        ...r,
+        companyName: nextCompanyName,
+        attributes: newAttrs,
+        completionPct: Math.round((validated / newAttrs.length) * 100),
+      };
     }));
   }, []);
 
