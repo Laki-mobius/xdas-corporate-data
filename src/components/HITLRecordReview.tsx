@@ -210,6 +210,20 @@ export default function HITLRecordReview({ record, onBack }: Props) {
               <X className="w-3.5 h-3.5 text-muted-foreground" />
             </Button>
           </div>
+        ) : f.value === "N/A" || f.value === "—" ? (
+          <div className="flex items-center justify-between">
+            <Input
+              value={f.value}
+              readOnly
+              className="h-8 text-[13px] text-muted-foreground bg-muted/30 border-dashed cursor-pointer flex-1 mr-2"
+              onClick={() => startEdit(f)}
+            />
+            <div className="flex items-center gap-1 shrink-0">
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => startEdit(f)}>
+                <Edit2 className="w-3.5 h-3.5 text-primary" />
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-normal text-foreground break-words">{f.value}</span>
