@@ -176,12 +176,17 @@ export default function HITLRecordReview({ record, onBack }: Props) {
     return fields;
   };
 
+  const isBlankValue = (val: string) => !val || val.trim() === "" || val === "N/A" || val === "—";
+
   const renderField = (f: DataField, setter: React.Dispatch<React.SetStateAction<DataField[]>>) => {
-    const borderClass = f.confidence < 50
-      ? "border-red-300 bg-red-50/20 dark:border-red-800 dark:bg-red-950/20"
-      : f.confidence < 75
-        ? "border-amber-300 bg-amber-50/20 dark:border-amber-800 dark:bg-amber-950/20"
-        : "border-border bg-card";
+    const blank = isBlankValue(f.value);
+    const borderClass = blank
+      ? "border-amber-300 bg-amber-50/20 dark:border-amber-800 dark:bg-amber-950/20"
+      : f.confidence < 50
+        ? "border-red-300 bg-red-50/20 dark:border-red-800 dark:bg-red-950/20"
+        : f.confidence < 75
+          ? "border-amber-300 bg-amber-50/20 dark:border-amber-800 dark:bg-amber-950/20"
+          : "border-border bg-card";
 
     return (
       <div key={f.key} className={`rounded-md border p-3 ${borderClass}`}>
@@ -193,7 +198,7 @@ export default function HITLRecordReview({ record, onBack }: Props) {
             <span className={`text-[11px] font-bold ${confidenceColor(f.confidence)}`}>
               {f.confidence}%
             </span>
-            <button className="text-muted-foreground hover:text-foreground">
+            <button className="text-muted-foreground hover:text-foreground" onClick={(e) => e.stopPropagation()}>
               <MoreVertical className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -205,6 +210,7 @@ export default function HITLRecordReview({ record, onBack }: Props) {
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               className="h-8 text-[13px]"
+              placeholder={`Enter ${f.label.toLowerCase()}...`}
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") saveEdit(f.key, setter);
@@ -218,11 +224,12 @@ export default function HITLRecordReview({ record, onBack }: Props) {
               <X className="w-3.5 h-3.5 text-muted-foreground" />
             </Button>
           </div>
-        ) : f.value === "N/A" || f.value === "—" ? (
+        ) : blank ? (
           <div className="flex items-center justify-between">
             <Input
-              value={f.value}
+              value={f.value || ""}
               readOnly
+              placeholder="Click to add value..."
               className="h-8 text-[13px] text-muted-foreground bg-muted/30 border-dashed cursor-pointer flex-1 mr-2"
               onClick={(e) => startEdit(f, e)}
             />
@@ -234,7 +241,7 @@ export default function HITLRecordReview({ record, onBack }: Props) {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-normal text-foreground break-words">{f.value}</span>
+            <span className="text-[13px] font-normal text-foreground break-words max-w-[70%]">{f.value}</span>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => startEdit(f, e)}>
                 <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
