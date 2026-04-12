@@ -155,13 +155,17 @@ export default function HITLRecordReview({ record, onBack }: Props) {
   const [financialFilter, setFinancialFilter] = useState("all");
   const [hierarchyFilter, setHierarchyFilter] = useState("all");
 
-  const startEdit = (f: DataField) => {
+  const startEdit = (f: DataField, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     setEditingKey(f.key);
-    setEditValue(f.value);
+    setEditValue(f.value === "N/A" || f.value === "—" ? "" : f.value);
   };
 
-  const saveEdit = (key: string, setter: React.Dispatch<React.SetStateAction<DataField[]>>) => {
-    setter((prev) => prev.map((f) => (f.key === key ? { ...f, value: editValue } : f)));
+  const saveEdit = (key: string, setter: React.Dispatch<React.SetStateAction<DataField[]>>, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
+    setter((prev) => prev.map((f) => (f.key === key ? { ...f, value: editValue || f.value } : f)));
     setEditingKey(null);
   };
 
