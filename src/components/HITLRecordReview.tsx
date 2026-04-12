@@ -155,13 +155,17 @@ export default function HITLRecordReview({ record, onBack }: Props) {
   const [financialFilter, setFinancialFilter] = useState("all");
   const [hierarchyFilter, setHierarchyFilter] = useState("all");
 
-  const startEdit = (f: DataField) => {
+  const startEdit = (f: DataField, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     setEditingKey(f.key);
-    setEditValue(f.value);
+    setEditValue(f.value === "N/A" || f.value === "—" ? "" : f.value);
   };
 
-  const saveEdit = (key: string, setter: React.Dispatch<React.SetStateAction<DataField[]>>) => {
-    setter((prev) => prev.map((f) => (f.key === key ? { ...f, value: editValue } : f)));
+  const saveEdit = (key: string, setter: React.Dispatch<React.SetStateAction<DataField[]>>, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
+    setter((prev) => prev.map((f) => (f.key === key ? { ...f, value: editValue || f.value } : f)));
     setEditingKey(null);
   };
 
@@ -196,17 +200,21 @@ export default function HITLRecordReview({ record, onBack }: Props) {
         </div>
 
         {editingKey === f.key ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <Input
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               className="h-8 text-[13px]"
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit(f.key, setter);
+                if (e.key === "Escape") setEditingKey(null);
+              }}
             />
-            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => saveEdit(f.key, setter)}>
-              <Save className="w-3.5 h-3.5 text-emerald-600" />
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={(e) => saveEdit(f.key, setter, e)}>
+              <Save className="w-3.5 h-3.5 text-brand" />
             </Button>
-            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setEditingKey(null)}>
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); setEditingKey(null); }}>
               <X className="w-3.5 h-3.5 text-muted-foreground" />
             </Button>
           </div>
@@ -216,10 +224,10 @@ export default function HITLRecordReview({ record, onBack }: Props) {
               value={f.value}
               readOnly
               className="h-8 text-[13px] text-muted-foreground bg-muted/30 border-dashed cursor-pointer flex-1 mr-2"
-              onClick={() => startEdit(f)}
+              onClick={(e) => startEdit(f, e)}
             />
             <div className="flex items-center gap-1 shrink-0">
-              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => startEdit(f)}>
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => startEdit(f, e)}>
                 <Edit2 className="w-3.5 h-3.5 text-primary" />
               </Button>
             </div>
@@ -228,11 +236,11 @@ export default function HITLRecordReview({ record, onBack }: Props) {
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-normal text-foreground break-words">{f.value}</span>
             <div className="flex items-center gap-1">
-              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => startEdit(f)}>
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => startEdit(f, e)}>
                 <Edit2 className="w-3.5 h-3.5 text-muted-foreground" />
               </Button>
-              <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => e.stopPropagation()}>
+                <Check className="w-3.5 h-3.5 text-brand" />
               </Button>
             </div>
           </div>
