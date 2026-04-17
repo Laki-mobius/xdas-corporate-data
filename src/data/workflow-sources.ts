@@ -26,11 +26,54 @@ export interface WorkflowSource {
   buildUrl: (companyName: string) => string;
 }
 
-const slug = (s: string) =>
-  s
+/**
+ * Extract a clean hostname from any input that might be a URL, domain,
+ * or plain company name. Strips protocol, www., paths, and query strings.
+ * Returns lowercase host (e.g. "microsoft.com") or empty if none detected.
+ */
+const extractHost = (s: string): string => {
+  if (!s) return "";
+  let v = s.trim().toLowerCase();
+  // Strip protocol
+  v = v.replace(/^[a-z]+:\/\//, "");
+  // Strip path / query / fragment
+  v = v.split(/[\/?#]/)[0];
+  // Strip leading www.
+  v = v.replace(/^www\./, "");
+  // Must look like a domain (contains a dot, no spaces)
+  if (/\s/.test(v)) return "";
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(v)) return "";
+  return v;
+};
+
+/**
+ * Build a slug suitable for URL paths from a company name.
+ * If the input is a domain, uses the domain's "core" label (e.g. "microsoft.com" -> "microsoft").
+ * Otherwise normalizes by replacing non-alphanumerics with hyphens.
+ */
+const slug = (s: string) => {
+  const host = extractHost(s);
+  if (host) {
+    // Take the part before the first dot ("microsoft.com" -> "microsoft")
+    return host.split(".")[0];
+  }
+  return s
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/^-+|-+$/g, "");
+};
+
+/**
+ * Build the canonical company website URL.
+ * - If input already looks like a URL/domain, use that exact host.
+ * - Otherwise fall back to "<slug>.com".
+ */
+const buildCompanyWebsite = (company: string): string => {
+  const host = extractHost(company);
+  if (host) return `https://${host}`;
+  const s = slug(company);
+  return s ? `https://www.${s}.com` : "https://www.google.com";
+};
 
 /**
  * Per-source attribute ownership.
