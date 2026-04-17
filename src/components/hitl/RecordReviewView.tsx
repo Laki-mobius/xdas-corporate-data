@@ -1,6 +1,6 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
-import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Search, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
 
 interface RecordReviewViewProps {
@@ -89,6 +89,28 @@ export default function RecordReviewView({
   };
 
   const [activeSourceUrl, setActiveSourceUrl] = useState<string>(getInitialSourceUrl());
+  const [highlightedField, setHighlightedField] = useState<{
+    fieldName: string;
+    value: string;
+    sourceName: string;
+    sourceUrl: string;
+  } | null>(null);
+
+  const focusFieldInSource = (fieldName: string, value: string, attr: ValidationAttribute | null) => {
+    if (!value || value.trim() === "" || value === "N/A") return;
+    const ref = attr?.sourceRefs?.find(r => r.url && r.url !== "#") ?? null;
+    const sourceUrl = ref?.url ?? activeSourceUrl;
+    const sourceName = ref?.name ?? "Source";
+    if (sourceUrl) {
+      // Append text-fragment so "Open in new tab" auto-scrolls + highlights in supporting browsers
+      const cleanUrl = sourceUrl.split("#")[0];
+      const fragment = `#:~:text=${encodeURIComponent(value.slice(0, 80))}`;
+      setActiveSourceUrl(sourceUrl);
+      setHighlightedField({ fieldName, value, sourceName, sourceUrl: cleanUrl + fragment });
+    } else {
+      setHighlightedField({ fieldName, value, sourceName, sourceUrl: "" });
+    }
+  };
 
   const categorized = useMemo(() => categorizeAttributes(record.attributes), [record.attributes]);
 
