@@ -161,6 +161,55 @@ export default function HITLRecordReview({ record, onBack }: Props) {
   const [financialFilter, setFinancialFilter] = useState("all");
   const [hierarchyFilter, setHierarchyFilter] = useState("all");
 
+  /* personalize snapshot when iframe loads */
+  const personalizeSnapshot = () => {
+    const doc = iframeRef.current?.contentDocument;
+    if (!doc) return;
+    const ticker = record.tier === "Tier 1" ? "ACM" : record.company.slice(0, 3).toUpperCase();
+    const shortName = record.company.split(" ")[0];
+    doc.body.innerHTML = doc.body.innerHTML
+      .replaceAll("__COMPANY__", record.company)
+      .replaceAll("__SHORT__", shortName)
+      .replaceAll("__TICKER__", ticker);
+
+    if (!doc.getElementById("__hl_styles__")) {
+      const style = doc.createElement("style");
+      style.id = "__hl_styles__";
+      style.textContent = `
+        .__xdas_hl__ {
+          background: #fef08a !important;
+          box-shadow: 0 0 0 3px #facc15, 0 0 0 6px rgba(250, 204, 21, 0.35) !important;
+          border-radius: 3px;
+          transition: background 0.3s, box-shadow 0.3s;
+          scroll-margin-top: 80px;
+        }
+        .__xdas_hl_pulse__ { animation: __xdas_pulse__ 1.2s ease-out 2; }
+        @keyframes __xdas_pulse__ {
+          0%,100% { box-shadow: 0 0 0 3px #facc15, 0 0 0 6px rgba(250, 204, 21, 0.35); }
+          50%     { box-shadow: 0 0 0 5px #f59e0b, 0 0 0 12px rgba(245, 158, 11, 0.45); }
+        }
+      `;
+      doc.head.appendChild(style);
+    }
+    setSnapshotReady(true);
+  };
+
+  /* apply highlight whenever active field changes */
+  useEffect(() => {
+    if (!snapshotReady) return;
+    const doc = iframeRef.current?.contentDocument;
+    if (!doc) return;
+    doc.querySelectorAll(".__xdas_hl__").forEach((el) => {
+      el.classList.remove("__xdas_hl__", "__xdas_hl_pulse__");
+    });
+    if (!activeFieldKey) return;
+    const targets = doc.querySelectorAll(`[data-field="${activeFieldKey}"]`);
+    targets.forEach((el) => el.classList.add("__xdas_hl__", "__xdas_hl_pulse__"));
+    const first = targets[0] as HTMLElement | undefined;
+    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeFieldKey, snapshotReady]);
+
+
   const startEdit = (f: DataField, e?: React.MouseEvent) => {
     e?.stopPropagation();
     e?.preventDefault();
