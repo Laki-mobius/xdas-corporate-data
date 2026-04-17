@@ -334,6 +334,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
 }) {
   const [jobName, setJobName] = useState('');
   const [selectedWorkflows, setSelectedWorkflows] = useState<string[]>([]);
+  const [selectedAdditionalWorkflows, setSelectedAdditionalWorkflows] = useState<string[]>([]);
+  const [additionalDropdownOpen, setAdditionalDropdownOpen] = useState(false);
   const [inputMode, setInputMode] = useState<'text' | 'file'>('file');
   const [manualInput, setManualInput] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
