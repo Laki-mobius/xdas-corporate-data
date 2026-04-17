@@ -195,9 +195,31 @@ serve(async (req) => {
       aiByEntity.set(key, padded);
     }
 
-    // Build output: preserve input headers + append extracted attributes
+    // Build output: preserve input headers + prepend "Company Name" + append extracted attributes
     const inputHeadersFinal = inputHeaders.length > 0 ? inputHeaders : ["Company"];
-    const columns = [...inputHeadersFinal, ...attributes];
+    const columns = [...inputHeadersFinal, "Company Name", ...attributes];
+
+    // Index of Legal Name within the extracted attributes (if present)
+    const legalNameIdx = attributes.findIndex((a) => a.toLowerCase() === "legal name");
+
+    /**
+     * Resolve "Company Name" per spec:
+     *  - If extracted entity name (AI key) matches Legal Name → use Legal Name
+     *  - Else fall back to the value from the uploaded input file (first column)
+     */
+    const resolveCompanyName = (
+      inputValue: string,
+      aiKey: string | null,
+      extracted: string[],
+    ): string => {
+      const legalName = legalNameIdx >= 0 ? String(extracted[legalNameIdx] ?? "").trim() : "";
+      const isValidLegal = legalName && legalName.toUpperCase() !== "N/A";
+      const aiKeyTrim = (aiKey ?? "").trim();
+      if (isValidLegal && aiKeyTrim && aiKeyTrim.toLowerCase() === legalName.toLowerCase()) {
+        return legalName;
+      }
+      return (inputValue || "").trim() || legalName || aiKeyTrim;
+    };
 
     let rows: string[][];
     if (inputRows.length > 0) {
@@ -205,15 +227,16 @@ serve(async (req) => {
         const key = String(inputRow[0] || "").trim();
         const ai = aiByEntity.get(key);
         const extracted = ai ? ai.slice(1) : attributes.map(() => "N/A");
-        // Pad input row to header length
         const paddedInput = inputHeadersFinal.map((_, i) => String(inputRow[i] ?? ""));
-        return [...paddedInput, ...extracted];
+        const companyName = resolveCompanyName(paddedInput[0], ai ? String(ai[0]) : null, extracted);
+        return [...paddedInput, companyName, ...extracted];
       });
     } else {
       rows = cappedEntities.map((entity) => {
         const ai = aiByEntity.get(entity);
         const extracted = ai ? ai.slice(1) : attributes.map(() => "N/A");
-        return [entity, ...extracted];
+        const companyName = resolveCompanyName(entity, ai ? String(ai[0]) : entity, extracted);
+        return [entity, companyName, ...extracted];
       });
     }
 
