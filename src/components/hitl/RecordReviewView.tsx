@@ -246,15 +246,51 @@ export default function RecordReviewView({
               </a>
             )}
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {highlightedField && (
+              <div className="px-3 py-2 border-b border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Highlighter className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Extracted Snippet</span>
+                    <span className="text-[10px] text-muted-foreground truncate">· {highlightedField.fieldName} · {highlightedField.sourceName}</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {highlightedField.sourceUrl && (
+                      <a
+                        href={highlightedField.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-[10px] text-status-blue hover:underline"
+                        title="Open source page and scroll to value"
+                      >
+                        <Search className="w-3 h-3" /> Find in source
+                      </a>
+                    )}
+                    <button
+                      onClick={() => setHighlightedField(null)}
+                      className="p-0.5 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded"
+                      title="Clear highlight"
+                    >
+                      <X className="w-3 h-3 text-amber-700 dark:text-amber-300" />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-[12px] text-foreground leading-snug">
+                  <mark className="bg-amber-300/70 dark:bg-amber-500/40 text-foreground px-1 rounded font-medium">
+                    {highlightedField.value}
+                  </mark>
+                </div>
+              </div>
+            )}
             {activeSourceUrl ? (
-              <iframe src={activeSourceUrl} title="Source page" className="w-full h-full border-0" sandbox="allow-same-origin allow-scripts" />
+              <iframe src={activeSourceUrl} title="Source page" className="w-full h-full border-0 flex-1" sandbox="allow-same-origin allow-scripts" />
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <ExternalLink className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                  <p className="text-[12px] text-muted-foreground">Click a source link on the right</p>
-                  <p className="text-[11px] text-muted-foreground/60">to load the original webpage here</p>
+                  <p className="text-[12px] text-muted-foreground">Click a field on the right</p>
+                  <p className="text-[11px] text-muted-foreground/60">to highlight its source value here</p>
                 </div>
               </div>
             )}
