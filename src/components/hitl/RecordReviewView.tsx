@@ -1,7 +1,8 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
-import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Search, Highlighter } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
+import MockSourcePage from "./MockSourcePage";
 
 interface RecordReviewViewProps {
   record: ValidationRecord;
@@ -77,6 +78,7 @@ export default function RecordReviewView({
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ basic_data: true, financial_data: true, corporate_hierarchy: true });
   const [sectionFilters, setSectionFilters] = useState<Record<string, ConfidenceFilter>>({});
   const [showGlobalFilter, setShowGlobalFilter] = useState(false);
+  const [sourceMode, setSourceMode] = useState<"mock" | "live">("mock");
 
   const getInitialSourceUrl = () => {
     for (const attr of record.attributes) {
@@ -101,15 +103,9 @@ export default function RecordReviewView({
     const ref = attr?.sourceRefs?.find(r => r.url && r.url !== "#") ?? null;
     const sourceUrl = ref?.url ?? activeSourceUrl;
     const sourceName = ref?.name ?? "Source";
-    if (sourceUrl) {
-      // Append text-fragment so "Open in new tab" auto-scrolls + highlights in supporting browsers
-      const cleanUrl = sourceUrl.split("#")[0];
-      const fragment = `#:~:text=${encodeURIComponent(value.slice(0, 80))}`;
-      setActiveSourceUrl(sourceUrl);
-      setHighlightedField({ fieldName, value, sourceName, sourceUrl: cleanUrl + fragment });
-    } else {
-      setHighlightedField({ fieldName, value, sourceName, sourceUrl: "" });
-    }
+    if (sourceUrl) setActiveSourceUrl(sourceUrl);
+    setHighlightedField({ fieldName, value, sourceName, sourceUrl: sourceUrl || "" });
+    setSourceMode("mock");
   };
 
   const categorized = useMemo(() => categorizeAttributes(record.attributes), [record.attributes]);
@@ -239,58 +235,81 @@ export default function RecordReviewView({
         <div className="w-1/2 border-r border-border flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-border bg-muted/20 flex items-center gap-2">
             <span className="text-[11px] font-semibold text-status-blue uppercase tracking-wide">Source View</span>
-            <span className="text-[11px] text-muted-foreground truncate flex-1 text-center">{activeSourceUrl || "Click a source link to load"}</span>
-            {activeSourceUrl && (
-              <a href={activeSourceUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground shrink-0">
-                Open in new tab <ExternalLink className="w-3 h-3" />
-              </a>
+            {highlightedField && sourceMode === "mock" && (
+              <span className="flex items-center gap-1 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded px-1.5 py-0.5">
+                <Highlighter className="w-3 h-3" />
+                {highlightedField.fieldName}
+              </span>
             )}
+            <span className="text-[11px] text-muted-foreground truncate flex-1 text-center">
+              {activeSourceUrl || "Click a field on the right to load its source"}
+            </span>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setSourceMode("mock")}
+                className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors ${
+                  sourceMode === "mock"
+                    ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+                title="Show mock source page with in-place highlighting"
+              >
+                Mock
+              </button>
+              <button
+                onClick={() => setSourceMode("live")}
+                disabled={!activeSourceUrl}
+                className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors disabled:opacity-40 ${
+                  sourceMode === "live"
+                    ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+                title="Load live source in iframe"
+              >
+                Live
+              </button>
+              {activeSourceUrl && (
+                <a
+                  href={
+                    highlightedField && highlightedField.value
+                      ? activeSourceUrl.split("#")[0] +
+                        `#:~:text=${encodeURIComponent(highlightedField.value.slice(0, 80))}`
+                      : activeSourceUrl
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground ml-1"
+                >
+                  Open <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           </div>
-          <div className="flex-1 overflow-hidden flex flex-col">
-            {highlightedField && (
-              <div className="px-3 py-2 border-b border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Highlighter className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Extracted Snippet</span>
-                    <span className="text-[10px] text-muted-foreground truncate">· {highlightedField.fieldName} · {highlightedField.sourceName}</span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {highlightedField.sourceUrl && (
-                      <a
-                        href={highlightedField.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-[10px] text-status-blue hover:underline"
-                        title="Open source page and scroll to value"
-                      >
-                        <Search className="w-3 h-3" /> Find in source
-                      </a>
-                    )}
-                    <button
-                      onClick={() => setHighlightedField(null)}
-                      className="p-0.5 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded"
-                      title="Clear highlight"
-                    >
-                      <X className="w-3 h-3 text-amber-700 dark:text-amber-300" />
-                    </button>
-                  </div>
-                </div>
-                <div className="text-[12px] text-foreground leading-snug">
-                  <mark className="bg-amber-300/70 dark:bg-amber-500/40 text-foreground px-1 rounded font-medium">
-                    {highlightedField.value}
-                  </mark>
-                </div>
-              </div>
-            )}
-            {activeSourceUrl ? (
-              <iframe src={activeSourceUrl} title="Source page" className="w-full h-full border-0 flex-1" sandbox="allow-same-origin allow-scripts" />
+          <div className="flex-1 overflow-hidden">
+            {sourceMode === "mock" ? (
+              <MockSourcePage
+                record={record}
+                sourceName={highlightedField?.sourceName ?? ""}
+                sourceUrl={activeSourceUrl}
+                highlightedField={
+                  highlightedField
+                    ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
+                    : null
+                }
+              />
+            ) : activeSourceUrl ? (
+              <iframe
+                src={activeSourceUrl}
+                title="Live source page"
+                className="w-full h-full border-0"
+                sandbox="allow-same-origin allow-scripts"
+              />
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <ExternalLink className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-[12px] text-muted-foreground">Click a field on the right</p>
-                  <p className="text-[11px] text-muted-foreground/60">to highlight its source value here</p>
+                  <p className="text-[11px] text-muted-foreground/60">to view and highlight it in the source</p>
                 </div>
               </div>
             )}
@@ -437,14 +456,13 @@ export default function RecordReviewView({
                                       <button
                                         key={si}
                                         onClick={() => {
-                                          if (!src.url || src.url === "#") return;
-                                          setActiveSourceUrl(src.url);
-                                          if (!isEmpty) {
-                                            const cleanUrl = src.url.split("#")[0];
-                                            const fragment = `#:~:text=${encodeURIComponent(displayValue.slice(0, 80))}`;
-                                            setHighlightedField({ fieldName: name, value: displayValue, sourceName: src.name, sourceUrl: cleanUrl + fragment });
-                                          }
-                                        }}
+                                           if (!src.url || src.url === "#") return;
+                                           setActiveSourceUrl(src.url);
+                                           setSourceMode("mock");
+                                           if (!isEmpty) {
+                                             setHighlightedField({ fieldName: name, value: displayValue, sourceName: src.name, sourceUrl: src.url });
+                                           }
+                                         }}
                                         className={`text-[10px] transition-colors ${
                                           activeSourceUrl === src.url
                                             ? "text-status-blue font-semibold"
