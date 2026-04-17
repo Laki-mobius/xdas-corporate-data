@@ -351,6 +351,29 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     );
   };
 
+  const additionalWorkflows = [
+    "SEDAR+ Canada",
+    "Financial Data Extraction - (XBRL/HTML)",
+    "Annual Report Data Extraction - (PDF/Unstructured)",
+    "Third-party Aggregators (Financial DBs)",
+    "Other Third-party Aggregators",
+    "Specialized Sources (Banking)",
+    "Specialized Sources (Tax)",
+    "Specialized Sources (UCC/Liens)",
+    "Hierarchy Impact",
+    "Event Monitoring",
+    "Scoring & Refresh",
+    "Data Consolidation",
+    "Deduplication",
+    "QC Validation",
+  ];
+
+  const toggleAdditionalWorkflow = (label: string) => {
+    setSelectedAdditionalWorkflows(prev =>
+      prev.includes(label) ? prev.filter(w => w !== label) : [...prev, label]
+    );
+  };
+
   const entityCount = inputMode === 'text'
     ? manualInput.split(/[\n,]+/).filter(s => s.trim()).length
     : fileEntities.length;
