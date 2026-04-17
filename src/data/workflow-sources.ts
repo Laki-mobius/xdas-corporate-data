@@ -32,16 +32,31 @@ const slug = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
+/**
+ * Per-source attribute ownership.
+ *
+ * Aligned to the master spec:
+ *  Basic Data:        Legal Name, Trade Name, Registration ID(s), Country, Address,
+ *                     City, State, Postal Code, Website, Email, Phone, Fax,
+ *                     Organizational Type, Foundation Year, Number of Employees,
+ *                     Business Description, NAICS/SIC Codes, Social Media Profiles,
+ *                     Status, Ticker Symbol, Stock Exchange
+ *  Financial Data:    Revenue (USD-normalized), Assets, Liabilities, Net Income,
+ *                     Fiscal Year End
+ *  Corporate Hierarchy: Ultimate Parent, Subsidiary Company, Entity Type,
+ *                       Hierarchy Level, Country, Relationship Type, Performance Expectation
+ */
 export const workflowSources: WorkflowSource[] = [
   {
     id: "company_data",
     label: "Company Data Extraction",
     sourceName: "Company Website",
     attributes: [
-      "Company Name", "Legal Name", "Address", "City", "State", "Zip Code",
-      "Country", "Phone Number", "Email ID", "Website URL", "Website",
-      "Industry / Sector", "Industry", "CEO / Founder", "LinkedIn URL", "Twitter URL",
-      "HQ Location",
+      // Basic Data — owned by company website
+      "Legal Name", "Trade Name", "Country", "Address", "City", "State",
+      "Postal Code", "Website", "Email", "Phone", "Fax",
+      "Foundation Year", "Number of Employees", "Business Description",
+      "Social Media Profiles",
     ],
     buildUrl: (company) => `https://www.${slug(company)}.com`,
   },
@@ -50,8 +65,11 @@ export const workflowSources: WorkflowSource[] = [
     label: "SEC Data",
     sourceName: "SEC EDGAR",
     attributes: [
-      "CIK", "Ticker Symbol", "Revenue", "Net Income", "EBITDA",
-      "Total Assets", "Liabilities", "Shares Outstanding", "SIC Code",
+      // Financial Data — owned by SEC filings
+      "Revenue (USD-normalized)", "Assets", "Liabilities", "Net Income",
+      "Fiscal Year End",
+      // SEC also exposes ticker / NAICS-SIC
+      "NAICS/SIC Codes", "Ticker Symbol",
     ],
     buildUrl: (company) =>
       `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=${encodeURIComponent(company)}&type=&dateb=&owner=include&count=40`,
@@ -61,8 +79,8 @@ export const workflowSources: WorkflowSource[] = [
     label: "Stock Exchange Data",
     sourceName: "Nasdaq",
     attributes: [
-      "Stock Price (Current)", "Stock Price (Open)", "Stock Price (Close)",
-      "Market Capitalization", "Exchange Name", "Trading Status",
+      // Market identity
+      "Ticker Symbol", "Stock Exchange", "Status",
     ],
     buildUrl: (company) =>
       `https://www.nasdaq.com/market-activity/stocks/${slug(company)}`,
@@ -72,10 +90,11 @@ export const workflowSources: WorkflowSource[] = [
     label: "Registry Data Extraction",
     sourceName: "California SOS",
     attributes: [
-      "Registration Number", "Incorporation Date", "Company Status", "Status",
-      "Entity Type", "Jurisdiction", "LEI", "Office Address", "Ownership %",
-      "Parent Name", "Ultimate Parent", "Subsidiary Name", "Hierarchy Level",
-      "Coverage",
+      // Basic Data (registration-side)
+      "Registration ID(s)", "Organizational Type",
+      // Corporate Hierarchy
+      "Ultimate Parent", "Subsidiary Company", "Entity Type",
+      "Hierarchy Level", "Relationship Type", "Performance Expectation",
     ],
     buildUrl: (company) =>
       `https://bizfileonline.sos.ca.gov/search/business?SearchCriteria=${encodeURIComponent(company)}`,
@@ -91,10 +110,6 @@ export const findWorkflowById = (id: string): WorkflowSource | undefined =>
 /**
  * Given an attribute name and the set of workflows that ran for the job,
  * return the source refs (name + URL) the user can click in the HITL review.
- *
- * Multi-workflow handling: if the attribute is claimed by more than one of the
- * selected workflows, all matching sources are returned. If none match, an
- * empty array is returned (the UI shows "No source available").
  */
 export function buildSourceRefsForAttribute(
   attributeName: string,
@@ -120,4 +135,24 @@ export function resolveWorkflowIdsFromLabels(labels: string[]): WorkflowSourceId
     if (wf) ids.push(wf.id);
   }
   return ids;
+}
+
+/**
+ * Aggregate the unique attribute list (in deterministic order) for a set
+ * of selected workflow IDs.
+ */
+export function attributesForWorkflows(selectedIds: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const id of selectedIds) {
+    const wf = findWorkflowById(id);
+    if (!wf) continue;
+    for (const attr of wf.attributes) {
+      if (!seen.has(attr)) {
+        seen.add(attr);
+        out.push(attr);
+      }
+    }
+  }
+  return out;
 }
