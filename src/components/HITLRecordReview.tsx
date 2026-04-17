@@ -140,7 +140,10 @@ interface Props {
 }
 
 export default function HITLRecordReview({ record, onBack }: Props) {
-  const src = sourceContent[record.source] ?? defaultSource;
+  const src = sourceSnapshots[record.source] ?? defaultSource;
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [snapshotReady, setSnapshotReady] = useState(false);
+  const [activeFieldKey, setActiveFieldKey] = useState<string | null>(null);
   const [reviewFields, setReviewFields] = useState(() => getReviewFields(record));
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
