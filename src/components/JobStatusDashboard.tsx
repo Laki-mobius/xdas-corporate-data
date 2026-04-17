@@ -1,8 +1,10 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
+import { attributesForWorkflows } from "@/data/workflow-sources";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
   MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
