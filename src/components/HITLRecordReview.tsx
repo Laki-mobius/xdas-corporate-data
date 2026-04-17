@@ -168,9 +168,9 @@ export default function HITLRecordReview({ record, onBack }: Props) {
     const ticker = record.tier === "Tier 1" ? "ACM" : record.company.slice(0, 3).toUpperCase();
     const shortName = record.company.split(" ")[0];
     doc.body.innerHTML = doc.body.innerHTML
-      .replaceAll("__COMPANY__", record.company)
-      .replaceAll("__SHORT__", shortName)
-      .replaceAll("__TICKER__", ticker);
+      .split("__COMPANY__").join(record.company)
+      .split("__SHORT__").join(shortName)
+      .split("__TICKER__").join(ticker);
 
     if (!doc.getElementById("__hl_styles__")) {
       const style = doc.createElement("style");
@@ -397,24 +397,24 @@ export default function HITLRecordReview({ record, onBack }: Props) {
           <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-muted/30">
             <span className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Source View</span>
             <div className="flex items-center gap-3">
-              <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[200px]">{src.url}</span>
+              <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[200px]">{src.liveUrl}</span>
               <a
-                href={src.url}
+                href={src.liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
               >
-                Open in new tab <ExternalLink className="w-3 h-3" />
+                Open live page <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </div>
           <div className="flex-1 relative">
             <iframe
-              src={src.url}
+              ref={iframeRef}
+              src={src.snapshot}
               title={`Source: ${record.source}`}
-              className="absolute inset-0 w-full h-full border-0"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              referrerPolicy="no-referrer"
+              className="absolute inset-0 w-full h-full border-0 bg-white"
+              onLoad={personalizeSnapshot}
             />
           </div>
         </div>
