@@ -223,17 +223,18 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                             e.stopPropagation();
                             const anyJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
                             if (anyJob._csvColumns && anyJob._csvRows) {
-                              const csvContent = [
-                                anyJob._csvColumns.join(','),
-                                ...anyJob._csvRows.map(row => row.join(','))
-                              ].join('\n');
-                              const blob = new Blob([csvContent], { type: 'text/csv' });
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = `${job.id}_output.csv`;
-                              a.click();
-                              URL.revokeObjectURL(url);
+                              const sheetData = [anyJob._csvColumns, ...anyJob._csvRows];
+                              const ws = XLSX.utils.aoa_to_sheet(sheetData);
+                              ws["!cols"] = anyJob._csvColumns.map((h, idx) => {
+                                const maxLen = Math.max(
+                                  String(h ?? "").length,
+                                  ...anyJob._csvRows!.map((r) => String(r[idx] ?? "").length),
+                                );
+                                return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+                              });
+                              const wb = XLSX.utils.book_new();
+                              XLSX.utils.book_append_sheet(wb, ws, "Extraction");
+                              XLSX.writeFile(wb, `${job.id}_output.xlsx`);
                             }
                           }}
                         >
