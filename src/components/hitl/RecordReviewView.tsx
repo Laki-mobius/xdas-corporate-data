@@ -436,7 +436,15 @@ export default function RecordReviewView({
                                     typedAttr.sourceRefs.map((src, si) => (
                                       <button
                                         key={si}
-                                        onClick={() => src.url && src.url !== "#" && setActiveSourceUrl(src.url)}
+                                        onClick={() => {
+                                          if (!src.url || src.url === "#") return;
+                                          setActiveSourceUrl(src.url);
+                                          if (!isEmpty) {
+                                            const cleanUrl = src.url.split("#")[0];
+                                            const fragment = `#:~:text=${encodeURIComponent(displayValue.slice(0, 80))}`;
+                                            setHighlightedField({ fieldName: name, value: displayValue, sourceName: src.name, sourceUrl: cleanUrl + fragment });
+                                          }
+                                        }}
                                         className={`text-[10px] transition-colors ${
                                           activeSourceUrl === src.url
                                             ? "text-status-blue font-semibold"
