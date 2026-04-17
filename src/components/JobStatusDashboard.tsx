@@ -378,7 +378,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     ? manualInput.split(/[\n,]+/).filter(s => s.trim()).length
     : fileEntities.length;
 
-  const canSubmit = jobName.trim() && selectedWorkflows.length > 0 && entityCount > 0;
+  const canSubmit = jobName.trim() && (selectedWorkflows.length > 0 || selectedAdditionalWorkflows.length > 0) && entityCount > 0;
 
   const workflowDefs = [
     { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data',
