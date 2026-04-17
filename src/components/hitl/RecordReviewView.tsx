@@ -1,7 +1,8 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
-import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Search, Highlighter } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
+import MockSourcePage from "./MockSourcePage";
 
 interface RecordReviewViewProps {
   record: ValidationRecord;
