@@ -1,5 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { sampleRecords, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
+import {
+  buildSourceRefsForAttribute,
+  resolveWorkflowIdsFromLabels,
+} from "@/data/workflow-sources";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import QCSummaryCards from "./hitl/QCSummaryCards";
@@ -21,6 +25,13 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
     // columns[0] is "Company" (entity identifier), rest are attributes
     const attrNames = columns.slice(1);
 
+    // Resolve which workflows ran for this job from job.tier (comma-joined labels)
+    const workflowLabels: string[] = (job.tier || "")
+      .split(",")
+      .map((s: string) => s.trim())
+      .filter(Boolean);
+    const selectedWorkflowIds = resolveWorkflowIdsFromLabels(workflowLabels);
+
     rows.forEach((row: string[], rowIdx: number) => {
       const companyName = row[0] || `Entity ${rowIdx + 1}`;
       const attributes: ValidationAttribute[] = attrNames.map((attr, i) => ({
@@ -29,12 +40,30 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
         currentValue: row[i + 1] || "",
         status: "pending" as const,
         qcFlag: false,
-        sourceRefs: [{ name: "Company Website", url: `https://www.${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.com` }],
+        // Only show source refs that correspond to the workflows the user
+        // actually selected when running the job.
+        sourceRefs: buildSourceRefsForAttribute(attr, selectedWorkflowIds, companyName),
       }));
 
       // Compute a pseudo confidence score based on how many attrs have values
       const filledCount = attributes.filter(a => a.extractedValue && a.extractedValue !== "N/A" && a.extractedValue !== "").length;
       const confidence = attributes.length > 0 ? Math.round(70 + (filledCount / attributes.length) * 25) : 0;
+
+      // Top-level `sources` (used as the LHS fallback URL) — first selected workflow's page
+      const fallbackSources = selectedWorkflowIds.length > 0
+        ? [{
+            url: buildSourceRefsForAttribute("Company Name", selectedWorkflowIds, companyName)[0]?.url
+              || `https://www.${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.com`,
+            type: "Website" as const,
+            snippet: `Extracted via ${workflowLabels.join(", ")}`,
+            highlightedText: companyName,
+          }]
+        : [{
+            url: "#",
+            type: "API" as const,
+            snippet: `Extracted via job ${job.job_id}`,
+            highlightedText: companyName,
+          }];
 
       records.push({
         id: `${job.job_id}-R${String(rowIdx + 1).padStart(3, "0")}`,
@@ -43,7 +72,7 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
         status: "pending",
         completionPct: 0,
         confidenceScore: confidence,
-        sourceList: [job.name || "Job Extraction"],
+        sourceList: workflowLabels.length > 0 ? workflowLabels : [job.name || "Job Extraction"],
         lastUpdated: new Date(job.updated_at || job.created_at).toLocaleString("en-US", {
           year: "numeric", month: "2-digit", day: "2-digit",
           hour: "2-digit", minute: "2-digit", hour12: false,
@@ -51,12 +80,7 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
         existingValue: "",
         suggestedValue: attributes[0]?.extractedValue || "",
         attributes,
-        sources: [{
-          url: "#",
-          type: "API" as const,
-          snippet: `Extracted via job ${job.job_id}`,
-          highlightedText: companyName,
-        }],
+        sources: fallbackSources,
       });
     });
   }
