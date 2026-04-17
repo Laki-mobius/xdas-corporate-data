@@ -18,21 +18,24 @@ export interface HITLRecord {
   flagReason?: string;
 }
 
-/* ── mock source content per source type ─────────────── */
+/* ── snapshot mapping per source type ────────────────── */
 
-const sourceContent: Record<string, { url: string; title: string }> = {
+const sourceSnapshots: Record<string, { snapshot: string; liveUrl: string; title: string }> = {
   "SEC EDGAR (10-K/Q)": {
-    url: "https://www.sec.gov/cgi-bin/browse-edgar",
-    title: "EDGAR | Company Search Results",
+    snapshot: "/snapshots/sec-edgar.html",
+    liveUrl: "https://www.sec.gov/cgi-bin/browse-edgar",
+    title: "EDGAR | Company Filings",
   },
   NYSE: {
-    url: "https://www.nyse.com/listings",
-    title: "NYSE Listed Companies",
+    snapshot: "/snapshots/nyse.html",
+    liveUrl: "https://www.nyse.com/listings",
+    title: "NYSE Listed Company",
   },
 };
 
 const defaultSource = {
-  url: "https://source.example.com",
+  snapshot: "/snapshots/generic.html",
+  liveUrl: "https://source.example.com",
   title: "Source Document Viewer",
 };
 
