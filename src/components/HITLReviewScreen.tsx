@@ -50,10 +50,14 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
       const confidence = attributes.length > 0 ? Math.round(70 + (filledCount / attributes.length) * 25) : 0;
 
       // Top-level `sources` (used as the LHS fallback URL) — first selected workflow's page
-      const fallbackSources = selectedWorkflowIds.length > 0
+      const fallbackUrl = selectedWorkflowIds.length > 0
+        ? buildSourceRefsForAttribute(attrNames[0] || "Legal Name", selectedWorkflowIds, companyName)[0]?.url
+            || buildSourceRefsForAttribute("Legal Name", selectedWorkflowIds, companyName)[0]?.url
+            || ""
+        : "";
+      const fallbackSources = fallbackUrl
         ? [{
-            url: buildSourceRefsForAttribute("Company Name", selectedWorkflowIds, companyName)[0]?.url
-              || `https://www.${companyName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.com`,
+            url: fallbackUrl,
             type: "Website" as const,
             snippet: `Extracted via ${workflowLabels.join(", ")}`,
             highlightedText: companyName,
