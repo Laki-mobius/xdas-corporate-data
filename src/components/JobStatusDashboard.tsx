@@ -424,8 +424,16 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       { label: 'Load', state: 'pending' },
     ];
     const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
-    const extractionAttrs = inputMode === 'file' && fileColumns.length > 0 ? fileColumns : mergedAttributes;
-    const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : manualInput.split(/[\n,]+/).filter(s => s.trim());
+    // Attributes derived from SELECTED WORKFLOWS (per-source ownership).
+    // Input file headers are preserved verbatim alongside extracted columns.
+    const extractionAttrs = mergedAttributes;
+    const inputHeadersForExtraction = inputMode === 'file' && fileColumns.length > 0
+      ? ['Company', ...fileColumns]
+      : ['Company'];
+    const inputRowsForExtraction = inputMode === 'file' && fileCsvRows.length > 0
+      ? fileCsvRows
+      : manualInput.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).map(s => [s]);
+    const companiesForExtraction = inputRowsForExtraction.map(r => r[0] || '');
     const workflowLabels = [
       ...selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id),
       ...selectedAdditionalWorkflows,
@@ -443,7 +451,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       logs: [
         { time: now(), level: 'INFO', message: `Job initialized. ${entityCount} entities targeted.` },
         { time: now(), level: 'INFO', message: `Workflows: ${workflowLabels.join(', ')}` },
-        { time: now(), level: 'INFO', message: `Extracting ${extractionAttrs.length} attributes` },
+        { time: now(), level: 'INFO', message: `Extracting ${extractionAttrs.length} attributes from ${selectedWorkflows.length} source(s)` },
         { time: now(), level: 'SUCCESS', message: 'Connection established. Extraction started.' },
       ],
       runtime: '0h 00m 00s',
@@ -452,7 +460,14 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       _csvRows: undefined,
       _companiesForExtraction: companiesForExtraction,
       _attributesForExtraction: extractionAttrs,
-    } as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
+      _selectedWorkflowIds: [...selectedWorkflows],
+      _inputHeaders: inputHeadersForExtraction,
+      _inputRows: inputRowsForExtraction,
+    } as Job & {
+      _csvColumns?: string[]; _csvRows?: string[][];
+      _companiesForExtraction?: string[]; _attributesForExtraction?: string[];
+      _selectedWorkflowIds?: string[]; _inputHeaders?: string[]; _inputRows?: string[][];
+    };
     onSubmit(newJob);
     setJobName('');
     setSelectedWorkflows([]);
