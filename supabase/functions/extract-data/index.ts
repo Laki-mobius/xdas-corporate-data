@@ -1,11 +1,111 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.2";
+
+/**
+ * Per-workflow source ownership. Must be kept in sync with
+ * src/data/workflow-sources.ts on the frontend.
+ */
+const WORKFLOW_SOURCES: Record<string, { sourceName: string; sourceUrlHint: string; attributes: string[] }> = {
+  company_data: {
+    sourceName: "Company Website",
+    sourceUrlHint: "the company's official website",
+    attributes: [
+      "Legal Name", "Trade Name", "Country", "Address", "City", "State",
+      "Postal Code", "Website", "Email", "Phone", "Fax",
+      "Foundation Year", "Number of Employees", "Business Description",
+      "Social Media Profiles",
+    ],
+  },
+  sec_data: {
+    sourceName: "SEC EDGAR",
+    sourceUrlHint: "https://www.sec.gov/search-filings",
+    attributes: [
+      "Revenue (USD-normalized)", "Assets", "Liabilities", "Net Income",
+      "Fiscal Year End", "NAICS/SIC Codes", "Ticker Symbol",
+    ],
+  },
+  stock_exchange: {
+    sourceName: "Nasdaq",
+    sourceUrlHint: "https://www.nasdaq.com/market-activity/stocks",
+    attributes: [
+      "Ticker Symbol", "Stock Exchange", "Status",
+    ],
+  },
+  registry_data: {
+    sourceName: "California Secretary of State",
+    sourceUrlHint: "https://bizfileonline.sos.ca.gov/search/business",
+    attributes: [
+      "Registration ID(s)", "Organizational Type",
+      "Ultimate Parent", "Subsidiary Company", "Entity Type",
+      "Hierarchy Level", "Relationship Type", "Performance Expectation",
+    ],
+  },
+};
+
+interface RequestBody {
+  /** Optional explicit attributes (legacy). If omitted, derived from selectedWorkflowIds. */
+  attributes?: string[];
+  /** Workflow ids selected by the user in Run New Job. */
+  selectedWorkflowIds?: string[];
+  /** Input file headers (preserved verbatim in output). First column = entity identifier. */
+  inputHeaders?: string[];
+  /** Input rows from the uploaded file (each row a string[] aligned to inputHeaders). */
+  inputRows?: string[][];
+  /** Legacy: list of company names. Used when no inputRows. */
+  companies?: string[];
+  /** DB row id of the job to update on completion. */
+  jobDbId?: string;
+}
+
+function uniqueAttributesForWorkflows(ids: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const id of ids) {
+    const wf = WORKFLOW_SOURCES[id];
+    if (!wf) continue;
+    for (const a of wf.attributes) {
+      if (!seen.has(a)) { seen.add(a); out.push(a); }
+    }
+  }
+  return out;
+}
+
+function buildPrompt(
+  entities: string[],
+  attributes: string[],
+  workflowIds: string[],
+): string {
+  const sourceLines = workflowIds
+    .map((id) => WORKFLOW_SOURCES[id])
+    .filter(Boolean)
+    .map((wf) => `  - ${wf!.sourceName} (${wf!.sourceUrlHint}) → ${wf!.attributes.join(", ")}`)
+    .join("\n");
+
+  return `You are a corporate data extraction assistant. For each company below, extract ONLY the listed attributes from ONLY the selected sources.
+
+Selected sources (each authoritative for its listed attributes):
+${sourceLines || "  - (none — use general public knowledge)"}
+
+Output rules:
+- Return ONLY a valid JSON array of arrays. No markdown, no commentary.
+- Each inner array MUST have exactly ${attributes.length + 1} elements in this order:
+  1. Company identifier (echo back exactly as provided)
+${attributes.map((a, i) => `  ${i + 2}. ${a}`).join("\n")}
+- Use real, factual public data. If a value is unknown or not applicable, return "N/A".
+- Normalize Revenue to USD millions when possible.
+- Foundation Year as 4-digit year. Status as "Active" / "Inactive" / "Dissolved" etc.
+
+Companies (${entities.length}):
+${entities.map((c) => `- ${c}`).join("\n")}
+
+Return ONLY the JSON array.`;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -13,12 +113,23 @@ serve(async (req) => {
   }
 
   try {
-    // Auth is handled by RLS on the jobs table; the function itself is open
+    const body = (await req.json()) as RequestBody;
 
-    const { companies, attributes, jobDbId } = await req.json();
+    // Resolve entities from inputRows (preferred) or legacy companies array
+    const inputHeaders = body.inputHeaders ?? [];
+    const inputRows = body.inputRows ?? [];
+    const entities: string[] = inputRows.length > 0
+      ? inputRows.map((r) => (r[0] || "").toString().trim()).filter(Boolean)
+      : (body.companies ?? []).map((c) => c.toString().trim()).filter(Boolean);
 
-    if (!companies?.length || !attributes?.length) {
-      return new Response(JSON.stringify({ error: "Missing companies or attributes" }), {
+    // Resolve attributes: per-workflow union (preferred) or explicit list
+    const workflowIds = (body.selectedWorkflowIds ?? []).filter((id) => WORKFLOW_SOURCES[id]);
+    const attributes = workflowIds.length > 0
+      ? uniqueAttributesForWorkflows(workflowIds)
+      : (body.attributes ?? []);
+
+    if (entities.length === 0 || attributes.length === 0) {
+      return new Response(JSON.stringify({ error: "Missing entities or attributes" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -32,25 +143,8 @@ serve(async (req) => {
       });
     }
 
-    // Build prompt
-    const companyList = companies.slice(0, 50); // limit batch size
-    const prompt = `You are a corporate data extraction assistant. Extract the following attributes for each company listed below. Return ONLY a valid JSON array of arrays (no markdown, no explanation).
-
-Each inner array should have elements in this exact order:
-1. Company Name (as provided)
-${attributes.map((a: string, i: number) => `${i + 2}. ${a}`).join("\n")}
-
-Companies:
-${companyList.map((c: string) => `- ${c}`).join("\n")}
-
-Rules:
-- Return real, factual data. If you don't know a value, return "N/A".
-- For phone numbers, use the company's actual main phone number.
-- For emails, use the company's actual contact email.
-- For websites, use the company's actual website URL.
-- For revenue, use the most recent publicly available figure.
-- For employee counts, use the most recent publicly available figure.
-- Return ONLY the JSON array, nothing else.`;
+    const cappedEntities = entities.slice(0, 50);
+    const prompt = buildPrompt(cappedEntities, attributes, workflowIds);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -79,22 +173,52 @@ Rules:
 
     const aiResult = await response.json();
     const content = aiResult.choices?.[0]?.message?.content || "[]";
-    
+
     // Parse the JSON from the AI response
-    let rows: string[][];
+    let aiRows: string[][];
     try {
-      // Strip markdown code fences if present
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      rows = JSON.parse(cleaned);
+      aiRows = JSON.parse(cleaned);
+      if (!Array.isArray(aiRows)) throw new Error("not array");
     } catch {
       console.error("Failed to parse AI response:", content);
-      rows = companyList.map((c: string) => [c, ...attributes.map(() => "N/A")]);
+      aiRows = cappedEntities.map((c) => [c, ...attributes.map(() => "N/A")]);
     }
 
-    const columns = ["Company Name", ...attributes];
+    // Index AI results by entity (column 0) for stable joining back to input rows
+    const aiByEntity = new Map<string, string[]>();
+    for (const row of aiRows) {
+      if (!Array.isArray(row) || row.length === 0) continue;
+      const key = String(row[0] || "").trim();
+      // Pad to attributes.length + 1
+      const padded = [key, ...attributes.map((_, i) => String(row[i + 1] ?? "N/A"))];
+      aiByEntity.set(key, padded);
+    }
 
-    // If jobDbId provided, update the job record in Supabase
-    if (jobDbId) {
+    // Build output: preserve input headers + append extracted attributes
+    const inputHeadersFinal = inputHeaders.length > 0 ? inputHeaders : ["Company"];
+    const columns = [...inputHeadersFinal, ...attributes];
+
+    let rows: string[][];
+    if (inputRows.length > 0) {
+      rows = inputRows.map((inputRow) => {
+        const key = String(inputRow[0] || "").trim();
+        const ai = aiByEntity.get(key);
+        const extracted = ai ? ai.slice(1) : attributes.map(() => "N/A");
+        // Pad input row to header length
+        const paddedInput = inputHeadersFinal.map((_, i) => String(inputRow[i] ?? ""));
+        return [...paddedInput, ...extracted];
+      });
+    } else {
+      rows = cappedEntities.map((entity) => {
+        const ai = aiByEntity.get(entity);
+        const extracted = ai ? ai.slice(1) : attributes.map(() => "N/A");
+        return [entity, ...extracted];
+      });
+    }
+
+    // Persist to Supabase if jobDbId provided
+    if (body.jobDbId) {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
@@ -105,7 +229,7 @@ Rules:
         status: "Completed",
         progress: 100,
         error_rate: "0.00%",
-      }).eq("id", jobDbId);
+      }).eq("id", body.jobDbId);
     }
 
     return new Response(JSON.stringify({ columns, rows }), {
@@ -113,7 +237,8 @@ Rules:
     });
   } catch (err) {
     console.error("Edge function error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

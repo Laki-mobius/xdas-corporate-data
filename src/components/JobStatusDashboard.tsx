@@ -1,8 +1,10 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
+import { attributesForWorkflows } from "@/data/workflow-sources";
 import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
   MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
@@ -221,17 +223,18 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                             e.stopPropagation();
                             const anyJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
                             if (anyJob._csvColumns && anyJob._csvRows) {
-                              const csvContent = [
-                                anyJob._csvColumns.join(','),
-                                ...anyJob._csvRows.map(row => row.join(','))
-                              ].join('\n');
-                              const blob = new Blob([csvContent], { type: 'text/csv' });
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = `${job.id}_output.csv`;
-                              a.click();
-                              URL.revokeObjectURL(url);
+                              const sheetData = [anyJob._csvColumns, ...anyJob._csvRows];
+                              const ws = XLSX.utils.aoa_to_sheet(sheetData);
+                              ws["!cols"] = anyJob._csvColumns.map((h, idx) => {
+                                const maxLen = Math.max(
+                                  String(h ?? "").length,
+                                  ...anyJob._csvRows!.map((r) => String(r[idx] ?? "").length),
+                                );
+                                return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
+                              });
+                              const wb = XLSX.utils.book_new();
+                              XLSX.utils.book_append_sheet(wb, ws, "Extraction");
+                              XLSX.writeFile(wb, `${job.id}_output.xlsx`);
                             }
                           }}
                         >
@@ -381,24 +384,16 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const canSubmit = jobName.trim() && (selectedWorkflows.length > 0 || selectedAdditionalWorkflows.length > 0) && entityCount > 0;
 
   const workflowDefs = [
-    { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data',
-      attributes: ["Company Name","Legal Name","Address","City","State","Zip Code","Phone Number","Email ID","Website URL","Industry / Sector","CEO / Founder","LinkedIn URL","Twitter URL"] },
-    { id: 'registry_data', label: 'Registry Data Extraction', desc: 'Registration & structure',
-      attributes: ["Company Name","Office Address","Registration Number","Incorporation Date","Company Status","Parent Name","Subsidiary Name","Entity Type","Country","Ownership %","Coverage","LEI","Status","SIC Code","Jurisdiction","Ultimate Parent","Hierarchy Level"] },
-    { id: 'sec_data', label: 'SEC Data', desc: 'SEC filings & financials',
-      attributes: ["Company Name","CIK","Ticker Symbol","Revenue","Net Income","EBITDA","Total Assets","Liabilities","Shares Outstanding"] },
-    { id: 'stock_exchange', label: 'Stock Exchange Data', desc: 'Trading & market data',
-      attributes: ["Company Name","Address","Stock Price (Current)","Stock Price (Open)","Stock Price (Close)","Market Capitalization","Exchange Name","Trading Status"] },
+    { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data' },
+    { id: 'registry_data', label: 'Registry Data Extraction', desc: 'Registration & hierarchy' },
+    { id: 'sec_data', label: 'SEC Data', desc: 'SEC filings & financials' },
+    { id: 'stock_exchange', label: 'Stock Exchange Data', desc: 'Trading & market data' },
   ];
 
-  const mergedAttributes = useMemo(() => {
-    const attrSet = new Set<string>();
-    for (const id of selectedWorkflows) {
-      const wf = workflowDefs.find(w => w.id === id);
-      if (wf) wf.attributes.forEach(a => attrSet.add(a));
-    }
-    return Array.from(attrSet);
-  }, [selectedWorkflows]);
+  const mergedAttributes = useMemo(
+    () => attributesForWorkflows(selectedWorkflows),
+    [selectedWorkflows],
+  );
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -429,8 +424,16 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       { label: 'Load', state: 'pending' },
     ];
     const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
-    const extractionAttrs = inputMode === 'file' && fileColumns.length > 0 ? fileColumns : mergedAttributes;
-    const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : manualInput.split(/[\n,]+/).filter(s => s.trim());
+    // Attributes derived from SELECTED WORKFLOWS (per-source ownership).
+    // Input file headers are preserved verbatim alongside extracted columns.
+    const extractionAttrs = mergedAttributes;
+    const inputHeadersForExtraction = inputMode === 'file' && fileColumns.length > 0
+      ? ['Company', ...fileColumns]
+      : ['Company'];
+    const inputRowsForExtraction = inputMode === 'file' && fileCsvRows.length > 0
+      ? fileCsvRows
+      : manualInput.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).map(s => [s]);
+    const companiesForExtraction = inputRowsForExtraction.map(r => r[0] || '');
     const workflowLabels = [
       ...selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id),
       ...selectedAdditionalWorkflows,
@@ -448,7 +451,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       logs: [
         { time: now(), level: 'INFO', message: `Job initialized. ${entityCount} entities targeted.` },
         { time: now(), level: 'INFO', message: `Workflows: ${workflowLabels.join(', ')}` },
-        { time: now(), level: 'INFO', message: `Extracting ${extractionAttrs.length} attributes` },
+        { time: now(), level: 'INFO', message: `Extracting ${extractionAttrs.length} attributes from ${selectedWorkflows.length} source(s)` },
         { time: now(), level: 'SUCCESS', message: 'Connection established. Extraction started.' },
       ],
       runtime: '0h 00m 00s',
@@ -457,7 +460,14 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
       _csvRows: undefined,
       _companiesForExtraction: companiesForExtraction,
       _attributesForExtraction: extractionAttrs,
-    } as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
+      _selectedWorkflowIds: [...selectedWorkflows],
+      _inputHeaders: inputHeadersForExtraction,
+      _inputRows: inputRowsForExtraction,
+    } as Job & {
+      _csvColumns?: string[]; _csvRows?: string[][];
+      _companiesForExtraction?: string[]; _attributesForExtraction?: string[];
+      _selectedWorkflowIds?: string[]; _inputHeaders?: string[]; _inputRows?: string[][];
+    };
     onSubmit(newJob);
     setJobName('');
     setSelectedWorkflows([]);
@@ -952,11 +962,18 @@ export default function JobStatusDashboard() {
   }, [session?.user?.id]);
 
   const handleNewJob = useCallback(async (job: Job) => {
-    const extJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
+    const extJob = job as Job & {
+      _csvColumns?: string[]; _csvRows?: string[][];
+      _companiesForExtraction?: string[]; _attributesForExtraction?: string[];
+      _selectedWorkflowIds?: string[]; _inputHeaders?: string[]; _inputRows?: string[][];
+    };
     const companies = extJob._companiesForExtraction || [];
     const attributes = extJob._attributesForExtraction || [];
+    const selectedWorkflowIds = extJob._selectedWorkflowIds || [];
+    const inputHeaders = extJob._inputHeaders || ['Company'];
+    const inputRows = extJob._inputRows || companies.map(c => [c]);
     setAdhocJobs(prev => [extJob, ...prev]);
-    
+
     // Save initial job to DB and get DB id
     const dbIdResult = await saveJobToDb(extJob);
 
@@ -985,6 +1002,9 @@ export default function JobStatusDashboard() {
         body: {
           companies,
           attributes,
+          selectedWorkflowIds,
+          inputHeaders,
+          inputRows,
           jobDbId: dbIdResult,
         },
       });
