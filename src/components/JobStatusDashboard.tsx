@@ -21,6 +21,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -333,6 +334,8 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
 }) {
   const [jobName, setJobName] = useState('');
   const [selectedWorkflows, setSelectedWorkflows] = useState<string[]>([]);
+  const [selectedAdditionalWorkflows, setSelectedAdditionalWorkflows] = useState<string[]>([]);
+  const [additionalDropdownOpen, setAdditionalDropdownOpen] = useState(false);
   const [inputMode, setInputMode] = useState<'text' | 'file'>('file');
   const [manualInput, setManualInput] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
@@ -348,11 +351,34 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     );
   };
 
+  const additionalWorkflows = [
+    "SEDAR+ Canada",
+    "Financial Data Extraction - (XBRL/HTML)",
+    "Annual Report Data Extraction - (PDF/Unstructured)",
+    "Third-party Aggregators (Financial DBs)",
+    "Other Third-party Aggregators",
+    "Specialized Sources (Banking)",
+    "Specialized Sources (Tax)",
+    "Specialized Sources (UCC/Liens)",
+    "Hierarchy Impact",
+    "Event Monitoring",
+    "Scoring & Refresh",
+    "Data Consolidation",
+    "Deduplication",
+    "QC Validation",
+  ];
+
+  const toggleAdditionalWorkflow = (label: string) => {
+    setSelectedAdditionalWorkflows(prev =>
+      prev.includes(label) ? prev.filter(w => w !== label) : [...prev, label]
+    );
+  };
+
   const entityCount = inputMode === 'text'
     ? manualInput.split(/[\n,]+/).filter(s => s.trim()).length
     : fileEntities.length;
 
-  const canSubmit = jobName.trim() && selectedWorkflows.length > 0 && entityCount > 0;
+  const canSubmit = jobName.trim() && (selectedWorkflows.length > 0 || selectedAdditionalWorkflows.length > 0) && entityCount > 0;
 
   const workflowDefs = [
     { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data',
@@ -405,7 +431,10 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
     const extractionAttrs = inputMode === 'file' && fileColumns.length > 0 ? fileColumns : mergedAttributes;
     const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : manualInput.split(/[\n,]+/).filter(s => s.trim());
-    const workflowLabels = selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id);
+    const workflowLabels = [
+      ...selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id),
+      ...selectedAdditionalWorkflows,
+    ];
 
     const newJob: Job = {
       id: nextId,
@@ -432,6 +461,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     onSubmit(newJob);
     setJobName('');
     setSelectedWorkflows([]);
+    setSelectedAdditionalWorkflows([]);
     setManualInput('');
     setFileName(null);
     setFileEntities([]);
@@ -508,6 +538,75 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
                 );
               })}
             </div>
+
+            {/* Additional Workflows Multi-Select Dropdown */}
+            <div className="space-y-1.5 pt-1">
+              <Label className="text-[12px] font-medium text-muted-foreground">
+                Additional Workflows
+                <span className="text-[11px] font-normal text-muted-foreground/80 ml-2">
+                  Select one or more
+                </span>
+              </Label>
+              <Popover open={additionalDropdownOpen} onOpenChange={setAdditionalDropdownOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between h-10 text-[13px] font-normal"
+                  >
+                    <span className={cn("truncate", selectedAdditionalWorkflows.length === 0 && "text-muted-foreground")}>
+                      {selectedAdditionalWorkflows.length === 0
+                        ? "Select additional workflows..."
+                        : `${selectedAdditionalWorkflows.length} selected`}
+                    </span>
+                    <ChevronDown className="w-4 h-4 opacity-50 shrink-0 ml-2" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0 z-[110]"
+                  align="start"
+                >
+                  <div className="max-h-64 overflow-y-auto py-1">
+                    {additionalWorkflows.map((wf) => {
+                      const checked = selectedAdditionalWorkflows.includes(wf);
+                      return (
+                        <button
+                          key={wf}
+                          type="button"
+                          onClick={() => toggleAdditionalWorkflow(wf)}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-left text-[13px] hover:bg-accent transition-colors"
+                        >
+                          <Checkbox checked={checked} className="pointer-events-none" />
+                          <span className={cn(checked && "font-medium")}>{wf}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              {selectedAdditionalWorkflows.length > 0 && (
+                <div className="flex flex-wrap gap-1 pt-1">
+                  {selectedAdditionalWorkflows.map((wf) => (
+                    <Badge
+                      key={wf}
+                      variant="secondary"
+                      className="text-[10px] gap-1 pr-1"
+                    >
+                      {wf}
+                      <button
+                        type="button"
+                        onClick={() => toggleAdditionalWorkflow(wf)}
+                        className="hover:bg-muted-foreground/20 rounded-sm p-0.5"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {selectedWorkflows.length > 0 && (
               <p className="text-[11px] text-muted-foreground">
                 {mergedAttributes.length} attributes will be extracted
