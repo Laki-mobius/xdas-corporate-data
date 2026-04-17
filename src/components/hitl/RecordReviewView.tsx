@@ -419,11 +419,12 @@ export default function RecordReviewView({
                                   ) : (
                                     <button
                                       type="button"
-                                      onClick={() => startEdit(name, globalIdx, typedAttr)}
+                                      onClick={() => isEmpty ? startEdit(name, globalIdx, typedAttr) : focusFieldInSource(name, displayValue, typedAttr)}
+                                      onDoubleClick={() => startEdit(name, globalIdx, typedAttr)}
                                       className="w-full text-left"
-                                      title={isEmpty ? `Add ${name}` : `Edit ${name}`}
+                                      title={isEmpty ? `Add ${name}` : `Click to highlight in source · Double-click to edit`}
                                     >
-                                      <span className={`block text-[12px] ${isEmpty ? "text-muted-foreground italic" : "text-foreground truncate"}`}>
+                                      <span className={`block text-[12px] ${isEmpty ? "text-muted-foreground italic" : highlightedField?.fieldName === name ? "text-amber-700 dark:text-amber-300 font-medium truncate" : "text-foreground truncate"}`}>
                                         {isEmpty ? "Click to add value" : displayValue}
                                       </span>
                                     </button>
