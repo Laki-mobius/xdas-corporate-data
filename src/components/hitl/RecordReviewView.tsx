@@ -456,14 +456,13 @@ export default function RecordReviewView({
                                       <button
                                         key={si}
                                         onClick={() => {
-                                          if (!src.url || src.url === "#") return;
-                                          setActiveSourceUrl(src.url);
-                                          if (!isEmpty) {
-                                            const cleanUrl = src.url.split("#")[0];
-                                            const fragment = `#:~:text=${encodeURIComponent(displayValue.slice(0, 80))}`;
-                                            setHighlightedField({ fieldName: name, value: displayValue, sourceName: src.name, sourceUrl: cleanUrl + fragment });
-                                          }
-                                        }}
+                                           if (!src.url || src.url === "#") return;
+                                           setActiveSourceUrl(src.url);
+                                           setSourceMode("mock");
+                                           if (!isEmpty) {
+                                             setHighlightedField({ fieldName: name, value: displayValue, sourceName: src.name, sourceUrl: src.url });
+                                           }
+                                         }}
                                         className={`text-[10px] transition-colors ${
                                           activeSourceUrl === src.url
                                             ? "text-status-blue font-semibold"
