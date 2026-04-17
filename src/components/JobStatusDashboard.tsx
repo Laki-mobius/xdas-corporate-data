@@ -962,11 +962,18 @@ export default function JobStatusDashboard() {
   }, [session?.user?.id]);
 
   const handleNewJob = useCallback(async (job: Job) => {
-    const extJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][]; _companiesForExtraction?: string[]; _attributesForExtraction?: string[] };
+    const extJob = job as Job & {
+      _csvColumns?: string[]; _csvRows?: string[][];
+      _companiesForExtraction?: string[]; _attributesForExtraction?: string[];
+      _selectedWorkflowIds?: string[]; _inputHeaders?: string[]; _inputRows?: string[][];
+    };
     const companies = extJob._companiesForExtraction || [];
     const attributes = extJob._attributesForExtraction || [];
+    const selectedWorkflowIds = extJob._selectedWorkflowIds || [];
+    const inputHeaders = extJob._inputHeaders || ['Company'];
+    const inputRows = extJob._inputRows || companies.map(c => [c]);
     setAdhocJobs(prev => [extJob, ...prev]);
-    
+
     // Save initial job to DB and get DB id
     const dbIdResult = await saveJobToDb(extJob);
 
@@ -995,6 +1002,9 @@ export default function JobStatusDashboard() {
         body: {
           companies,
           attributes,
+          selectedWorkflowIds,
+          inputHeaders,
+          inputRows,
           jobDbId: dbIdResult,
         },
       });
