@@ -101,7 +101,7 @@ export const workflowSources: WorkflowSource[] = [
       "Foundation Year", "Number of Employees", "Business Description",
       "Social Media Profiles",
     ],
-    buildUrl: (company) => `https://www.${slug(company)}.com`,
+    buildUrl: (company) => buildCompanyWebsite(company),
   },
   {
     id: "sec_data",
@@ -114,8 +114,11 @@ export const workflowSources: WorkflowSource[] = [
       // SEC also exposes ticker / NAICS-SIC
       "NAICS/SIC Codes", "Ticker Symbol",
     ],
-    buildUrl: (company) =>
-      `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=${encodeURIComponent(company)}&type=&dateb=&owner=include&count=40`,
+    buildUrl: (company) => {
+      const host = extractHost(company);
+      const queryName = host ? host.split(".")[0] : company;
+      return `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=${encodeURIComponent(queryName)}&type=&dateb=&owner=include&count=40`;
+    },
   },
   {
     id: "stock_exchange",
@@ -125,8 +128,13 @@ export const workflowSources: WorkflowSource[] = [
       // Market identity
       "Ticker Symbol", "Stock Exchange", "Status",
     ],
-    buildUrl: (company) =>
-      `https://www.nasdaq.com/market-activity/stocks/${slug(company)}`,
+    buildUrl: (company) => {
+      // Nasdaq stock pages need a ticker symbol we don't reliably have;
+      // fall back to the search page with the cleaned company name.
+      const host = extractHost(company);
+      const queryName = host ? host.split(".")[0] : company;
+      return `https://www.nasdaq.com/search?q=${encodeURIComponent(queryName)}`;
+    },
   },
   {
     id: "registry_data",
@@ -139,8 +147,11 @@ export const workflowSources: WorkflowSource[] = [
       "Ultimate Parent", "Subsidiary Company", "Entity Type",
       "Hierarchy Level", "Relationship Type", "Performance Expectation",
     ],
-    buildUrl: (company) =>
-      `https://bizfileonline.sos.ca.gov/search/business?SearchCriteria=${encodeURIComponent(company)}`,
+    buildUrl: (company) => {
+      const host = extractHost(company);
+      const queryName = host ? host.split(".")[0] : company;
+      return `https://bizfileonline.sos.ca.gov/search/business?SearchCriteria=${encodeURIComponent(queryName)}`;
+    },
   },
 ];
 
