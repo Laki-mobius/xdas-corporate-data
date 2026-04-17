@@ -243,8 +243,13 @@ export default function HITLRecordReview({ record, onBack }: Props) {
           ? "border-amber-300 bg-amber-50/20 dark:border-amber-800 dark:bg-amber-950/20"
           : "border-border bg-card";
 
+    const isActive = activeFieldKey === f.key;
     return (
-      <div key={f.key} className={`rounded-md border p-3 ${borderClass}`}>
+      <div
+        key={f.key}
+        onClick={() => setActiveFieldKey(f.key)}
+        className={`rounded-md border p-3 cursor-pointer transition-shadow ${borderClass} ${isActive ? "ring-2 ring-amber-400 ring-offset-1" : "hover:shadow-sm"}`}
+      >
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[11px] font-medium text-muted-foreground max-w-[60%]">
             {f.label}
