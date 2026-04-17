@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ExternalLink, Eye, Check, Edit2, Save, X, ChevronDown, ChevronRight, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,21 +18,24 @@ export interface HITLRecord {
   flagReason?: string;
 }
 
-/* ── mock source content per source type ─────────────── */
+/* ── snapshot mapping per source type ────────────────── */
 
-const sourceContent: Record<string, { url: string; title: string }> = {
+const sourceSnapshots: Record<string, { snapshot: string; liveUrl: string; title: string }> = {
   "SEC EDGAR (10-K/Q)": {
-    url: "https://www.sec.gov/cgi-bin/browse-edgar",
-    title: "EDGAR | Company Search Results",
+    snapshot: "/snapshots/sec-edgar.html",
+    liveUrl: "https://www.sec.gov/cgi-bin/browse-edgar",
+    title: "EDGAR | Company Filings",
   },
   NYSE: {
-    url: "https://www.nyse.com/listings",
-    title: "NYSE Listed Companies",
+    snapshot: "/snapshots/nyse.html",
+    liveUrl: "https://www.nyse.com/listings",
+    title: "NYSE Listed Company",
   },
 };
 
 const defaultSource = {
-  url: "https://source.example.com",
+  snapshot: "/snapshots/generic.html",
+  liveUrl: "https://source.example.com",
   title: "Source Document Viewer",
 };
 
@@ -137,7 +140,10 @@ interface Props {
 }
 
 export default function HITLRecordReview({ record, onBack }: Props) {
-  const src = sourceContent[record.source] ?? defaultSource;
+  const src = sourceSnapshots[record.source] ?? defaultSource;
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [snapshotReady, setSnapshotReady] = useState(false);
+  const [activeFieldKey, setActiveFieldKey] = useState<string | null>(null);
   const [reviewFields, setReviewFields] = useState(() => getReviewFields(record));
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -154,6 +160,55 @@ export default function HITLRecordReview({ record, onBack }: Props) {
   const [basicFilter, setBasicFilter] = useState("all");
   const [financialFilter, setFinancialFilter] = useState("all");
   const [hierarchyFilter, setHierarchyFilter] = useState("all");
+
+  /* personalize snapshot when iframe loads */
+  const personalizeSnapshot = () => {
+    const doc = iframeRef.current?.contentDocument;
+    if (!doc) return;
+    const ticker = record.tier === "Tier 1" ? "ACM" : record.company.slice(0, 3).toUpperCase();
+    const shortName = record.company.split(" ")[0];
+    doc.body.innerHTML = doc.body.innerHTML
+      .split("__COMPANY__").join(record.company)
+      .split("__SHORT__").join(shortName)
+      .split("__TICKER__").join(ticker);
+
+    if (!doc.getElementById("__hl_styles__")) {
+      const style = doc.createElement("style");
+      style.id = "__hl_styles__";
+      style.textContent = `
+        .__xdas_hl__ {
+          background: #fef08a !important;
+          box-shadow: 0 0 0 3px #facc15, 0 0 0 6px rgba(250, 204, 21, 0.35) !important;
+          border-radius: 3px;
+          transition: background 0.3s, box-shadow 0.3s;
+          scroll-margin-top: 80px;
+        }
+        .__xdas_hl_pulse__ { animation: __xdas_pulse__ 1.2s ease-out 2; }
+        @keyframes __xdas_pulse__ {
+          0%,100% { box-shadow: 0 0 0 3px #facc15, 0 0 0 6px rgba(250, 204, 21, 0.35); }
+          50%     { box-shadow: 0 0 0 5px #f59e0b, 0 0 0 12px rgba(245, 158, 11, 0.45); }
+        }
+      `;
+      doc.head.appendChild(style);
+    }
+    setSnapshotReady(true);
+  };
+
+  /* apply highlight whenever active field changes */
+  useEffect(() => {
+    if (!snapshotReady) return;
+    const doc = iframeRef.current?.contentDocument;
+    if (!doc) return;
+    doc.querySelectorAll(".__xdas_hl__").forEach((el) => {
+      el.classList.remove("__xdas_hl__", "__xdas_hl_pulse__");
+    });
+    if (!activeFieldKey) return;
+    const targets = doc.querySelectorAll(`[data-field="${activeFieldKey}"]`);
+    targets.forEach((el) => el.classList.add("__xdas_hl__", "__xdas_hl_pulse__"));
+    const first = targets[0] as HTMLElement | undefined;
+    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeFieldKey, snapshotReady]);
+
 
   const startEdit = (f: DataField, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -188,8 +243,13 @@ export default function HITLRecordReview({ record, onBack }: Props) {
           ? "border-amber-300 bg-amber-50/20 dark:border-amber-800 dark:bg-amber-950/20"
           : "border-border bg-card";
 
+    const isActive = activeFieldKey === f.key;
     return (
-      <div key={f.key} className={`rounded-md border p-3 ${borderClass}`}>
+      <div
+        key={f.key}
+        onClick={() => setActiveFieldKey(f.key)}
+        className={`rounded-md border p-3 cursor-pointer transition-shadow ${borderClass} ${isActive ? "ring-2 ring-amber-400 ring-offset-1" : "hover:shadow-sm"}`}
+      >
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[11px] font-medium text-muted-foreground max-w-[60%]">
             {f.label}
@@ -342,24 +402,24 @@ export default function HITLRecordReview({ record, onBack }: Props) {
           <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-muted/30">
             <span className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Source View</span>
             <div className="flex items-center gap-3">
-              <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[200px]">{src.url}</span>
+              <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[200px]">{src.liveUrl}</span>
               <a
-                href={src.url}
+                href={src.liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
               >
-                Open in new tab <ExternalLink className="w-3 h-3" />
+                Open live page <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </div>
           <div className="flex-1 relative">
             <iframe
-              src={src.url}
+              ref={iframeRef}
+              src={src.snapshot}
               title={`Source: ${record.source}`}
-              className="absolute inset-0 w-full h-full border-0"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              referrerPolicy="no-referrer"
+              className="absolute inset-0 w-full h-full border-0 bg-white"
+              onLoad={personalizeSnapshot}
             />
           </div>
         </div>
