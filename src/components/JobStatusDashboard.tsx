@@ -431,7 +431,10 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
     const extractionAttrs = inputMode === 'file' && fileColumns.length > 0 ? fileColumns : mergedAttributes;
     const companiesForExtraction = inputMode === 'file' ? fileCsvRows.map(r => r[0] || '') : manualInput.split(/[\n,]+/).filter(s => s.trim());
-    const workflowLabels = selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id);
+    const workflowLabels = [
+      ...selectedWorkflows.map(id => workflowDefs.find(w => w.id === id)?.label || id),
+      ...selectedAdditionalWorkflows,
+    ];
 
     const newJob: Job = {
       id: nextId,
