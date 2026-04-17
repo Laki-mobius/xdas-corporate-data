@@ -1,5 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { sampleRecords, type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
+import {
+  buildSourceRefsForAttribute,
+  resolveWorkflowIdsFromLabels,
+} from "@/data/workflow-sources";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import QCSummaryCards from "./hitl/QCSummaryCards";
