@@ -78,6 +78,7 @@ export default function RecordReviewView({
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ basic_data: true, financial_data: true, corporate_hierarchy: true });
   const [sectionFilters, setSectionFilters] = useState<Record<string, ConfidenceFilter>>({});
   const [showGlobalFilter, setShowGlobalFilter] = useState(false);
+  const [sourceMode, setSourceMode] = useState<"mock" | "live">("mock");
 
   const getInitialSourceUrl = () => {
     for (const attr of record.attributes) {
@@ -102,15 +103,9 @@ export default function RecordReviewView({
     const ref = attr?.sourceRefs?.find(r => r.url && r.url !== "#") ?? null;
     const sourceUrl = ref?.url ?? activeSourceUrl;
     const sourceName = ref?.name ?? "Source";
-    if (sourceUrl) {
-      // Append text-fragment so "Open in new tab" auto-scrolls + highlights in supporting browsers
-      const cleanUrl = sourceUrl.split("#")[0];
-      const fragment = `#:~:text=${encodeURIComponent(value.slice(0, 80))}`;
-      setActiveSourceUrl(sourceUrl);
-      setHighlightedField({ fieldName, value, sourceName, sourceUrl: cleanUrl + fragment });
-    } else {
-      setHighlightedField({ fieldName, value, sourceName, sourceUrl: "" });
-    }
+    if (sourceUrl) setActiveSourceUrl(sourceUrl);
+    setHighlightedField({ fieldName, value, sourceName, sourceUrl: sourceUrl || "" });
+    setSourceMode("mock");
   };
 
   const categorized = useMemo(() => categorizeAttributes(record.attributes), [record.attributes]);
