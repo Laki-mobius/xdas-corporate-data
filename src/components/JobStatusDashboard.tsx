@@ -461,6 +461,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
     onSubmit(newJob);
     setJobName('');
     setSelectedWorkflows([]);
+    setSelectedAdditionalWorkflows([]);
     setManualInput('');
     setFileName(null);
     setFileEntities([]);
