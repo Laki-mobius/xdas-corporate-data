@@ -384,24 +384,16 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const canSubmit = jobName.trim() && (selectedWorkflows.length > 0 || selectedAdditionalWorkflows.length > 0) && entityCount > 0;
 
   const workflowDefs = [
-    { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data',
-      attributes: ["Company Name","Legal Name","Address","City","State","Zip Code","Phone Number","Email ID","Website URL","Industry / Sector","CEO / Founder","LinkedIn URL","Twitter URL"] },
-    { id: 'registry_data', label: 'Registry Data Extraction', desc: 'Registration & structure',
-      attributes: ["Company Name","Office Address","Registration Number","Incorporation Date","Company Status","Parent Name","Subsidiary Name","Entity Type","Country","Ownership %","Coverage","LEI","Status","SIC Code","Jurisdiction","Ultimate Parent","Hierarchy Level"] },
-    { id: 'sec_data', label: 'SEC Data', desc: 'SEC filings & financials',
-      attributes: ["Company Name","CIK","Ticker Symbol","Revenue","Net Income","EBITDA","Total Assets","Liabilities","Shares Outstanding"] },
-    { id: 'stock_exchange', label: 'Stock Exchange Data', desc: 'Trading & market data',
-      attributes: ["Company Name","Address","Stock Price (Current)","Stock Price (Open)","Stock Price (Close)","Market Capitalization","Exchange Name","Trading Status"] },
+    { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data' },
+    { id: 'registry_data', label: 'Registry Data Extraction', desc: 'Registration & hierarchy' },
+    { id: 'sec_data', label: 'SEC Data', desc: 'SEC filings & financials' },
+    { id: 'stock_exchange', label: 'Stock Exchange Data', desc: 'Trading & market data' },
   ];
 
-  const mergedAttributes = useMemo(() => {
-    const attrSet = new Set<string>();
-    for (const id of selectedWorkflows) {
-      const wf = workflowDefs.find(w => w.id === id);
-      if (wf) wf.attributes.forEach(a => attrSet.add(a));
-    }
-    return Array.from(attrSet);
-  }, [selectedWorkflows]);
+  const mergedAttributes = useMemo(
+    () => attributesForWorkflows(selectedWorkflows),
+    [selectedWorkflows],
+  );
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
