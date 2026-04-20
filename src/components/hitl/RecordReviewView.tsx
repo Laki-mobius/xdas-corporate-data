@@ -257,9 +257,9 @@ export default function RecordReviewView({
                     ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
                     : "border-border text-muted-foreground hover:text-foreground"
                 }`}
-                title="Show mock source page with in-place highlighting"
+                title="Show archived source page with in-place highlighting"
               >
-                Mock
+                Archived
               </button>
               <button
                 onClick={() => setSourceMode("live")}
