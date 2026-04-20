@@ -152,11 +152,16 @@ export default function RecordReviewView({
   const saveEdit = () => {
     if (!editingField) return;
 
-    const targetIndex = editingField.index >= 0 ? editingField.index : record.attributes.length;
-    const nextAttr: ValidationAttribute = editingField.attr
+    // Always resolve index from the latest record state by name to avoid stale indices.
+    const liveIndex = record.attributes.findIndex(a => a.name === editingField.name);
+    const liveAttr = liveIndex >= 0 ? record.attributes[liveIndex] : editingField.attr;
+    const targetIndex = liveIndex >= 0 ? liveIndex : record.attributes.length;
+
+    const nextAttr: ValidationAttribute = liveAttr
       ? {
-          ...editingField.attr,
+          ...liveAttr,
           currentValue: editValue,
+          extractedValue: liveAttr.extractedValue ?? "",
           status: "edited",
           qcFlag: false,
         }
@@ -252,9 +257,9 @@ export default function RecordReviewView({
                     ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
                     : "border-border text-muted-foreground hover:text-foreground"
                 }`}
-                title="Show mock source page with in-place highlighting"
+                title="Show archived source page with in-place highlighting"
               >
-                Mock
+                Archived
               </button>
               <button
                 onClick={() => setSourceMode("live")}
