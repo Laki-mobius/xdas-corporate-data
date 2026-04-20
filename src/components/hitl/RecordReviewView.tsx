@@ -152,11 +152,16 @@ export default function RecordReviewView({
   const saveEdit = () => {
     if (!editingField) return;
 
-    const targetIndex = editingField.index >= 0 ? editingField.index : record.attributes.length;
-    const nextAttr: ValidationAttribute = editingField.attr
+    // Always resolve index from the latest record state by name to avoid stale indices.
+    const liveIndex = record.attributes.findIndex(a => a.name === editingField.name);
+    const liveAttr = liveIndex >= 0 ? record.attributes[liveIndex] : editingField.attr;
+    const targetIndex = liveIndex >= 0 ? liveIndex : record.attributes.length;
+
+    const nextAttr: ValidationAttribute = liveAttr
       ? {
-          ...editingField.attr,
+          ...liveAttr,
           currentValue: editValue,
+          extractedValue: liveAttr.extractedValue ?? "",
           status: "edited",
           qcFlag: false,
         }
