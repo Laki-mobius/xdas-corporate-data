@@ -474,7 +474,39 @@ export default function RecordReviewView({
                                   </button>
                                 </div>
 
-                                <div className={`border rounded px-2.5 py-1.5 min-h-[30px] flex items-center ${isEmpty ? "border-dashed border-border bg-muted/30" : "border-border bg-background"}`}>
+                                <div
+                                  onDragOver={(e) => {
+                                    if (!isEmpty) return;
+                                    e.preventDefault();
+                                    e.dataTransfer.dropEffect = "copy";
+                                    if (dropTargetField !== name) setDropTargetField(name);
+                                  }}
+                                  onDragLeave={() => {
+                                    if (dropTargetField === name) setDropTargetField(null);
+                                  }}
+                                  onDrop={(e) => {
+                                    if (!isEmpty) return;
+                                    e.preventDefault();
+                                    const text =
+                                      e.dataTransfer.getData("application/x-hitl-source-text") ||
+                                      e.dataTransfer.getData("text/plain") ||
+                                      selectedSourceText;
+                                    setDropTargetField(null);
+                                    if (text && text.trim()) {
+                                      applyValueToField(name, text);
+                                      setSelectedSourceText("");
+                                    }
+                                  }}
+                                  className={`border rounded px-2.5 py-1.5 min-h-[30px] flex items-center transition-colors ${
+                                    isEmpty
+                                      ? dropTargetField === name
+                                        ? "border-2 border-dashed border-status-blue bg-status-blue/10 ring-2 ring-status-blue/30"
+                                        : selectedSourceText
+                                          ? "border-dashed border-status-blue/60 bg-status-blue/5"
+                                          : "border-dashed border-border bg-muted/30"
+                                      : "border-border bg-background"
+                                  }`}
+                                >
                                   {isEditing ? (
                                     <div className="flex items-center gap-2 flex-1">
                                       <input
