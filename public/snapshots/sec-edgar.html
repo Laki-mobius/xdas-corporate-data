@@ -30,26 +30,6 @@
   table.filings tr:nth-child(even) td { background: #f8f9fb; }
   .filing-link { color: #14467c; text-decoration: underline; cursor: pointer; }
   footer { background: #14467c; color: #fff; padding: 14px 20px; font-size: 11px; text-align: center; margin-top: 40px; }
-  /* Archived-copy indicators */
-  .archived-banner {
-    position: sticky; top: 0; z-index: 1000;
-    background: repeating-linear-gradient(45deg, #fde68a, #fde68a 12px, #fcd34d 12px, #fcd34d 24px);
-    color: #78350f; font-weight: 700; font-size: 12px; letter-spacing: 0.08em;
-    text-transform: uppercase; padding: 6px 16px;
-    border-bottom: 2px solid #b45309;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .archived-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: #b45309; display: inline-block; margin-right: 8px; animation: arch-pulse 1.6s ease-in-out infinite; }
-  @keyframes arch-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-  body { position: relative; }
-  body::before {
-    content: "ARCHIVED COPY";
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 140px; font-weight: 900; color: rgba(180, 83, 9, 0.08);
-    transform: rotate(-28deg); pointer-events: none; z-index: 999;
-    letter-spacing: 0.15em; user-select: none; white-space: nowrap;
-  }
   /* Highlight injected from parent */
   .__xdas_hl__ {
     background: #fde047 !important;
@@ -64,10 +44,6 @@
 </style>
 </head>
 <body>
-  <div class="archived-banner">
-    <span><span class="dot"></span>Archived snapshot — not the live page</span>
-    <span style="font-weight:600; opacity:0.85;">Captured for validation · Read-only</span>
-  </div>
   <div class="top-bar">
     <span>U.S. SECURITIES AND EXCHANGE COMMISSION</span>
     <span><a href="#">EDGAR</a><a href="#">Filings</a><a href="#">About</a><a href="#">Contact</a></span>
