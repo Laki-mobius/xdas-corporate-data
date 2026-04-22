@@ -2,7 +2,7 @@ import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-val
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
-import ArchivedSnapshotFrame from "./ArchivedSnapshotFrame";
+import ArchivedSnapshotFrame, { type SelectionInfo } from "./ArchivedSnapshotFrame";
 
 interface RecordReviewViewProps {
   record: ValidationRecord;
@@ -98,7 +98,13 @@ export default function RecordReviewView({
     sourceUrl: string;
   } | null>(null);
   const [selectedSourceText, setSelectedSourceText] = useState<string>("");
+  const [selectionRect, setSelectionRect] = useState<SelectionInfo["rect"]>(null);
   const [dropTargetField, setDropTargetField] = useState<string | null>(null);
+
+  const handleSourceSelection = (sel: SelectionInfo) => {
+    setSelectedSourceText(sel.text);
+    setSelectionRect(sel.rect);
+  };
 
   const focusFieldInSource = (fieldName: string, value: string, attr: ValidationAttribute | null) => {
     if (!value || value.trim() === "" || value === "N/A") return;
@@ -312,7 +318,7 @@ export default function RecordReviewView({
                     ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
                     : null
                 }
-                onSelectionChange={setSelectedSourceText}
+                onSelectionChange={handleSourceSelection}
               />
             ) : activeSourceUrl ? (
               <iframe
