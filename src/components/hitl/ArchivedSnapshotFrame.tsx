@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Archive, ExternalLink } from "lucide-react";
 import type { ValidationRecord, ValidationAttribute } from "@/data/hitl-validation-data";
 
 interface ArchivedSnapshotFrameProps {
@@ -168,32 +167,14 @@ export default function ArchivedSnapshotFrame({
 
   return (
     <div className="relative w-full h-full bg-white">
-      {/* Top chrome banner makes it crystal-clear this is an archived copy */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-2 px-3 py-1.5 bg-amber-100 border-b border-amber-300 text-amber-900 text-[11px] font-semibold tracking-wide pointer-events-none">
-        <Archive className="w-3.5 h-3.5" />
-        <span>{snapshot.label}</span>
-        <span className="ml-auto opacity-70 font-normal">
-          Captured for HITL validation · Not the live page
-        </span>
-      </div>
       <iframe
         ref={iframeRef}
         src={snapshot.src}
-        title="Archived source snapshot"
+        title="Source page"
         onLoad={personalize}
-        className="w-full h-full border-0 pt-7"
+        className="w-full h-full border-0"
         sandbox="allow-same-origin"
       />
-      {sourceUrl && (
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute bottom-2 right-2 z-10 flex items-center gap-1 text-[10px] text-amber-900 bg-amber-50 border border-amber-300 rounded px-2 py-1 hover:bg-amber-100 transition-colors shadow-sm"
-        >
-          Open live source <ExternalLink className="w-3 h-3" />
-        </a>
-      )}
     </div>
   );
 }
