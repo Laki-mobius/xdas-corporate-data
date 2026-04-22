@@ -312,7 +312,7 @@ export default function RecordReviewView({
               )}
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
             {sourceMode === "mock" ? (
               <ArchivedSnapshotFrame
                 record={record}
@@ -323,6 +323,7 @@ export default function RecordReviewView({
                     ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
                     : null
                 }
+                onSelectionChange={setSelectedSourceText}
               />
             ) : activeSourceUrl ? (
               <iframe
@@ -338,6 +339,33 @@ export default function RecordReviewView({
                   <p className="text-[12px] text-muted-foreground">Click a field on the right</p>
                   <p className="text-[11px] text-muted-foreground/60">to view and highlight it in the source</p>
                 </div>
+              </div>
+            )}
+
+            {/* Floating draggable pill — appears when text is selected in the snapshot */}
+            {sourceMode === "mock" && selectedSourceText && (
+              <div
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = "copy";
+                  e.dataTransfer.setData("text/plain", selectedSourceText);
+                  e.dataTransfer.setData("application/x-hitl-source-text", selectedSourceText);
+                }}
+                className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-blue text-primary-foreground shadow-lg border border-status-blue/60 cursor-grab active:cursor-grabbing select-none"
+                title="Drag this selection onto a blank field on the right"
+              >
+                <span className="text-[10px] uppercase tracking-wide opacity-80 font-semibold">Drag →</span>
+                <span className="text-[11px] font-medium truncate max-w-[280px]">
+                  "{selectedSourceText.length > 60 ? selectedSourceText.slice(0, 60) + "…" : selectedSourceText}"
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSourceText("")}
+                  className="ml-1 opacity-70 hover:opacity-100"
+                  title="Clear selection"
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </div>
             )}
           </div>
