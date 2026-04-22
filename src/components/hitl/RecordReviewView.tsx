@@ -337,32 +337,54 @@ export default function RecordReviewView({
               </div>
             )}
 
-            {/* Floating draggable pill — appears when text is selected in the snapshot */}
-            {sourceMode === "mock" && selectedSourceText && (
-              <div
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.effectAllowed = "copy";
-                  e.dataTransfer.setData("text/plain", selectedSourceText);
-                  e.dataTransfer.setData("application/x-hitl-source-text", selectedSourceText);
-                }}
-                className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-blue text-primary-foreground shadow-lg border border-status-blue/60 cursor-grab active:cursor-grabbing select-none"
-                title="Drag this selection onto a blank field on the right"
-              >
-                <span className="text-[10px] uppercase tracking-wide opacity-80 font-semibold">Drag →</span>
-                <span className="text-[11px] font-medium truncate max-w-[280px]">
-                  "{selectedSourceText.length > 60 ? selectedSourceText.slice(0, 60) + "…" : selectedSourceText}"
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedSourceText("")}
-                  className="ml-1 opacity-70 hover:opacity-100"
-                  title="Clear selection"
+            {/* Floating draggable pill — anchored just below the selected text */}
+            {sourceMode === "mock" && selectedSourceText && (() => {
+              // Position the pill 6px below the selection bottom, clamped inside the iframe area.
+              // Fall back to bottom-center when no rect is available.
+              const PILL_GAP = 6;
+              const PILL_EST_WIDTH = 320;
+              const hasRect = !!selectionRect;
+              const style: React.CSSProperties = hasRect
+                ? {
+                    position: "absolute",
+                    top: (selectionRect!.top + selectionRect!.height + PILL_GAP),
+                    left: Math.max(
+                      8,
+                      selectionRect!.left + selectionRect!.width / 2 - PILL_EST_WIDTH / 2,
+                    ),
+                    maxWidth: `calc(100% - 16px)`,
+                  }
+                : { position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)" };
+              return (
+                <div
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.effectAllowed = "copy";
+                    e.dataTransfer.setData("text/plain", selectedSourceText);
+                    e.dataTransfer.setData("application/x-hitl-source-text", selectedSourceText);
+                  }}
+                  style={style}
+                  className="z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-blue text-primary-foreground shadow-lg border border-status-blue/60 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
+                  title="Drag this selection onto a blank field on the right"
                 >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            )}
+                  <span className="text-[10px] uppercase tracking-wide opacity-80 font-semibold">Drag →</span>
+                  <span className="text-[11px] font-medium truncate max-w-[240px]">
+                    "{selectedSourceText.length > 60 ? selectedSourceText.slice(0, 60) + "…" : selectedSourceText}"
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedSourceText("");
+                      setSelectionRect(null);
+                    }}
+                    className="ml-1 opacity-70 hover:opacity-100"
+                    title="Clear selection"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
