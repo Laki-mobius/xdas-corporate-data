@@ -7,6 +7,7 @@ interface ArchivedSnapshotFrameProps {
   sourceName: string;
   sourceUrl: string;
   highlightedField: { fieldName: string; value: string } | null;
+  onSelectionChange?: (text: string) => void;
 }
 
 /* ── Resolve which snapshot template to use per source ─────────── */
@@ -75,6 +76,7 @@ export default function ArchivedSnapshotFrame({
   sourceName,
   sourceUrl,
   highlightedField,
+  onSelectionChange,
 }: ArchivedSnapshotFrameProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const snapshot = resolveSnapshot(sourceName, sourceUrl);
@@ -120,6 +122,18 @@ export default function ArchivedSnapshotFrame({
         if (el.textContent !== value) el.textContent = value;
       });
     });
+
+    // Wire up text-selection reporting so parent can build a draggable pill.
+    if (onSelectionChange) {
+      const handler = () => {
+        const sel = doc.getSelection?.();
+        const text = sel ? sel.toString().trim() : "";
+        onSelectionChange(text);
+      };
+      doc.addEventListener("mouseup", handler);
+      doc.addEventListener("keyup", handler);
+      doc.addEventListener("selectionchange", handler);
+    }
 
     setReady(true);
   };
