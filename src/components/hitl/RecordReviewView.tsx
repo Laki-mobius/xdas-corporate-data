@@ -97,6 +97,8 @@ export default function RecordReviewView({
     sourceName: string;
     sourceUrl: string;
   } | null>(null);
+  const [selectedSourceText, setSelectedSourceText] = useState<string>("");
+  const [dropTargetField, setDropTargetField] = useState<string | null>(null);
 
   const focusFieldInSource = (fieldName: string, value: string, attr: ValidationAttribute | null) => {
     if (!value || value.trim() === "" || value === "N/A") return;
@@ -106,6 +108,26 @@ export default function RecordReviewView({
     if (sourceUrl) setActiveSourceUrl(sourceUrl);
     setHighlightedField({ fieldName, value, sourceName, sourceUrl: sourceUrl || "" });
     setSourceMode("mock");
+  };
+
+  /* Apply a dropped/selected text value into a target attribute field. */
+  const applyValueToField = (fieldName: string, value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const liveIndex = record.attributes.findIndex(a => a.name === fieldName);
+    const liveAttr = liveIndex >= 0 ? record.attributes[liveIndex] : null;
+    const targetIndex = liveIndex >= 0 ? liveIndex : record.attributes.length;
+    const nextAttr: ValidationAttribute = liveAttr
+      ? { ...liveAttr, currentValue: trimmed, status: "edited", qcFlag: false }
+      : {
+          name: fieldName,
+          extractedValue: "",
+          currentValue: trimmed,
+          status: "edited",
+          qcFlag: false,
+          sourceRefs: [],
+        };
+    onUpdateAttribute(record.id, targetIndex, nextAttr);
   };
 
   const categorized = useMemo(() => categorizeAttributes(record.attributes), [record.attributes]);
@@ -290,7 +312,7 @@ export default function RecordReviewView({
               )}
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
             {sourceMode === "mock" ? (
               <ArchivedSnapshotFrame
                 record={record}
@@ -301,6 +323,7 @@ export default function RecordReviewView({
                     ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
                     : null
                 }
+                onSelectionChange={setSelectedSourceText}
               />
             ) : activeSourceUrl ? (
               <iframe
@@ -316,6 +339,33 @@ export default function RecordReviewView({
                   <p className="text-[12px] text-muted-foreground">Click a field on the right</p>
                   <p className="text-[11px] text-muted-foreground/60">to view and highlight it in the source</p>
                 </div>
+              </div>
+            )}
+
+            {/* Floating draggable pill — appears when text is selected in the snapshot */}
+            {sourceMode === "mock" && selectedSourceText && (
+              <div
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = "copy";
+                  e.dataTransfer.setData("text/plain", selectedSourceText);
+                  e.dataTransfer.setData("application/x-hitl-source-text", selectedSourceText);
+                }}
+                className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-blue text-primary-foreground shadow-lg border border-status-blue/60 cursor-grab active:cursor-grabbing select-none"
+                title="Drag this selection onto a blank field on the right"
+              >
+                <span className="text-[10px] uppercase tracking-wide opacity-80 font-semibold">Drag →</span>
+                <span className="text-[11px] font-medium truncate max-w-[280px]">
+                  "{selectedSourceText.length > 60 ? selectedSourceText.slice(0, 60) + "…" : selectedSourceText}"
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSourceText("")}
+                  className="ml-1 opacity-70 hover:opacity-100"
+                  title="Clear selection"
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </div>
             )}
           </div>
@@ -424,7 +474,39 @@ export default function RecordReviewView({
                                   </button>
                                 </div>
 
-                                <div className={`border rounded px-2.5 py-1.5 min-h-[30px] flex items-center ${isEmpty ? "border-dashed border-border bg-muted/30" : "border-border bg-background"}`}>
+                                <div
+                                  onDragOver={(e) => {
+                                    if (!isEmpty) return;
+                                    e.preventDefault();
+                                    e.dataTransfer.dropEffect = "copy";
+                                    if (dropTargetField !== name) setDropTargetField(name);
+                                  }}
+                                  onDragLeave={() => {
+                                    if (dropTargetField === name) setDropTargetField(null);
+                                  }}
+                                  onDrop={(e) => {
+                                    if (!isEmpty) return;
+                                    e.preventDefault();
+                                    const text =
+                                      e.dataTransfer.getData("application/x-hitl-source-text") ||
+                                      e.dataTransfer.getData("text/plain") ||
+                                      selectedSourceText;
+                                    setDropTargetField(null);
+                                    if (text && text.trim()) {
+                                      applyValueToField(name, text);
+                                      setSelectedSourceText("");
+                                    }
+                                  }}
+                                  className={`border rounded px-2.5 py-1.5 min-h-[30px] flex items-center transition-colors ${
+                                    isEmpty
+                                      ? dropTargetField === name
+                                        ? "border-2 border-dashed border-status-blue bg-status-blue/10 ring-2 ring-status-blue/30"
+                                        : selectedSourceText
+                                          ? "border-dashed border-status-blue/60 bg-status-blue/5"
+                                          : "border-dashed border-border bg-muted/30"
+                                      : "border-border bg-background"
+                                  }`}
+                                >
                                   {isEditing ? (
                                     <div className="flex items-center gap-2 flex-1">
                                       <input
