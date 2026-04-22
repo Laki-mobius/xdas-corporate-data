@@ -75,7 +75,7 @@ function withConfidenceColumns(
       const cell = row[i] ?? "";
       out.push(String(cell));
       if (i >= firstExtractedIdx) {
-        out.push(`${getExtractedValueConfidence(String(cell))}%`);
+        out.push(`${getExtractedValueConfidence(String(columns[i]), String(cell))}%`);
       }
     }
     return out;

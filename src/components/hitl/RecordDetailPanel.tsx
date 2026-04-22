@@ -1,6 +1,7 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import { CheckCircle2, AlertTriangle, Edit3, Flag, X, Eye, MoreVertical, Settings } from "lucide-react";
 import { useState } from "react";
+import { getConfidenceScoreFromStatus } from "@/lib/confidence";
 
 interface RecordDetailPanelProps {
   record: ValidationRecord;
@@ -21,20 +22,8 @@ const getConfidenceColor = (status: string) => {
 };
 
 const getConfidenceNum = (attr: { name: string; status: string; currentValue: string; extractedValue: string }): number => {
-  switch (attr.status) {
-    case "validated": return 96;
-    case "edited": return 98;
-    case "flagged": return 50;
-    default: {
-      const val = attr.currentValue || attr.extractedValue || "";
-      if (!val || val === "N/A" || val.length <= 1) return 52;
-      // Derive a stable pseudo-random confidence from attribute name
-      let hash = 0;
-      for (let i = 0; i < attr.name.length; i++) hash = ((hash << 5) - hash + attr.name.charCodeAt(i)) | 0;
-      const scores = [62, 68, 71, 74, 78, 82, 85, 88, 91, 93];
-      return scores[Math.abs(hash) % scores.length];
-    }
-  }
+  const value = attr.currentValue || attr.extractedValue || "";
+  return getConfidenceScoreFromStatus(attr.status as "validated" | "pending" | "flagged" | "edited", value, attr.name);
 };
 
 export default function RecordDetailPanel({ record, onClose, onUpdateAttribute, onApprove, onReject, onReview }: RecordDetailPanelProps) {
