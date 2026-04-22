@@ -101,9 +101,9 @@ export default function ArchivedSnapshotFrame({
         replacements.push({
           node: t,
           text: t.nodeValue
-            .replaceAll("__COMPANY__", company)
-            .replaceAll("__SHORT__", short)
-            .replaceAll("__TICKER__", ticker),
+            .split("__COMPANY__").join(company)
+            .split("__SHORT__").join(short)
+            .split("__TICKER__").join(ticker),
         });
       }
     }
