@@ -6,6 +6,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { attributesForWorkflows } from "@/data/workflow-sources";
 import {
+  getExtractedValueConfidence,
+  confidenceColumnName,
+} from "@/lib/confidence";
+import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
   MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
   CalendarIcon, Timer,
