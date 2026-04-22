@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { ValidationRecord, ValidationAttribute } from "@/data/hitl-validation-data";
 
-export interface SelectionInfo {
-  text: string;
-  /** Position relative to the iframe element (top-left) in CSS pixels */
-  rect: { top: number; left: number; width: number; height: number } | null;
-}
-
 interface ArchivedSnapshotFrameProps {
   record: ValidationRecord;
   sourceName: string;
   sourceUrl: string;
   highlightedField: { fieldName: string; value: string } | null;
-  onSelectionChange?: (selection: SelectionInfo) => void;
 }
 
 /* ── Resolve which snapshot template to use per source ─────────── */
@@ -81,7 +74,6 @@ export default function ArchivedSnapshotFrame({
   sourceName,
   sourceUrl,
   highlightedField,
-  onSelectionChange,
 }: ArchivedSnapshotFrameProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const snapshot = resolveSnapshot(sourceName, sourceUrl);
@@ -127,34 +119,6 @@ export default function ArchivedSnapshotFrame({
         if (el.textContent !== value) el.textContent = value;
       });
     });
-
-    // Wire up text-selection reporting so parent can build a draggable pill.
-    if (onSelectionChange) {
-      const handler = () => {
-        const sel = doc.getSelection?.();
-        const text = sel ? sel.toString().trim() : "";
-        if (!text) {
-          onSelectionChange({ text: "", rect: null });
-          return;
-        }
-        let rect: SelectionInfo["rect"] = null;
-        try {
-          if (sel && sel.rangeCount > 0) {
-            const range = sel.getRangeAt(0);
-            const r = range.getBoundingClientRect();
-            if (r && (r.width > 0 || r.height > 0)) {
-              rect = { top: r.top, left: r.left, width: r.width, height: r.height };
-            }
-          }
-        } catch {
-          rect = null;
-        }
-        onSelectionChange({ text, rect });
-      };
-      doc.addEventListener("mouseup", handler);
-      doc.addEventListener("keyup", handler);
-      doc.addEventListener("selectionchange", handler);
-    }
 
     setReady(true);
   };

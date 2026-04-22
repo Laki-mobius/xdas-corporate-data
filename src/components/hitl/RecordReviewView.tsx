@@ -2,7 +2,7 @@ import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-val
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
-import ArchivedSnapshotFrame, { type SelectionInfo } from "./ArchivedSnapshotFrame";
+import ArchivedSnapshotFrame from "./ArchivedSnapshotFrame";
 
 interface RecordReviewViewProps {
   record: ValidationRecord;
@@ -97,14 +97,7 @@ export default function RecordReviewView({
     sourceName: string;
     sourceUrl: string;
   } | null>(null);
-  const [selectedSourceText, setSelectedSourceText] = useState<string>("");
-  const [selectionRect, setSelectionRect] = useState<SelectionInfo["rect"]>(null);
   const [dropTargetField, setDropTargetField] = useState<string | null>(null);
-
-  const handleSourceSelection = (sel: SelectionInfo) => {
-    setSelectedSourceText(sel.text);
-    setSelectionRect(sel.rect);
-  };
 
   const focusFieldInSource = (fieldName: string, value: string, attr: ValidationAttribute | null) => {
     if (!value || value.trim() === "" || value === "N/A") return;
@@ -318,7 +311,6 @@ export default function RecordReviewView({
                     ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
                     : null
                 }
-                onSelectionChange={handleSourceSelection}
               />
             ) : activeSourceUrl ? (
               <iframe
@@ -337,54 +329,6 @@ export default function RecordReviewView({
               </div>
             )}
 
-            {/* Floating draggable pill — anchored just below the selected text */}
-            {sourceMode === "mock" && selectedSourceText && (() => {
-              // Position the pill 6px below the selection bottom, clamped inside the iframe area.
-              // Fall back to bottom-center when no rect is available.
-              const PILL_GAP = 6;
-              const PILL_EST_WIDTH = 320;
-              const hasRect = !!selectionRect;
-              const style: React.CSSProperties = hasRect
-                ? {
-                    position: "absolute",
-                    top: (selectionRect!.top + selectionRect!.height + PILL_GAP),
-                    left: Math.max(
-                      8,
-                      selectionRect!.left + selectionRect!.width / 2 - PILL_EST_WIDTH / 2,
-                    ),
-                    maxWidth: `calc(100% - 16px)`,
-                  }
-                : { position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)" };
-              return (
-                <div
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.effectAllowed = "copy";
-                    e.dataTransfer.setData("text/plain", selectedSourceText);
-                    e.dataTransfer.setData("application/x-hitl-source-text", selectedSourceText);
-                  }}
-                  style={style}
-                  className="z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-status-blue text-primary-foreground shadow-lg border border-status-blue/60 cursor-grab active:cursor-grabbing select-none pointer-events-auto"
-                  title="Drag this selection onto a blank field on the right"
-                >
-                  <span className="text-[10px] uppercase tracking-wide opacity-80 font-semibold">Drag →</span>
-                  <span className="text-[11px] font-medium truncate max-w-[240px]">
-                    "{selectedSourceText.length > 60 ? selectedSourceText.slice(0, 60) + "…" : selectedSourceText}"
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedSourceText("");
-                      setSelectionRect(null);
-                    }}
-                    className="ml-1 opacity-70 hover:opacity-100"
-                    title="Clear selection"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              );
-            })()}
           </div>
         </div>
 
@@ -506,21 +450,17 @@ export default function RecordReviewView({
                                     e.preventDefault();
                                     const text =
                                       e.dataTransfer.getData("application/x-hitl-source-text") ||
-                                      e.dataTransfer.getData("text/plain") ||
-                                      selectedSourceText;
+                                      e.dataTransfer.getData("text/plain");
                                     setDropTargetField(null);
                                     if (text && text.trim()) {
                                       applyValueToField(name, text);
-                                      setSelectedSourceText("");
                                     }
                                   }}
                                   className={`border rounded px-2.5 py-1.5 min-h-[30px] flex items-center transition-colors ${
                                     isEmpty
                                       ? dropTargetField === name
                                         ? "border-2 border-dashed border-status-blue bg-status-blue/10 ring-2 ring-status-blue/30"
-                                        : selectedSourceText
-                                          ? "border-dashed border-status-blue/60 bg-status-blue/5"
-                                          : "border-dashed border-border bg-muted/30"
+                                        : "border-dashed border-border bg-muted/30"
                                       : "border-border bg-background"
                                   }`}
                                 >
