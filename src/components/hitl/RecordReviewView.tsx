@@ -16,16 +16,8 @@ interface RecordReviewViewProps {
 }
 
 const getConfidenceScore = (attr: ValidationAttribute): number => {
-  switch (attr.status) {
-    case "validated": return 96;
-    case "edited": return 98;
-    case "flagged": return 50;
-    default: {
-      const val = attr.currentValue || attr.extractedValue || "";
-      if (val && val !== "N/A" && val !== "" && val.length > 1) return 85;
-      return 52;
-    }
-  }
+  const value = attr.currentValue || attr.extractedValue || "";
+  return getConfidenceScoreFromStatus(attr.status, value);
 };
 
 const getConfidenceColor = (score: number) => {
