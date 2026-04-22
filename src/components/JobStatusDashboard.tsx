@@ -42,6 +42,48 @@ import {
   type Job, type JobStatus, type FlowStep,
 } from "@/data/job-status-data";
 
+/**
+ * Inject a "<Field> Confidence Score Percentage" column right after each
+ * extracted attribute column. Extracted attributes are everything strictly
+ * after the "Company Name" column (which is appended by the extract-data
+ * edge function). If "Company Name" isn't found, fall back to inserting a
+ * confidence column for every column except the first (entity identifier).
+ *
+ * Scores match the HITL Record Details RHS view via shared logic in
+ * src/lib/confidence.ts.
+ */
+function withConfidenceColumns(
+  columns: string[],
+  rows: string[][],
+): { columns: string[]; rows: string[][] } {
+  const companyNameIdx = columns.findIndex(
+    (c) => String(c).trim().toLowerCase() === "company name",
+  );
+  const firstExtractedIdx = companyNameIdx >= 0 ? companyNameIdx + 1 : 1;
+
+  const outColumns: string[] = [];
+  for (let i = 0; i < columns.length; i++) {
+    outColumns.push(columns[i]);
+    if (i >= firstExtractedIdx) {
+      outColumns.push(confidenceColumnName(String(columns[i])));
+    }
+  }
+
+  const outRows = rows.map((row) => {
+    const out: string[] = [];
+    for (let i = 0; i < columns.length; i++) {
+      const cell = row[i] ?? "";
+      out.push(String(cell));
+      if (i >= firstExtractedIdx) {
+        out.push(`${getExtractedValueConfidence(String(cell))}%`);
+      }
+    }
+    return out;
+  });
+
+  return { columns: outColumns, rows: outRows };
+}
+
 /* ── Status badge ── */
 function StatusBadge({ status }: { status: JobStatus }) {
   const config: Record<JobStatus, { bg: string; icon: React.ReactNode }> = {
