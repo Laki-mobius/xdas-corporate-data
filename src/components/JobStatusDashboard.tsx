@@ -223,12 +223,16 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                             e.stopPropagation();
                             const anyJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
                             if (anyJob._csvColumns && anyJob._csvRows) {
-                              const sheetData = [anyJob._csvColumns, ...anyJob._csvRows];
+                              const { columns: outCols, rows: outRows } = withConfidenceColumns(
+                                anyJob._csvColumns,
+                                anyJob._csvRows,
+                              );
+                              const sheetData = [outCols, ...outRows];
                               const ws = XLSX.utils.aoa_to_sheet(sheetData);
-                              ws["!cols"] = anyJob._csvColumns.map((h, idx) => {
+                              ws["!cols"] = outCols.map((h, idx) => {
                                 const maxLen = Math.max(
                                   String(h ?? "").length,
-                                  ...anyJob._csvRows!.map((r) => String(r[idx] ?? "").length),
+                                  ...outRows.map((r) => String(r[idx] ?? "").length),
                                 );
                                 return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
                               });
