@@ -3,6 +3,7 @@ import { categorizeAttributes, profileCategories } from "@/data/workflow-attribu
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
 import ArchivedSnapshotFrame from "./ArchivedSnapshotFrame";
+import { getConfidenceScoreFromStatus } from "@/lib/confidence";
 
 interface RecordReviewViewProps {
   record: ValidationRecord;
