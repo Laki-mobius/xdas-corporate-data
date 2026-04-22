@@ -97,6 +97,8 @@ export default function RecordReviewView({
     sourceName: string;
     sourceUrl: string;
   } | null>(null);
+  const [selectedSourceText, setSelectedSourceText] = useState<string>("");
+  const [dropTargetField, setDropTargetField] = useState<string | null>(null);
 
   const focusFieldInSource = (fieldName: string, value: string, attr: ValidationAttribute | null) => {
     if (!value || value.trim() === "" || value === "N/A") return;
@@ -106,6 +108,26 @@ export default function RecordReviewView({
     if (sourceUrl) setActiveSourceUrl(sourceUrl);
     setHighlightedField({ fieldName, value, sourceName, sourceUrl: sourceUrl || "" });
     setSourceMode("mock");
+  };
+
+  /* Apply a dropped/selected text value into a target attribute field. */
+  const applyValueToField = (fieldName: string, value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const liveIndex = record.attributes.findIndex(a => a.name === fieldName);
+    const liveAttr = liveIndex >= 0 ? record.attributes[liveIndex] : null;
+    const targetIndex = liveIndex >= 0 ? liveIndex : record.attributes.length;
+    const nextAttr: ValidationAttribute = liveAttr
+      ? { ...liveAttr, currentValue: trimmed, status: "edited", qcFlag: false }
+      : {
+          name: fieldName,
+          extractedValue: "",
+          currentValue: trimmed,
+          status: "edited",
+          qcFlag: false,
+          sourceRefs: [],
+        };
+    onUpdateAttribute(record.id, targetIndex, nextAttr);
   };
 
   const categorized = useMemo(() => categorizeAttributes(record.attributes), [record.attributes]);
