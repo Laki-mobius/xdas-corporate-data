@@ -6,6 +6,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { attributesForWorkflows } from "@/data/workflow-sources";
 import {
+  getExtractedValueConfidence,
+  confidenceColumnName,
+} from "@/lib/confidence";
+import {
   Clock, Activity, CheckCircle2, XCircle, Search, ChevronDown, ChevronUp,
   MoreHorizontal, Download, RotateCcw, StopCircle, Play, Upload, X, FileText,
   CalendarIcon, Timer,
@@ -37,6 +41,48 @@ import {
   jobsData, summaryStats, alertsData, scheduleData, formatNumber,
   type Job, type JobStatus, type FlowStep,
 } from "@/data/job-status-data";
+
+/**
+ * Inject a "<Field> Confidence Score Percentage" column right after each
+ * extracted attribute column. Extracted attributes are everything strictly
+ * after the "Company Name" column (which is appended by the extract-data
+ * edge function). If "Company Name" isn't found, fall back to inserting a
+ * confidence column for every column except the first (entity identifier).
+ *
+ * Scores match the HITL Record Details RHS view via shared logic in
+ * src/lib/confidence.ts.
+ */
+function withConfidenceColumns(
+  columns: string[],
+  rows: string[][],
+): { columns: string[]; rows: string[][] } {
+  const companyNameIdx = columns.findIndex(
+    (c) => String(c).trim().toLowerCase() === "company name",
+  );
+  const firstExtractedIdx = companyNameIdx >= 0 ? companyNameIdx + 1 : 1;
+
+  const outColumns: string[] = [];
+  for (let i = 0; i < columns.length; i++) {
+    outColumns.push(columns[i]);
+    if (i >= firstExtractedIdx) {
+      outColumns.push(confidenceColumnName(String(columns[i])));
+    }
+  }
+
+  const outRows = rows.map((row) => {
+    const out: string[] = [];
+    for (let i = 0; i < columns.length; i++) {
+      const cell = row[i] ?? "";
+      out.push(String(cell));
+      if (i >= firstExtractedIdx) {
+        out.push(`${getExtractedValueConfidence(String(cell))}%`);
+      }
+    }
+    return out;
+  });
+
+  return { columns: outColumns, rows: outRows };
+}
 
 /* ── Status badge ── */
 function StatusBadge({ status }: { status: JobStatus }) {
@@ -223,12 +269,16 @@ function JobGroup({ label, jobs, expandedId, onToggle }: {
                             e.stopPropagation();
                             const anyJob = job as Job & { _csvColumns?: string[]; _csvRows?: string[][] };
                             if (anyJob._csvColumns && anyJob._csvRows) {
-                              const sheetData = [anyJob._csvColumns, ...anyJob._csvRows];
+                              const { columns: outCols, rows: outRows } = withConfidenceColumns(
+                                anyJob._csvColumns,
+                                anyJob._csvRows,
+                              );
+                              const sheetData = [outCols, ...outRows];
                               const ws = XLSX.utils.aoa_to_sheet(sheetData);
-                              ws["!cols"] = anyJob._csvColumns.map((h, idx) => {
+                              ws["!cols"] = outCols.map((h, idx) => {
                                 const maxLen = Math.max(
                                   String(h ?? "").length,
-                                  ...anyJob._csvRows!.map((r) => String(r[idx] ?? "").length),
+                                  ...outRows.map((r) => String(r[idx] ?? "").length),
                                 );
                                 return { wch: Math.min(Math.max(maxLen + 2, 10), 60) };
                               });
