@@ -273,27 +273,16 @@ export default function RecordReviewView({
             </span>
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => setSourceMode("mock")}
-                className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors ${
-                  sourceMode === "mock"
-                    ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
-                title="Show archived source page with in-place highlighting"
-              >
-                Archived
-              </button>
-              <button
-                onClick={() => setSourceMode("live")}
+                onClick={() => setSourceMode(sourceMode === "live" ? "mock" : "live")}
                 disabled={!activeSourceUrl}
-                className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors disabled:opacity-40 ${
+                className={`text-[10px] px-2 py-0.5 rounded border transition-colors disabled:opacity-40 ${
                   sourceMode === "live"
                     ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
                     : "border-border text-muted-foreground hover:text-foreground"
                 }`}
-                title="Load live source in iframe"
+                title={sourceMode === "live" ? "Return to annotation view" : "Load the actual live page"}
               >
-                Live
+                {sourceMode === "live" ? "Live ●" : "Live"}
               </button>
               {activeSourceUrl && (
                 <a
