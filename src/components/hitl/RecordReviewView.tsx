@@ -2,7 +2,7 @@ import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-val
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
 import { useState, useMemo } from "react";
-import MockSourcePage from "./MockSourcePage";
+import ArchivedSnapshotFrame from "./ArchivedSnapshotFrame";
 
 interface RecordReviewViewProps {
   record: ValidationRecord;
@@ -292,7 +292,7 @@ export default function RecordReviewView({
           </div>
           <div className="flex-1 overflow-hidden">
             {sourceMode === "mock" ? (
-              <MockSourcePage
+              <ArchivedSnapshotFrame
                 record={record}
                 sourceName={highlightedField?.sourceName ?? ""}
                 sourceUrl={activeSourceUrl}
