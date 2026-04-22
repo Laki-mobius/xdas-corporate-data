@@ -17,7 +17,7 @@ interface RecordReviewViewProps {
 
 const getConfidenceScore = (attr: ValidationAttribute): number => {
   const value = attr.currentValue || attr.extractedValue || "";
-  return getConfidenceScoreFromStatus(attr.status, value);
+  return getConfidenceScoreFromStatus(attr.status, value, attr.name);
 };
 
 const getConfidenceColor = (score: number) => {
