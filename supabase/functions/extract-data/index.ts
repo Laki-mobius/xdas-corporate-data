@@ -38,8 +38,8 @@ const WORKFLOW_SOURCES: Record<string, { sourceName: string; sourceUrlHint: stri
     ],
   },
   registry_data: {
-    sourceName: "California Secretary of State",
-    sourceUrlHint: "https://bizfileonline.sos.ca.gov/search/business",
+    sourceName: "Annual Report (Govt Filing)",
+    sourceUrlHint: "the company's most recent annual report (PDF) published on its investor relations site or filed with the relevant government authority",
     attributes: [
       "Registration ID(s)", "Organizational Type",
       "Ultimate Parent", "Subsidiary Company", "Entity Type",

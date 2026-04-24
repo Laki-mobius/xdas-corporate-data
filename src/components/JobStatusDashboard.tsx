@@ -407,7 +407,6 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
   const additionalWorkflows = [
     "SEDAR+ Canada",
     "Financial Data Extraction - (XBRL/HTML)",
-    "Annual Report Data Extraction - (PDF/Unstructured)",
     "Third-party Aggregators (Financial DBs)",
     "Other Third-party Aggregators",
     "Specialized Sources (Banking)",
@@ -435,7 +434,7 @@ function RunNewJobModal({ open, onOpenChange, onSubmit }: {
 
   const workflowDefs = [
     { id: 'company_data', label: 'Company Data Extraction', desc: 'Website profile data' },
-    { id: 'registry_data', label: 'Registry Data Extraction', desc: 'Registration & hierarchy' },
+    { id: 'registry_data', label: 'Annual Report Data Extraction', desc: 'Annual report (PDF) — registration & hierarchy' },
     { id: 'sec_data', label: 'SEC Data', desc: 'SEC filings & financials' },
     { id: 'stock_exchange', label: 'Stock Exchange Data', desc: 'Trading & market data' },
   ];
