@@ -15,6 +15,34 @@ import SamplingModal from "./hitl/SamplingModal";
 import DistributeModal from "./hitl/DistributeModal";
 import { toast } from "sonner";
 
+/** Detect a "company website" column in user-supplied input headers. */
+function findWebsiteColumnIndex(columns: string[]): number {
+  return columns.findIndex((c) => {
+    const k = String(c || "").trim().toLowerCase();
+    return (
+      k === "website" ||
+      k === "url" ||
+      k === "domain" ||
+      k === "company website" ||
+      k === "company url" ||
+      k === "company domain" ||
+      k === "homepage" ||
+      k === "site"
+    );
+  });
+}
+
+/** Normalize a user-supplied website value into a fully-qualified https URL. */
+function normalizeWebsiteUrl(raw: string): string {
+  const v = (raw || "").trim();
+  if (!v || v.toUpperCase() === "N/A") return "";
+  if (/^https?:\/\//i.test(v)) return v;
+  // Strip any leading slashes / "www." duplication and prefix https://
+  const cleaned = v.replace(/^\/+/, "").replace(/^www\./i, "");
+  if (!/\./.test(cleaned)) return "";
+  return `https://${cleaned}`;
+}
+
 function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
   const records: ValidationRecord[] = [];
   for (const job of jobs) {
@@ -24,6 +52,7 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
 
     // columns[0] is "Company" (entity identifier), rest are attributes
     const attrNames = columns.slice(1);
+    const websiteColIdx = findWebsiteColumnIndex(columns);
 
     // Resolve which workflows ran for this job from job.tier (comma-joined labels)
     const workflowLabels: string[] = (job.tier || "")
@@ -34,32 +63,54 @@ function convertJobsToValidationRecords(jobs: any[]): ValidationRecord[] {
 
     rows.forEach((row: string[], rowIdx: number) => {
       const companyName = row[0] || `Entity ${rowIdx + 1}`;
-      const attributes: ValidationAttribute[] = attrNames.map((attr, i) => ({
-        name: attr,
-        extractedValue: row[i + 1] || "",
-        currentValue: row[i + 1] || "",
-        status: "pending" as const,
-        qcFlag: false,
-        // Only show source refs that correspond to the workflows the user
-        // actually selected when running the job.
-        sourceRefs: buildSourceRefsForAttribute(attr, selectedWorkflowIds, companyName),
-      }));
+      // Per-row company website provided by the user in the input file (if any).
+      const userWebsiteUrl = websiteColIdx >= 0
+        ? normalizeWebsiteUrl(String(row[websiteColIdx] ?? ""))
+        : "";
+
+      const attributes: ValidationAttribute[] = attrNames.map((attr, i) => {
+        // Build the canonical source refs for this attribute given the workflows
+        // that actually ran. Then, if the user supplied a website URL in the input
+        // file, override the auto-built "Company Website" URL with it so the LHS
+        // and the "Live" button point to the real site.
+        const refs = buildSourceRefsForAttribute(attr, selectedWorkflowIds, companyName);
+        const refsWithUserWebsite = userWebsiteUrl
+          ? refs.map((r) =>
+              /company website/i.test(r.name) ? { ...r, url: userWebsiteUrl } : r,
+            )
+          : refs;
+        return {
+          name: attr,
+          extractedValue: row[i + 1] || "",
+          currentValue: row[i + 1] || "",
+          status: "pending" as const,
+          qcFlag: false,
+          // Only show source refs that correspond to the workflows the user
+          // actually selected when running the job.
+          sourceRefs: refsWithUserWebsite,
+        };
+      });
 
       // Compute a pseudo confidence score based on how many attrs have values
       const filledCount = attributes.filter(a => a.extractedValue && a.extractedValue !== "N/A" && a.extractedValue !== "").length;
       const confidence = attributes.length > 0 ? Math.round(70 + (filledCount / attributes.length) * 25) : 0;
 
-      // Top-level `sources` (used as the LHS fallback URL) — first selected workflow's page
-      const fallbackUrl = selectedWorkflowIds.length > 0
-        ? buildSourceRefsForAttribute(attrNames[0] || "Legal Name", selectedWorkflowIds, companyName)[0]?.url
-            || buildSourceRefsForAttribute("Legal Name", selectedWorkflowIds, companyName)[0]?.url
-            || ""
-        : "";
+      // Top-level `sources` (used as the LHS fallback URL).
+      // Prefer the user-supplied company website when available, then fall back
+      // to the first selected workflow's auto-built URL.
+      const fallbackUrl = userWebsiteUrl
+        || (selectedWorkflowIds.length > 0
+          ? buildSourceRefsForAttribute(attrNames[0] || "Legal Name", selectedWorkflowIds, companyName)[0]?.url
+              || buildSourceRefsForAttribute("Legal Name", selectedWorkflowIds, companyName)[0]?.url
+              || ""
+          : "");
       const fallbackSources = fallbackUrl
         ? [{
             url: fallbackUrl,
             type: "Website" as const,
-            snippet: `Extracted via ${workflowLabels.join(", ")}`,
+            snippet: userWebsiteUrl
+              ? `Company website provided in input file`
+              : `Extracted via ${workflowLabels.join(", ")}`,
             highlightedText: companyName,
           }]
         : [{
