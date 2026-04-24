@@ -11,6 +11,16 @@ interface ArchivedSnapshotFrameProps {
 /* ── Resolve which snapshot template to use per source ─────────── */
 function resolveSnapshot(sourceName: string, sourceUrl: string): { src: string; label: string } {
   const n = (sourceName + " " + sourceUrl).toLowerCase();
+  // Annual Report extraction → render the multi-page PDF-style snapshot
+  if (
+    n.includes("annual report") ||
+    n.includes("annualreport") ||
+    n.includes("govt filing") ||
+    n.includes("government filing") ||
+    /\.pdf(\?|$|#)/.test(n)
+  ) {
+    return { src: "/snapshots/annual-report.html", label: "Annual Report · PDF document" };
+  }
   if (n.includes("sec") || n.includes("edgar")) {
     return { src: "/snapshots/sec-edgar.html", label: "SEC EDGAR · Archived snapshot" };
   }

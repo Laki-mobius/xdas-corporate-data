@@ -138,19 +138,22 @@ export const workflowSources: WorkflowSource[] = [
   },
   {
     id: "registry_data",
-    label: "Registry Data Extraction",
-    sourceName: "California SOS",
+    label: "Annual Report Data Extraction",
+    sourceName: "Annual Report (Govt Filing)",
     attributes: [
-      // Basic Data (registration-side)
+      // Basic Data (registration-side, disclosed in annual report cover pages)
       "Registration ID(s)", "Organizational Type",
-      // Corporate Hierarchy
+      // Corporate Hierarchy (disclosed in annual report subsidiary listings)
       "Ultimate Parent", "Subsidiary Company", "Entity Type",
       "Hierarchy Level", "Relationship Type", "Performance Expectation",
     ],
     buildUrl: (company) => {
+      // Annual reports are typically published on the company's investor relations
+      // page or as government filings. We surface a stable mock URL so the LHS
+      // resolver can match the "annual report" source and render the PDF snapshot.
       const host = extractHost(company);
       const queryName = host ? host.split(".")[0] : company;
-      return `https://bizfileonline.sos.ca.gov/search/business?SearchCriteria=${encodeURIComponent(queryName)}`;
+      return `https://www.annualreports.com/HostedData/AnnualReports/PDF/${encodeURIComponent(queryName)}-annual-report.pdf`;
     },
   },
 ];
