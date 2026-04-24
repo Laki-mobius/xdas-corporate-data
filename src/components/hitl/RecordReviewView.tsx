@@ -71,7 +71,7 @@ export default function RecordReviewView({
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ basic_data: true, financial_data: true, corporate_hierarchy: true });
   const [sectionFilters, setSectionFilters] = useState<Record<string, ConfidenceFilter>>({});
   const [showGlobalFilter, setShowGlobalFilter] = useState(false);
-  const [sourceMode, setSourceMode] = useState<"mock" | "live">("mock");
+  
 
   const getInitialSourceUrl = () => {
     for (const attr of record.attributes) {
