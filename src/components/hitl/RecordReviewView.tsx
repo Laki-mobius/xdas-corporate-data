@@ -99,7 +99,6 @@ export default function RecordReviewView({
     const sourceName = ref?.name ?? "Source";
     if (sourceUrl) setActiveSourceUrl(sourceUrl);
     setHighlightedField({ fieldName, value, sourceName, sourceUrl: sourceUrl || "" });
-    setSourceMode("mock");
   };
 
   /* Apply a dropped/selected text value into a target attribute field. */
@@ -254,7 +253,7 @@ export default function RecordReviewView({
         <div className="w-1/2 border-r border-border flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-border bg-muted/20 flex items-center gap-2">
             <span className="text-[11px] font-semibold text-status-blue uppercase tracking-wide">Source View</span>
-            {highlightedField && sourceMode === "mock" && (
+            {highlightedField && (
               <span className="flex items-center gap-1 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded px-1.5 py-0.5">
                 <Highlighter className="w-3 h-3" />
                 {highlightedField.fieldName}
@@ -480,7 +479,7 @@ export default function RecordReviewView({
                                         onClick={() => {
                                            if (!src.url || src.url === "#") return;
                                            setActiveSourceUrl(src.url);
-                                           setSourceMode("mock");
+                                           
                                            if (!isEmpty) {
                                              setHighlightedField({ fieldName: name, value: displayValue, sourceName: src.name, sourceUrl: src.url });
                                            }
