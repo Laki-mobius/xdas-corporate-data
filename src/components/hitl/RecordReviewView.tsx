@@ -265,36 +265,28 @@ export default function RecordReviewView({
             </span>
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => setSourceMode(sourceMode === "live" ? "mock" : "live")}
-                disabled={!activeSourceUrl}
-                className={`text-[10px] px-2 py-0.5 rounded border transition-colors disabled:opacity-40 ${
-                  sourceMode === "live"
-                    ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
-                title={sourceMode === "live" ? "Return to annotation view" : "Load the actual live page"}
-              >
-                {sourceMode === "live" ? "Live ●" : "Live"}
-              </button>
-              {activeSourceUrl && (
-                <a
-                  href={
+                onClick={() => {
+                  if (!activeSourceUrl) return;
+                  // Most public sites block iframe embedding via X-Frame-Options or CSP,
+                  // so always open the live page in a new tab. The in-app view stays on
+                  // the annotated mock snapshot for reference.
+                  const url =
                     highlightedField && highlightedField.value
                       ? activeSourceUrl.split("#")[0] +
                         `#:~:text=${encodeURIComponent(highlightedField.value.slice(0, 80))}`
-                      : activeSourceUrl
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground ml-1"
-                >
-                  Open <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
+                      : activeSourceUrl;
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
+                disabled={!activeSourceUrl}
+                className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+                title="Open the live source page in a new tab"
+              >
+                Live <ExternalLink className="w-3 h-3" />
+              </button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden relative">
-            {sourceMode === "mock" ? (
+            {activeSourceUrl ? (
               <ArchivedSnapshotFrame
                 record={record}
                 sourceName={highlightedField?.sourceName ?? ""}
@@ -304,13 +296,6 @@ export default function RecordReviewView({
                     ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
                     : null
                 }
-              />
-            ) : activeSourceUrl ? (
-              <iframe
-                src={activeSourceUrl}
-                title="Live source page"
-                className="w-full h-full border-0"
-                sandbox="allow-same-origin allow-scripts"
               />
             ) : (
               <div className="flex items-center justify-center h-full">
