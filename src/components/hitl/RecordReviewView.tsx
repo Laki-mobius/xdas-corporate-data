@@ -95,6 +95,18 @@ export default function RecordReviewView({
   } | null>(null);
   const [dropTargetField, setDropTargetField] = useState<string | null>(null);
 
+  /* Reset live-load tracker whenever the URL changes or user re-enters live mode.
+     If the iframe doesn't fire onLoad within 4s, treat it as blocked by X-Frame-Options/CSP. */
+  useEffect(() => {
+    if (sourceMode !== "live" || !activeSourceUrl) return;
+    setLiveLoaded(false);
+    if (liveTimeoutRef.current) window.clearTimeout(liveTimeoutRef.current);
+    liveTimeoutRef.current = window.setTimeout(() => setLiveLoaded(false), 4000);
+    return () => {
+      if (liveTimeoutRef.current) window.clearTimeout(liveTimeoutRef.current);
+    };
+  }, [sourceMode, activeSourceUrl]);
+
   const focusFieldInSource = (fieldName: string, value: string, attr: ValidationAttribute | null) => {
     if (!value || value.trim() === "" || value === "N/A") return;
     const ref = attr?.sourceRefs?.find(r => r.url && r.url !== "#") ?? null;
