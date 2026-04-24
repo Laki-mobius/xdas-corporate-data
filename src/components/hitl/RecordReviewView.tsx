@@ -1,7 +1,7 @@
 import { type ValidationRecord, type ValidationAttribute } from "@/data/hitl-validation-data";
 import { categorizeAttributes, profileCategories } from "@/data/workflow-attributes";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Edit3, Settings, X, Highlighter } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import ArchivedSnapshotFrame from "./ArchivedSnapshotFrame";
 import { getConfidenceScoreFromStatus } from "@/lib/confidence";
 
