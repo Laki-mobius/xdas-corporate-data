@@ -279,38 +279,65 @@ export default function RecordReviewView({
             </span>
             <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => {
-                  if (!activeSourceUrl) return;
-                  // Most public sites block iframe embedding via X-Frame-Options or CSP,
-                  // so always open the live page in a new tab. The in-app view stays on
-                  // the annotated mock snapshot for reference.
-                  const url =
-                    highlightedField && highlightedField.value
-                      ? activeSourceUrl.split("#")[0] +
-                        `#:~:text=${encodeURIComponent(highlightedField.value.slice(0, 80))}`
-                      : activeSourceUrl;
-                  window.open(url, "_blank", "noopener,noreferrer");
-                }}
+                onClick={() => setSourceMode(sourceMode === "live" ? "snapshot" : "live")}
                 disabled={!activeSourceUrl}
-                className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40"
-                title="Open the live source page in a new tab"
+                className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border transition-colors disabled:opacity-40 ${
+                  sourceMode === "live"
+                    ? "bg-status-blue/10 border-status-blue/40 text-status-blue font-semibold"
+                    : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                title={sourceMode === "live" ? "Return to annotated snapshot" : "Load the live page in this panel"}
               >
-                Live <ExternalLink className="w-3 h-3" />
+                {sourceMode === "live" ? "Snapshot" : "Live"}
+                <ExternalLink className="w-3 h-3" />
               </button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden relative">
             {activeSourceUrl ? (
-              <ArchivedSnapshotFrame
-                record={record}
-                sourceName={highlightedField?.sourceName ?? ""}
-                sourceUrl={activeSourceUrl}
-                highlightedField={
-                  highlightedField
-                    ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
-                    : null
-                }
-              />
+              sourceMode === "live" ? (
+                <>
+                  <iframe
+                    key={activeSourceUrl}
+                    src={activeSourceUrl}
+                    title="Live source page"
+                    className="w-full h-full border-0 bg-white"
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                    referrerPolicy="no-referrer"
+                    onLoad={() => setLiveLoaded(true)}
+                  />
+                  {!liveLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/95 pointer-events-none">
+                      <div className="text-center pointer-events-auto">
+                        <div className="w-6 h-6 border-2 border-status-blue/30 border-t-status-blue rounded-full animate-spin mx-auto mb-2" />
+                        <p className="text-[11px] text-muted-foreground">Loading live page…</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-1">
+                          If the page never loads, the site may block embedding.{" "}
+                          <a
+                            href={activeSourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-status-blue hover:underline"
+                          >
+                            Open in new tab
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <ArchivedSnapshotFrame
+                  record={record}
+                  sourceName={highlightedField?.sourceName ?? ""}
+                  sourceUrl={activeSourceUrl}
+                  highlightedField={
+                    highlightedField
+                      ? { fieldName: highlightedField.fieldName, value: highlightedField.value }
+                      : null
+                  }
+                />
+              )
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
